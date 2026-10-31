@@ -1159,6 +1159,18 @@ html_template = f"""<!DOCTYPE html>
             document.getElementById('kpiDelivFees').innerText = '$' + delivFees.toLocaleString('en-US', {{maximumFractionDigits: 0}});
         }}
 
+        function renderAllCharts() {{
+            try {{ renderMonthlyChart(); }} catch(e) {{ console.error('Error in renderMonthlyChart:', e); }}
+            try {{ renderCuisinePie(); }} catch(e) {{ console.error('Error in renderCuisinePie:', e); }}
+            try {{ renderHourlyChart(); }} catch(e) {{ console.error('Error in renderHourlyChart:', e); }}
+            try {{ renderCuisineBar(); }} catch(e) {{ console.error('Error in renderCuisineBar:', e); }}
+            try {{ renderDayTypeChart(); }} catch(e) {{ console.error('Error in renderDayTypeChart:', e); }}
+            try {{ renderRestaurantsChart(); }} catch(e) {{ console.error('Error in renderRestaurantsChart:', e); }}
+            try {{ renderDishesChart(); }} catch(e) {{ console.error('Error in renderDishesChart:', e); }}
+            try {{ renderDietaryChart(); }} catch(e) {{ console.error('Error in renderDietaryChart:', e); }}
+            try {{ renderDeliverySLA(); }} catch(e) {{ console.error('Error in renderDeliverySLA:', e); }}
+        }}
+
         // 1. Monthly Chart (With Power BI Dimming / Highlighting)
         function renderMonthlyChart() {{
             const filtered = getFilteredMatrix();
@@ -1564,10 +1576,14 @@ html_template = f"""<!DOCTYPE html>
             Plotly.react('chartDeliverySLA', [trace], layout, {{ responsive: true }});
         }}
 
-        // Attach Plotly Click Handler helper
+        // Attach Plotly Click Handler helper with safe retry
         function attachPlotlyClick(domId, callback) {{
             const el = document.getElementById(domId);
             if (!el || el._clickBound) return;
+            if (typeof el.on !== 'function') {{
+                setTimeout(() => attachPlotlyClick(domId, callback), 150);
+                return;
+            }}
             el._clickBound = true;
             el.on('plotly_click', (data) => {{
                 if (data && data.points && data.points.length > 0) {{
