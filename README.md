@@ -88,6 +88,36 @@ The latest update introduces unsupervised customer behavioral clustering and ass
 
 ---
 
+## 💡 Step 2: Prescriptive Business Strategy & Executive Storytelling
+
+Step 2 bridges the gap between diagnostic numbers and C-Suite executive decision-making. By analyzing the 25.1% quarterly order volume drop, we formulated an executive turnaround plan centered around 4 quantifiable pillars projected to unlock **+,600 / quarter** (+12.5% revenue expansion):
+
+### 1. Root Cause Problem Diagnosis (RCA)
+* **Volume Decline, Not Spend Fatigue:** Between June and September, order volume declined from 12,502 to 9,365 orders (-25.1%), while Average Order Value (AOV) remained completely stable at .57 – .04.
+* **Discount Inefficiency:** Flat 13.3% discounts (,680 total) were handed out unconditionally without volume commitments. High-ticket orders (+) received ,889 in un-gated discounts (15% off).
+* **Delivery is NOT the Bottleneck:** Delivery SLA was outstanding (82.9% delivered under 30 minutes, 23.4 mins avg, 0 orders over 45 mins). Ratings correlate directly with speed: **3.99 stars for <20m vs 3.06 stars for 30-45m**. The issue is strictly demand retention and merchant mix.
+
+### 2. The 4 Prescriptive Growth Pillars
+1. **🛡️ VIP Churn Shield & Win-Back (+\,400 Recovered):**
+   * Target: 456 churn-risk VIPs with ,185 cumulative historical spend inactive for 57+ days.
+   * Lever: Automated 3-stage CRM drip (Day 21 gentle nudge, Day 28  voucher on favorite cuisine, Day 45 CEO survey + VIP perk). Targeting 25% reactivation.
+2. **🍱 Intelligent Menu Bundling & Cross-Sell (+\,500/Mo MRR):**
+   * Target: Lift overall AOV from .78 to .63 (+6.7%).
+   * Lever: Capitalize on Apriori Association Rules (e.g. Peking Duck + Hot & Sour Soup) with dynamic checkout combo meal bundles.
+3. **💰 Discount Rationalization & Margin Defense (+\,100 Margin Preserved):**
+   * Target: Compress discount rate from 13.3% to 9.5%.
+   * Lever: Enforce minimum order spend gates (+ for 10% off) and re-route promo budget into points-based loyalty.
+4. **🌍 Cuisine Balancing & Regional Merchant Expansion (+\,600/Mo Revenue):**
+   * Target: Reduce vulnerability to Chinese cuisine concentration (38.6% of volume) by expanding under-indexed Thai () and Indian ().
+   * Lever: Onboard 20 premier merchant partners and launch 'World Flavor Weekends' with sponsored merchant placement.
+
+### 3. Executive Turnaround Visuals Added
+* **Financial Recovery Waterfall Bridge:** Step-by-step visual bridge from current September run-rate (.2k/mo) to target monthly revenue (.4k/mo).
+* **Impact vs. Effort Priority Matrix:** 4-quadrant evaluation categorizing initiatives into Quick Wins, Major Strategic Bets, Fill-Ins, and De-prioritizations.
+* **30-60-90 Day Phased Execution Roadmap Table:** Detailed milestone schedule with cross-functional departmental ownership and quantitative targets.
+
+---
+
 ## 🛠️ How to Run Locally
 
 ### 1. Clone the repository

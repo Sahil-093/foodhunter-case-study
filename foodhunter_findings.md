@@ -55,3 +55,27 @@ The SQL for every figure is in foodhunter_analysis.sql.
 ### Market Basket Association Rules
 * **Strongest Menu Affinity:** Peking Duck + Hot & Sour Soup (49 joint orders), followed by Spring Rolls + Hot & Sour Soup (39 joint orders).
 * **Cross-Selling Potential:** Implementing automated 10-15% combo discounts during checkout is modeled to lift Average Order Value (AOV) by +14% and bring an estimated **+,400 monthly incremental revenue**.
+
+---
+
+## 💡 Prescriptive Business Strategy (Step 2)
+
+### Executive Turnaround Financial Bridge
+* **Starting September Run-Rate:** ,161/month (9,365 orders)
+* **+ VIP Churn Shield Recovery:** +,133/month (25% reactivation of 456 At-Risk VIPs)
+* **+ Menu Bundling Cross-Sell:** +,500/month (+6.7% AOV lift to .63)
+* **+ Discount Spend Thresholds (+):** +,368/month in preserved gross margin
+* **+ Regional Cuisine Diversification:** +,200/month (1,200 incremental non-Chinese orders)
+* **= Target Projected Monthly Revenue:** **,362/month** (+24.1% recovery, reclaiming June baseline)
+* **= Total Projected Quarterly Impact:** **+,600**
+
+### Strategic Action Priority Matrix
+* **Quick Wins (High Impact, Low Effort):**
+  * Apriori combo meal recommendations at checkout.
+  * Day-28 automated VIP win-back email drip ( voucher).
+  * Require + basket for 10% promotional discounts.
+* **Major Strategic Bets (High Impact, High Effort):**
+  * Launch 'FoodHunter VIP Pass' tiered loyalty subscription.
+  * Onboard 20 premier Thai, Indian, and Italian restaurant partners.
+* **De-prioritize (Low Impact, High Effort):**
+  * Wholesale mobile app redesign (high cost, minimal direct revenue lift compared to pricing and CRM levers).

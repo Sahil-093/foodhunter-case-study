@@ -393,7 +393,86 @@ payload = {
     "rfm_summary": rfm_records,
     "rfm_scatter": scatter_sample,
     "top_pairs": top_pairs,
-    "cuisine_baskets": cuisine_baskets
+    "cuisine_baskets": cuisine_baskets,
+    "strategy_waterfall": {
+        "x": ["Sep Run-Rate", "VIP Win-Back", "Menu Bundling", "Discount Optimization", "Cuisine Expansion", "Target Run-Rate"],
+        "y": [258.2, 16.1, 18.5, 16.4, 11.2, 0],
+        "text": ["$258.2k", "+$16.1k", "+$18.5k", "+$16.4k", "+$11.2k", "$320.4k"],
+        "measure": ["relative", "relative", "relative", "relative", "relative", "total"]
+    },
+    "priority_matrix": [
+        {"name": "Checkout Combo Bundles", "effort": 2.5, "impact": 8.8, "cat": "Quick Win", "color": "#10B981", "desc": "Pre-packaged Apriori combos at 10-15% side discount. Fast engineering, immediate +$18.5k/mo."},
+        {"name": "VIP Churn Win-Back Drip", "effort": 3.0, "impact": 8.2, "cat": "Quick Win", "color": "#10B981", "desc": "Automated email/SMS at day 28 of inactivity with $10 credit to recover $48.4k at-risk revenue."},
+        {"name": "Discount Spend Gates ($35+)", "effort": 3.5, "impact": 7.9, "cat": "Quick Win", "color": "#10B981", "desc": "Require $35+ basket for 10% off to stop margin leak on small tickets. Recovers +$16.4k/mo."},
+        {"name": "FoodHunter VIP Pass (Loyalty)", "effort": 7.5, "impact": 9.2, "cat": "Major Strategic Bet", "color": "#4F46E5", "desc": "Subscription/Points tier for Champions & Loyalists providing free delivery. Expands CLV by 28%."},
+        {"name": "Regional Merchant Expansion", "effort": 6.8, "impact": 8.5, "cat": "Major Strategic Bet", "color": "#4F46E5", "desc": "Onboard 20 top-tier Thai & Indian restaurants to fix 38.6% Chinese cuisine over-reliance."},
+        {"name": "Peak-Hour Courier Incentives", "effort": 3.8, "impact": 4.5, "cat": "Fill-In", "color": "#F59E0B", "desc": "Micro-bonus for dinner rush drivers maintaining <25m delivery speeds."},
+        {"name": "Dietary Menu Badging (Veg/Vegan)", "effort": 2.0, "impact": 4.0, "cat": "Fill-In", "color": "#F59E0B", "desc": "Prominent green leaf badges on vegetarian items to capture health-conscious segment."},
+        {"name": "Wholesale Mobile App Redesign", "effort": 8.5, "impact": 3.8, "cat": "De-prioritize", "color": "#EF4444", "desc": "High cost, complex migration with minimal direct revenue impact compared to CRM & menu levers."}
+    ],
+    "strategic_pillars": [
+        {
+            "id": 1,
+            "title": "VIP Churn Shield & Automated Win-Back",
+            "tag": "Customer Lifetime Value (CLV)",
+            "icon": "fa-shield-halved",
+            "color": "var(--primary)",
+            "bg": "var(--primary-light)",
+            "target": "+$48,400 Recovered",
+            "kpi": "25% Reactivation of 456 At-Risk VIPs",
+            "problem": "456 high-value customers ($158 avg spend) have been inactive for 57+ days, risking $72,185 in annual revenue.",
+            "solution": "Deploy 3-stage automated CRM lifecycle drip at Day 21 (gentle reminder), Day 28 ($10 credit on favorite cuisine), and Day 45 (CEO survey + VIP perk).",
+            "owner": "CRM & Retention Marketing",
+            "timeline": "Immediate (Days 1 - 30)"
+        },
+        {
+            "id": 2,
+            "title": "Intelligent Menu Bundling & Cross-Sell",
+            "tag": "Average Order Value (AOV) Expansion",
+            "icon": "fa-cubes",
+            "color": "#10B981",
+            "bg": "rgba(16, 185, 129, 0.1)",
+            "target": "+$18,500 Monthly MRR",
+            "kpi": "AOV Lift: $27.78 → $29.63 (+6.7%)",
+            "problem": "50.4% of orders are under $20 (single items), missing side dish and appetizer cross-sell opportunities.",
+            "solution": "Implement Apriori basket recommendations at checkout (e.g. Peking Duck + Hot & Sour Soup combo with $2 discount).",
+            "owner": "Merchandising & Product Engineering",
+            "timeline": "Quick Win (Days 1 - 45)"
+        },
+        {
+            "id": 3,
+            "title": "Discount Rationalization & Margin Defense",
+            "tag": "Gross Margin Optimization",
+            "icon": "fa-coins",
+            "color": "#F59E0B",
+            "bg": "rgba(245, 158, 11, 0.1)",
+            "target": "+$49,100 Margin Preserved",
+            "kpi": "Discount Rate: 13.3% → 9.5%",
+            "problem": "FoodHunter gave away $163,680 in flat discounts (15% on high tickets) unconditionally, without preventing a 21% volume drop.",
+            "solution": "Replace flat un-gated discounts with minimum order thresholds ($35+ for 10% off) and shift promo budget into tiered loyalty points.",
+            "owner": "Pricing & Commercial Finance",
+            "timeline": "Phase 2 (Days 30 - 60)"
+        },
+        {
+            "id": 4,
+            "title": "Cuisine Diversification & Merchant Expansion",
+            "tag": "Portfolio Risk Mitigation",
+            "icon": "fa-utensils",
+            "color": "#06B6D4",
+            "bg": "rgba(6, 182, 212, 0.1)",
+            "target": "+$33,600 Monthly Revenue",
+            "kpi": "+1,200 Non-Chinese Orders / Mo",
+            "problem": "Chinese cuisine represents 38.6% of orders and 36.8% of revenue, leaving the platform vulnerable to merchant supply shocks.",
+            "solution": "Onboard 20 premier Thai, Indian, and Italian restaurants; launch 'World Flavor Weekends' with sponsored merchant placement.",
+            "owner": "Merchant Partnerships & Business Development",
+            "timeline": "Phase 3 (Days 45 - 90)"
+        }
+    ],
+    "roadmap_milestones": [
+        {"phase": "Days 1 – 30", "focus": "Stabilization & Leak Plugging", "initiatives": "Launch 3-stage automated VIP win-back CRM campaign; roll out Top 5 Apriori combo bundles at checkout for Chinese cuisine; eliminate flat discounts under $20.", "owner": "Marketing & CRM", "target_metric": "+$16.1k/mo recovered, AOV +$0.80"},
+        {"phase": "Days 31 – 60", "focus": "Margin Defense & Optimization", "initiatives": "Enforce $35+ basket threshold for promotional discounts; expand combo meal cross-selling to Italian and Indian menus; recruit first batch of 10 new regional restaurant partners.", "owner": "Finance & Merchandising", "target_metric": "Discount rate down to 10.5%, +$16.4k margin"},
+        {"phase": "Days 61 – 90", "focus": "Scale & Institutional Loyalty", "initiatives": "Launch 'FoodHunter VIP Pass' tiered loyalty subscription; onboard remaining 10 high-demand merchant partners; establish automated Courier SLA driver dispatch incentives.", "owner": "Product & Growth", "target_metric": "+1,200 monthly orders, Platform MRR $320.4k"}
+    ]
 }
 
 json_str = json.dumps(payload, separators=(',', ':'))
@@ -972,6 +1051,12 @@ html_template = f"""<!DOCTYPE html>
                 </button>
             </li>
             <li class="nav-item">
+                <button class="nav-link" id="strategy-tab" data-bs-toggle="pill" data-bs-target="#tab-strategy" type="button" style="border: 1px solid rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.08);">
+                    <i class="fas fa-lightbulb text-info me-1"></i> <span class="fw-bold">2️⃣ Prescriptive Strategy &amp; Insights</span>
+                    <span class="badge bg-info text-dark ms-1 px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Executive Roadmap</span>
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link" id="table-tab" data-bs-toggle="pill" data-bs-target="#tab-table" type="button">
                     <i class="fas fa-table-list me-1"></i> Live Data Explorer
                 </button>
@@ -1352,6 +1437,169 @@ html_template = f"""<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- TAB 7: PRESCRIPTIVE BUSINESS STRATEGY & EXECUTIVE STORYTELLING (STEP 2) -->
+            <div class="tab-pane fade" id="tab-strategy">
+                <!-- Step 2 Hero Banner -->
+                <div class="card border-0 mb-4 shadow-sm" style="background: linear-gradient(135deg, #092c4c 0%, #173f6b 100%); border-radius: 16px; color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge bg-info text-dark fw-bold px-3 py-1 rounded-pill">STEP 2 COMPLETE</span>
+                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-chess-knight me-1"></i> McKinsey/BCG Style Prescriptive Strategy</span>
+                                </div>
+                                <h4 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Executive Turnaround Roadmap: Reversing Volume Decline &amp; Unlocking +$149.6k/Qtr</h4>
+                                <p class="text-white-50 mb-0 small">
+                                    Synthesizing <strong>43,118 transactional records</strong>, <strong>9,874 customer accounts</strong>, and delivery logistics into 4 quantifiable growth levers to restore peak June revenue run-rates.
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-success bg-opacity-25 text-success-light border border-success border-opacity-50 px-3 py-2 rounded-pill small">
+                                    <i class="fas fa-chart-line me-1"></i> +12.5% Revenue Growth
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategic Impact KPI Scorecards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Target Quarterly Impact</span>
+                                <div class="kpi-icon-box" style="background:#ECFDF5; color:#10B981;">
+                                    <i class="fas fa-arrow-trend-up"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-success">+$149,600</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success">
+                                +12.5% revenue expansion
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">At-Risk VIP Protection</span>
+                                <div class="kpi-icon-box" style="background:#EEF2FF; color:#4F46E5;">
+                                    <i class="fas fa-shield-halved"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-primary">+$48,400</div>
+                            <span class="badge-pill-custom bg-primary bg-opacity-10 text-primary">
+                                25% win-back reactivation
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Target Basket Size (AOV)</span>
+                                <div class="kpi-icon-box" style="background:#FFFBEB; color:#F59E0B;">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-warning">$29.63</div>
+                            <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
+                                +6.7% via Apriori bundling
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Discount Efficiency Gain</span>
+                                <div class="kpi-icon-box" style="background:#F0FDF4; color:#16A34A;">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-success">+$49,100</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success">
+                                Spend thresholds ($35+)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 1: Executive Visualizations (Waterfall & Priority Matrix) -->
+                <div class="row g-4 mb-4">
+                    <!-- Waterfall Chart: Revenue Recovery Bridge -->
+                    <div class="col-12 col-xl-7">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-chart-waterfall text-primary"></i>
+                                        Strategic Revenue Recovery Bridge
+                                    </div>
+                                    <div class="text-muted small">Financial bridge from current September run-rate to projected monthly target</div>
+                                </div>
+                            </div>
+                            <div id="chartStrategyWaterfall" style="min-height: 420px; width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Strategic Action Priority Matrix (Impact vs Effort) -->
+                    <div class="col-12 col-xl-5">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-crosshairs text-info"></i>
+                                        Strategic Action Priority Matrix
+                                    </div>
+                                    <div class="text-muted small">Impact vs. Implementation Effort quadrant evaluation</div>
+                                </div>
+                            </div>
+                            <div id="chartPriorityMatrix" style="min-height: 420px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: The 4 Strategic Growth Pillars Deep-Dive Cards -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-columns text-primary me-2"></i> The 4 Prescriptive Growth Pillars</h5>
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill small fw-semibold">
+                            C-Suite Operational Playbook
+                        </span>
+                    </div>
+                    <div class="row g-3" id="strategicPillarsContainer">
+                        <!-- Dynamically Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Row 3: 30-60-90 Day Phased Execution Roadmap Table -->
+                <div class="chart-box mb-4">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <i class="fas fa-timeline text-primary"></i>
+                                30 – 60 – 90 Day Strategic Execution Roadmap
+                            </div>
+                            <div class="text-muted small">Phase-wise execution schedule with departmental ownership and target KPIs</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-custom align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 130px;">Execution Phase</th>
+                                    <th style="min-width: 180px;">Strategic Focus</th>
+                                    <th style="min-width: 320px;">Tactical Levers &amp; Initiatives</th>
+                                    <th style="min-width: 140px;">Ownership</th>
+                                    <th style="min-width: 150px;">Target Milestone</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roadmapTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 5: DATA EXPLORER -->
             <div class="tab-pane fade" id="tab-table">
                 <div class="chart-box">
@@ -1596,6 +1844,7 @@ html_template = f"""<!DOCTYPE html>
             try {{ renderMonthlyChart(); }} catch(e) {{ console.error('Error in renderMonthlyChart:', e); }}
             try {{ renderRFMCharts(); }} catch(e) {{ console.error('Error in renderRFMCharts:', e); }}
             try {{ renderMarketBasketChart(); }} catch(e) {{ console.error('Error in renderMarketBasketChart:', e); }}
+            try {{ renderStrategyCharts(); }} catch(e) {{ console.error('Error in renderStrategyCharts:', e); }}
             try {{ renderCuisinePie(); }} catch(e) {{ console.error('Error in renderCuisinePie:', e); }}
             try {{ renderHourlyChart(); }} catch(e) {{ console.error('Error in renderHourlyChart:', e); }}
             try {{ renderCuisineBar(); }} catch(e) {{ console.error('Error in renderCuisineBar:', e); }}
@@ -2409,6 +2658,198 @@ html_template = f"""<!DOCTYPE html>
                 renderMarketBasketChart();
             }});
         }}
+
+        // ==========================================
+        // STEP 2: PRESCRIPTIVE STRATEGY & INSIGHTS LOGIC
+        // ==========================================
+        function renderStrategyCharts() {{
+            renderStrategyWaterfall();
+            renderPriorityMatrix();
+            populateStrategyPillars();
+            populateRoadmapTable();
+        }}
+
+        // 1. Revenue Recovery Waterfall Bridge (Plotly Waterfall)
+        function renderStrategyWaterfall() {{
+            const wf = RAW_DATA.strategy_waterfall;
+            const trace = {{
+                type: 'waterfall',
+                orientation: 'v',
+                measure: wf.measure,
+                x: wf.x,
+                y: wf.y,
+                text: wf.text,
+                textposition: 'outside',
+                connector: {{
+                    line: {{ color: currentTheme === 'dark' ? '#475569' : '#94A3B8', width: 1.5, dash: 'dot' }}
+                }},
+                increasing: {{ marker: {{ color: '#10B981' }} }},
+                decreasing: {{ marker: {{ color: '#EF4444' }} }},
+                totals: {{ marker: {{ color: '#4F46E5' }} }},
+                hovertemplate: '<b>%{{x}}</b><br>Impact: %{{text}}<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 30, b: 60, l: 60, r: 20 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                yaxis: {{
+                    title: 'Monthly Revenue ($ in Thousands)',
+                    ticksuffix: 'k',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9',
+                    zeroline: false
+                }},
+                xaxis: {{
+                    automargin: true,
+                    tickangle: -15
+                }},
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartStrategyWaterfall', [trace], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // 2. Strategic Action Priority Matrix (Plotly Scatter Quadrant)
+        function renderPriorityMatrix() {{
+            const items = RAW_DATA.priority_matrix;
+
+            const trace = {{
+                type: 'scatter',
+                mode: 'markers+text',
+                x: items.map(d => d.effort),
+                y: items.map(d => d.impact),
+                text: items.map(d => d.name),
+                textposition: 'top center',
+                textfont: {{
+                    family: 'Plus Jakarta Sans',
+                    size: 11,
+                    weight: 'bold',
+                    color: currentTheme === 'dark' ? '#F1F5F9' : '#0F172A'
+                }},
+                marker: {{
+                    size: items.map(d => d.cat === 'Quick Win' ? 22 : (d.cat === 'Major Strategic Bet' ? 24 : 16)),
+                    color: items.map(d => d.color),
+                    opacity: 0.9,
+                    line: {{ width: 2, color: '#FFFFFF' }}
+                }},
+                customdata: items.map(d => [d.cat, d.desc]),
+                hovertemplate: '<b>%{{text}}</b> (%{{customdata[0]}})<br>Effort: %{{x}}/10 &bull; Impact: %{{y}}/10<br>%{{customdata[1]}}<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 30, b: 50, l: 50, r: 30 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: {{
+                    title: 'Implementation Effort & Complexity (1 = Lowest, 10 = Highest)',
+                    range: [0, 10],
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9',
+                    zeroline: false
+                }},
+                yaxis: {{
+                    title: 'Revenue & Margin Impact (1 = Lowest, 10 = Highest)',
+                    range: [0, 10.5],
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9',
+                    zeroline: false
+                }},
+                shapes: [
+                    // Vertical dividing line at Effort = 5
+                    {{ type: 'line', x0: 5, x1: 5, y0: 0, y1: 10, line: {{ color: currentTheme === 'dark' ? '#334155' : '#CBD5E1', width: 1.5, dash: 'dash' }} }},
+                    // Horizontal dividing line at Impact = 5
+                    {{ type: 'line', x0: 0, x1: 10, y0: 6, y1: 6, line: {{ color: currentTheme === 'dark' ? '#334155' : '#CBD5E1', width: 1.5, dash: 'dash' }} }}
+                ],
+                annotations: [
+                    {{ x: 2.5, y: 10.1, xref: 'x', yref: 'y', text: '⚡ QUICK WINS (High Impact, Low Effort)', showarrow: false, font: {{ size: 10, color: '#10B981', weight: 'bold' }} }},
+                    {{ x: 7.5, y: 10.1, xref: 'x', yref: 'y', text: '🚀 MAJOR STRATEGIC BETS', showarrow: false, font: {{ size: 10, color: '#4F46E5', weight: 'bold' }} }},
+                    {{ x: 2.5, y: 0.8, xref: 'x', yref: 'y', text: '🔍 FILL-INS', showarrow: false, font: {{ size: 10, color: '#F59E0B', weight: 'bold' }} }},
+                    {{ x: 7.5, y: 0.8, xref: 'x', yref: 'y', text: '⏳ DE-PRIORITIZE', showarrow: false, font: {{ size: 10, color: '#EF4444', weight: 'bold' }} }}
+                ],
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartPriorityMatrix', [trace], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // 3. Populate The 4 Strategic Growth Pillars
+        function populateStrategyPillars() {{
+            const container = document.getElementById('strategicPillarsContainer');
+            if (!container) return;
+            const pillars = RAW_DATA.strategic_pillars;
+
+            container.innerHTML = pillars.map(p => `
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="chart-box h-100 d-flex flex-column justify-content-between p-3.5" style="border-top: 4px solid ${{p.color}};">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold" style="background: ${{p.bg}}; color: ${{p.color}};">
+                                    <i class="fas ${{p.icon}} me-1"></i> Pillar ${{p.id}}
+                                </span>
+                                <span class="badge bg-success bg-opacity-10 text-success fw-bold small">${{p.target}}</span>
+                            </div>
+                            <h6 class="fw-bold mb-1" style="color: var(--text-main); font-size: 0.95rem;">${{p.title}}</h6>
+                            <p class="text-muted small mb-2 fst-italic" style="font-size: 0.78rem;">${{p.tag}}</p>
+                            
+                            <div class="p-2.5 rounded-2 mb-2.5" style="background: var(--primary-light); font-size: 0.82rem;">
+                                <div class="fw-bold mb-1 text-danger small"><i class="fas fa-triangle-exclamation me-1"></i> The Core Problem:</div>
+                                <div class="text-muted small">${{p.problem}}</div>
+                            </div>
+
+                            <div class="p-2.5 rounded-2 mb-2.5" style="background: var(--bg-card); border: 1px dashed var(--border-color); font-size: 0.82rem;">
+                                <div class="fw-bold mb-1 text-success small"><i class="fas fa-circle-check me-1"></i> Prescriptive Action:</div>
+                                <div style="color: var(--text-main); font-size: 0.82rem;">${{p.solution}}</div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-top mt-2 d-flex justify-content-between align-items-center text-muted small" style="font-size: 0.75rem;">
+                            <span><i class="fas fa-user-tie me-1"></i> ${{p.owner}}</span>
+                            <span class="fw-bold text-primary">${{p.timeline}}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }}
+
+        // 4. Populate 30-60-90 Day Roadmap Table
+        function populateRoadmapTable() {{
+            const tbody = document.getElementById('roadmapTableBody');
+            if (!tbody) return;
+            const rows = RAW_DATA.roadmap_milestones;
+
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td>
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill fw-bold">
+                            <i class="fas fa-calendar-check me-1"></i> ${{r.phase}}
+                        </span>
+                    </td>
+                    <td><strong>${{r.focus}}</strong></td>
+                    <td class="small" style="line-height: 1.45;">${{r.initiatives}}</td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-dark px-2.5 py-1 rounded-pill">${{r.owner}}</span></td>
+                    <td><span class="badge bg-success bg-opacity-15 text-success fw-bold px-2.5 py-1 rounded-pill">${{r.target_metric}}</span></td>
+                </tr>
+            `).join('');
+        }}
+
+        // Trigger redraw on Strategy tab click
+        const strategyTabBtn = document.getElementById('strategy-tab');
+        if (strategyTabBtn) {{
+            strategyTabBtn.addEventListener('shown.bs.tab', () => {{
+                renderStrategyCharts();
+            }});
+        }}
+
+        // Resize handler updates for Strategy charts
+        window.addEventListener('resize', () => {{
+            const stratCharts = ['chartStrategyWaterfall', 'chartPriorityMatrix'];
+            stratCharts.forEach(id => {{
+                const el = document.getElementById(id);
+                if (el && el.data) {{
+                    Plotly.Plots.resize(el);
+                }}
+            }});
+        }});
 
         // Initial Load
         syncUIAndRefresh();
