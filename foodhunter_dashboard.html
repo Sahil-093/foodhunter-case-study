@@ -3,339 +3,1117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodHunter Executive Analytics Dashboard</title>
+    <title>FoodHunter - Dynamic Interactive BI Dashboard</title>
+    
+    <!-- Meta tags for responsive & social -->
+    <meta name="description" content="FoodHunter Interactive Data Analytics & BI Dashboard. Explore revenue trends, cuisine share, dish sales, and delivery efficiency.">
+    <meta name="theme-color" content="#4F46E5">
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+            --shadow-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
         }
+
+        [data-theme="dark"] {
+            --bg-body: #0b0f19;
+            --bg-card: #151c2e;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #242f47;
+            --primary: #6366f1;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+            --shadow-hover: 0 12px 28px rgba(0,0,0,0.5);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
         .navbar-custom {
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
         }
+
+        /* Filter Toolbar */
+        .filter-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+        }
+
+        /* KPI Card */
         .kpi-card {
-            background: #ffffff;
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
             padding: 22px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-            transition: all 0.25s ease;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
         }
         .kpi-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
         }
-        .kpi-icon {
+        .kpi-icon-box {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
         }
-        .chart-card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-            margin-bottom: 24px;
-        }
-        .badge-subtle {
-            font-size: 0.75rem;
+        .kpi-title {
+            font-size: 0.82rem;
             font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 20px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .section-header {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #0f172a;
+        .kpi-value {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 6px 0 4px 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Chart Container Cards */
+        .chart-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 16px;
+        }
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .pill-tab {
+
+        /* Badges */
+        .badge-pill-custom {
+            padding: 5px 12px;
             border-radius: 30px;
-            padding: 8px 18px;
             font-weight: 600;
+            font-size: 0.78rem;
+        }
+
+        /* Select controls */
+        .form-select-custom {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .form-select-custom:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        /* Table styling */
+        .table-custom {
+            color: var(--text-main);
+        }
+        .table-custom thead th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+            padding: 12px 14px;
+        }
+        .table-custom tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        /* Nav Pills for Views */
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            transition: all 0.2s;
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+        }
+
+        /* Responsive utilities */
+        @media (max-width: 768px) {
+            .kpi-value {
+                font-size: 1.5rem;
+            }
+            .filter-bar {
+                padding: 14px;
+            }
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
-        <div class="container-fluid px-4">
+    <!-- TOP NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 sticky-top">
+        <div class="container-fluid px-3 px-md-4">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 text-white" href="#">
-                <span class="p-2 bg-danger rounded-3"><i class="fas fa-utensils"></i></span>
-                FoodHunter BI Portal
+                <span class="p-2 bg-danger rounded-3 text-white"><i class="fas fa-burger"></i></span>
+                FoodHunter BI
             </a>
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-success text-white py-2 px-3 rounded-pill">
-                    <i class="fas fa-database me-1"></i> 43,118 Orders Loaded
-                </span>
-                <a href="https://github.com/Sahil-093/foodhunter-case-study" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold shadow-sm">
-                    <i class="fab fa-github me-1"></i> View on GitHub
+            
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon me-1"></i> <span class="d-none d-sm-inline">Dark Mode</span>
+                </button>
+                
+                <!-- GitHub Repo Link -->
+                <a href="https://github.com/Sahil-093/foodhunter-case-study" target="_blank" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
+                    <i class="fab fa-github me-1"></i> <span class="d-none d-sm-inline">GitHub Repo</span>
                 </a>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid px-4 py-4">
+    <!-- MAIN CONTAINER -->
+    <div class="container-fluid px-3 px-md-4 py-4">
 
-        <!-- SUB HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- INTRO & BREADCRUMB -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
             <div>
-                <h3 class="fw-extrabold mb-1 text-slate-900">Executive Performance Dashboard</h3>
-                <p class="text-muted mb-0">Analysis of FoodHunter SQL Dataset (June 1, 2022 - September 29, 2022)</p>
+                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Interactive Executive Dashboard</h3>
+                <p class="text-muted small mb-0">Multi-Dimensional Analysis of 43,118 Orders &bull; June 1 – September 29, 2022</p>
             </div>
-            <div class="text-end">
-                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
-                    <i class="far fa-calendar-alt me-1"></i> Q3 2022 Performance Window
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                    <i class="fas fa-bolt me-1"></i> Live Real-Time Filtering
                 </span>
             </div>
         </div>
 
-        <!-- KPI SCORECARDS -->
+        <!-- DYNAMIC FILTER TOOLBAR -->
+        <div class="filter-bar">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-utensils me-1"></i> Cuisine Filter</label>
+                    <select id="cuisineSelect" class="form-select form-select-custom">
+                        <option value="ALL">All Cuisines (Chinese, Italian, Indian, Thai)</option>
+                        <option value="Chinese">Chinese Only</option>
+                        <option value="Italian">Italian Only</option>
+                        <option value="Indian">Indian Only</option>
+                        <option value="Thai">Thai Only</option>
+                    </select>
+                </div>
+                
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-calendar-alt me-1"></i> Month Filter</label>
+                    <select id="monthSelect" class="form-select form-select-custom">
+                        <option value="ALL">Full Timeframe (June - Sept 2022)</option>
+                        <option value="2022-06">June 2022</option>
+                        <option value="2022-07">July 2022</option>
+                        <option value="2022-08">August 2022</option>
+                        <option value="2022-09">September 2022</option>
+                    </select>
+                </div>
+                
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-business-time me-1"></i> Day Type</label>
+                    <select id="dayTypeSelect" class="form-select form-select-custom">
+                        <option value="ALL">All Days (Weekdays & Weekends)</option>
+                        <option value="Weekday">Weekdays Only (Mon - Fri)</option>
+                        <option value="Weekend">Weekends Only (Sat - Sun)</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end gap-2 pt-2 pt-lg-0">
+                    <button id="resetFiltersBtn" class="btn btn-outline-secondary w-100 rounded-3 fw-semibold py-2">
+                        <i class="fas fa-rotate-left me-1"></i> Reset Filters
+                    </button>
+                    <button id="exportCsvBtn" class="btn btn-primary w-100 rounded-3 fw-semibold py-2">
+                        <i class="fas fa-file-csv me-1"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DYNAMIC KPI SCORECARDS (Live Updating) -->
         <div class="row g-3 mb-4">
             <!-- KPI 1: Revenue -->
-            <div class="col-md-4 col-xl-2">
+            <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Total Revenue</span>
-                        <div class="kpi-icon bg-indigo-50 text-primary" style="background:#EEF2FF; color:#4F46E5;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">Gross Revenue</span>
+                        <div class="kpi-icon-box" style="background:#EEF2FF; color:#4F46E5;">
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">$1,197,706</h3>
-                    <span class="badge-subtle bg-success bg-opacity-10 text-success">
-                        <i class="fas fa-arrow-up me-1"></i>43,118 orders
+                    <div class="kpi-value" id="kpiRevenue">$1,197,706</div>
+                    <span class="badge-pill-custom bg-primary bg-opacity-10 text-primary" id="kpiOrdersSub">
+                        43,118 orders
                     </span>
                 </div>
             </div>
 
-            <!-- KPI 2: AOV -->
-            <div class="col-md-4 col-xl-2">
+            <!-- KPI 2: Total Orders -->
+            <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Average Order</span>
-                        <div class="kpi-icon" style="background:#ECFDF5; color:#10B981;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">Total Orders</span>
+                        <div class="kpi-icon-box" style="background:#ECFDF5; color:#10B981;">
+                            <i class="fas fa-bag-shopping"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiOrders">43,118</div>
+                    <span class="badge-pill-custom bg-success bg-opacity-10 text-success" id="kpiShareSub">
+                        100% of volume
+                    </span>
+                </div>
+            </div>
+
+            <!-- KPI 3: AOV -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">Avg Order Value</span>
+                        <div class="kpi-icon-box" style="background:#FFFBEB; color:#F59E0B;">
                             <i class="fas fa-receipt"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">$27.78</h3>
-                    <span class="badge-subtle bg-info bg-opacity-10 text-info">
-                        <i class="fas fa-check me-1"></i>Stable spend
+                    <div class="kpi-value" id="kpiAov">$27.78</div>
+                    <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
+                        Consistent spend
                     </span>
                 </div>
             </div>
 
-            <!-- KPI 3: Customers -->
-            <div class="col-md-4 col-xl-2">
+            <!-- KPI 4: Food Total -->
+            <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Repeat Customers</span>
-                        <div class="kpi-icon" style="background:#FFFBEB; color:#F59E0B;">
-                            <i class="fas fa-user-check"></i>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">Food Total</span>
+                        <div class="kpi-icon-box" style="background:#F5F3FF; color:#8B5CF6;">
+                            <i class="fas fa-plate-wheat"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">94.7%</h3>
-                    <span class="badge-subtle bg-warning bg-opacity-10 text-warning">
-                        9,349 repeat clients
-                    </span>
-                </div>
-            </div>
-
-            <!-- KPI 4: Top Cuisine -->
-            <div class="col-md-4 col-xl-2">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Top Cuisine</span>
-                        <div class="kpi-icon" style="background:#FEF2F2; color:#EF4444;">
-                            <i class="fas fa-bowl-rice"></i>
-                        </div>
-                    </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">Chinese</h3>
-                    <span class="badge-subtle bg-danger bg-opacity-10 text-danger">
-                        $437.7K revenue
+                    <div class="kpi-value" id="kpiFoodTotal">$1,229,527</div>
+                    <span class="badge-pill-custom bg-info bg-opacity-10 text-info" id="kpiDiscountSub">
+                        13.3% discount
                     </span>
                 </div>
             </div>
 
             <!-- KPI 5: Delivery SLA -->
-            <div class="col-md-4 col-xl-2">
+            <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Avg Delivery</span>
-                        <div class="kpi-icon" style="background:#F0FDF4; color:#22C55E;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">On-Time (&lt;30m)</span>
+                        <div class="kpi-icon-box" style="background:#F0FDF4; color:#16A34A;">
+                            <i class="fas fa-stopwatch-20"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiFastPct">82.9%</div>
+                    <span class="badge-pill-custom bg-success bg-opacity-10 text-success" id="kpiAvgTimeSub">
+                        Avg: 23.4 mins
+                    </span>
+                </div>
+            </div>
+
+            <!-- KPI 6: Delivery Fees -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="kpi-title">Delivery Fees</span>
+                        <div class="kpi-icon-box" style="background:#FEF2F2; color:#EF4444;">
                             <i class="fas fa-motorcycle"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">23.4 min</h3>
-                    <span class="badge-subtle bg-success bg-opacity-10 text-success">
-                        <i class="fas fa-bolt me-1"></i>82.9% &lt;30m
+                    <div class="kpi-value" id="kpiDelivFees">$131,859</div>
+                    <span class="badge-pill-custom bg-danger bg-opacity-10 text-danger">
+                        250 couriers active
                     </span>
                 </div>
             </div>
+        </div>
 
-            <!-- KPI 6: Active Drivers -->
-            <div class="col-md-4 col-xl-2">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-muted small fw-semibold">Fleet Utilization</span>
-                        <div class="kpi-icon" style="background:#F5F3FF; color:#8B5CF6;">
-                            <i class="fas fa-users-gear"></i>
+        <!-- TABS BAR FOR MULTI-PERSPECTIVE ANALYTICS -->
+        <ul class="nav nav-pills mb-4 gap-2" id="dashboardTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#tab-overview" type="button">
+                    <i class="fas fa-chart-line me-1"></i> Revenue & Volume Dynamics
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="cuisines-tab" data-bs-toggle="pill" data-bs-target="#tab-cuisines" type="button">
+                    <i class="fas fa-bowl-rice me-1"></i> Cuisine & Restaurants
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="dishes-tab" data-bs-toggle="pill" data-bs-target="#tab-dishes" type="button">
+                    <i class="fas fa-utensils me-1"></i> Top Dishes & Menu
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="delivery-tab" data-bs-toggle="pill" data-bs-target="#tab-delivery" type="button">
+                    <i class="fas fa-truck-fast me-1"></i> Delivery SLA & Drivers
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="table-tab" data-bs-toggle="pill" data-bs-target="#tab-table" type="button">
+                    <i class="fas fa-table-list me-1"></i> Live Data Explorer
+                </button>
+            </li>
+        </ul>
+
+        <!-- TAB CONTENT PANES -->
+        <div class="tab-content" id="dashboardTabsContent">
+
+            <!-- TAB 1: OVERVIEW & TRENDS -->
+            <div class="tab-pane fade show active" id="tab-overview">
+                <div class="row g-4">
+                    <!-- Monthly Trend Combo Chart -->
+                    <div class="col-12 col-xl-8">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-chart-column text-primary"></i>
+                                    Monthly Revenue & Order Volume Progression
+                                </div>
+                                <span class="badge bg-light text-dark border">Dual Axis (Revenue + Orders)</span>
+                            </div>
+                            <div id="chartMonthly" style="min-height: 380px; width: 100%;"></div>
                         </div>
                     </div>
-                    <h3 class="fw-bold mb-1 text-slate-800">100%</h3>
-                    <span class="badge-subtle bg-primary bg-opacity-10 text-primary">
-                        250 of 250 active
-                    </span>
-                </div>
-            </div>
-        </div>
 
-        <!-- MAIN CHARTS ROW 1 -->
-        <div class="row g-4 mb-4">
-            <!-- Monthly Trends -->
-            <div class="col-xl-8">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-chart-line text-primary"></i>
-                        Monthly Revenue & Order Volume Progression
+                    <!-- Cuisine Share Donut -->
+                    <div class="col-12 col-xl-4">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-chart-pie text-success"></i>
+                                    Revenue Distribution by Cuisine
+                                </div>
+                            </div>
+                            <div id="chartCuisinePie" style="min-height: 380px; width: 100%;"></div>
+                        </div>
                     </div>
-                    <p class="text-muted small mb-3">Order volume dropped by 25.1% from June to September while average ticket price remained locked at ~$27.78.</p>
-                    <div>                            <div id="c307592e-9ad0-4d28-81a1-7237db7e4a55" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("c307592e-9ad0-4d28-81a1-7237db7e4a55")) {                    Plotly.newPlot(                        "c307592e-9ad0-4d28-81a1-7237db7e4a55",                        [{"marker":{"color":"#4F46E5"},"name":"Revenue ($)","text":["$347,578","$308,602","$283,366","$258,161"],"textposition":"inside","x":["2022-06","2022-07","2022-08","2022-09"],"y":{"dtype":"f8","bdata":"AAAAAOY2FUEAAAAA5tUSQZqZmZmXSxFBzczMzIiDD0E="},"type":"bar","xaxis":"x","yaxis":"y"},{"line":{"color":"#F59E0B","width":3},"marker":{"size":8},"mode":"lines+markers+text","name":"Orders Count","text":["12,502","11,144","10,107","9,365"],"textposition":"top center","x":["2022-06","2022-07","2022-08","2022-09"],"y":{"dtype":"i2","bdata":"1jCIK3snlSQ="},"type":"scatter","xaxis":"x","yaxis":"y2"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,0.94]},"yaxis":{"anchor":"x","domain":[0.0,1.0]},"yaxis2":{"anchor":"x","overlaying":"y","side":"right"},"margin":{"l":20,"r":20,"t":30,"b":20},"legend":{"orientation":"h","y":1.1,"x":0.5,"xanchor":"center"}},                        {"responsive": true}                    )                };            </script>        </div>
-                </div>
-            </div>
 
-            <!-- Cuisine Revenue Share -->
-            <div class="col-xl-4">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-chart-pie text-success"></i>
-                        Revenue Share by Cuisine
+                    <!-- 24-Hour Peak Demand Curve -->
+                    <div class="col-12">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-clock text-info"></i>
+                                    24-Hour Peak Ordering Patterns (Hourly Traffic Distribution)
+                                </div>
+                                <span class="badge bg-light text-dark border">Lunch Peak (12-14h) &bull; Dinner Peak (18-20h)</span>
+                            </div>
+                            <div id="chartHourly" style="min-height: 320px; width: 100%;"></div>
+                        </div>
                     </div>
-                    <p class="text-muted small mb-3">Chinese food accounts for over 36.5% of gross sales, followed by Italian (29.8%).</p>
-                    <div>                            <div id="80100586-3757-46a2-8ef6-81106b3f9ec4" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("80100586-3757-46a2-8ef6-81106b3f9ec4")) {                    Plotly.newPlot(                        "80100586-3757-46a2-8ef6-81106b3f9ec4",                        [{"domain":{"x":[0.0,1.0],"y":[0.0,1.0]},"hole":0.5,"hovertemplate":"cuisine=%{label}\u003cbr\u003erevenue=%{value}\u003cextra\u003e\u003c\u002fextra\u003e","labels":["Chinese","Italian","Indian","Thai"],"legendgroup":"","name":"","showlegend":true,"values":{"dtype":"f8","bdata":"ZmZmZiy3GkFmZmZmfsUVQTMzMzOvbgxBMzMzM0vMBEE="},"type":"pie","textinfo":"percent+label","textposition":"inside"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"legend":{"tracegroupgap":0},"margin":{"t":20,"l":20,"r":20,"b":20},"piecolorway":["#4F46E5","#10B981","#F59E0B","#EF4444"]},                        {"responsive": true}                    )                };            </script>        </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MAIN CHARTS ROW 2 -->
-        <div class="row g-4 mb-4">
-            <!-- Top Dishes -->
-            <div class="col-xl-7">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-fire-flame-curved text-danger"></i>
-                        Top 12 Best-Selling Menu Dishes (Units Sold)
-                    </div>
-                    <div>                            <div id="644c4769-4bef-414d-8294-6f183ff1d42d" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("644c4769-4bef-414d-8294-6f183ff1d42d")) {                    Plotly.newPlot(                        "644c4769-4bef-414d-8294-6f183ff1d42d",                        [{"hovertemplate":"cuisine=Chinese\u003cbr\u003etotal_qty_sold=%{text}\u003cbr\u003eitem_name=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Chinese","marker":{"color":"rgb(136, 204, 238)","pattern":{"shape":""}},"name":"Chinese","orientation":"h","showlegend":true,"text":{"dtype":"f8","bdata":"AAAAAACcpEAAAAAAABKkQAAAAAAAYqJAAAAAAADsnkAAAAAAALSbQAAAAAAAaJtAAAAAAAA8l0AAAAAAAOCWQAAAAAAASJZAAAAAAAAUlkAAAAAAAOyVQAAAAAAAlJJA"},"textposition":"auto","x":{"dtype":"i2","bdata":"TgoJCjEJuwftBtoGzwW4BZIFhQV7BaUE"},"xaxis":"x","y":["Hot and sour soup","Peking duck","Spring rolls","Moo shu pork","Kung Pao chicken","Crab Rangoon","Shrimp fried rice","Dan dan noodles","Korean-style fried chicken","Wonton soup","Vegetable lo mein","Beef and broccoli"],"yaxis":"y","type":"bar"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Units Sold"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":""},"categoryorder":"total ascending"},"legend":{"title":{"text":"cuisine"},"tracegroupgap":0},"margin":{"t":20,"l":20,"r":20,"b":20},"barmode":"relative"},                        {"responsive": true}                    )                };            </script>        </div>
                 </div>
             </div>
 
-            <!-- Delivery Time Distribution -->
-            <div class="col-xl-5">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-stopwatch text-warning"></i>
-                        Delivery SLA Compliance (Target: &lt;30m)
+            <!-- TAB 2: CUISINES & RESTAURANTS -->
+            <div class="tab-pane fade" id="tab-cuisines">
+                <div class="row g-4">
+                    <!-- Cuisine Comparison Bar -->
+                    <div class="col-12 col-lg-6">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-ranking-star text-warning"></i>
+                                    Average Order Value by Cuisine ($)
+                                </div>
+                            </div>
+                            <div id="chartCuisineBar" style="min-height: 360px; width: 100%;"></div>
+                        </div>
                     </div>
-                    <div>                            <div id="364d520c-bcd7-4cd0-96bb-fee21a6ba75d" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("364d520c-bcd7-4cd0-96bb-fee21a6ba75d")) {                    Plotly.newPlot(                        "364d520c-bcd7-4cd0-96bb-fee21a6ba75d",                        [{"bingroup":"x","hovertemplate":"delivery_minutes=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"","marker":{"color":"#10B981","pattern":{"shape":""}},"name":"","nbinsx":30,"orientation":"v","showlegend":false,"x":{"dtype":"i1","bdata":"DQ4PExwVGhYMFBMSEhQUFxQPEQ8NFBISFxoUFRAPDQ8UFBYXFBgPFxQTEw4QDxMTEg8PERMWGhkXFRYVFRIXFBESEhASEBUZFBESDxIREhIQEhYSDg0NDxQcGRMNDxUTFRcSDxEPEhYVERMSFRERHBYZFxQNEgwTEhUSFg8RFBQUFBISFhkYGBUTFBQRERQUExQTEhAUExIQGxYdHBYZGhUSDhIWFhkQERISFhoQFhUUERMTFBgYFxMTExIPDxEREhERFRsVEQ0LFh0bHRsPEBEREBMXFBEPDxMTFBYTEhAPEBATExIVExMODhQVFRkYGBQREQ8QExMSFRYUFRMSExITFBIMDhIUFBATFBAPFBcaFxUaHR0VGxoUFhcSFBQWExQUDA8MEhMVGRYPEhsUDhQREQ4RDxcaGhkWFhMRFBISDBEVERoSFBERDAwUFBASDw8MEBMRFBsSDxMUEw8PDg8VGBgZGBYWFBIVExQUFBITExAUEhQUFhIPDxUUFxgYFhYYExATExYUDxAYFxcZDg0OExcWFhIVFRscDxcYFhQPDxISFBYVGhoZEg4PExIVFhQVFRMVFhISDxIPDxYcHBIPDg8NFw8NExQUFRAUEwsUFRUPFhQSDxQMFA8SEQoMDhIRFhkWFRYcGBQXEhMSFA4UFRMSFhYXFRYUGBcWFhYSFBITDg4PFBEREhMUFBQSERQQEBYbFxYUFRMXGBQSFBQdHBUUExQWEhAPERMTEhMRERMVFhUQEhgaGxUODw4VFBIWDBEUEhQXFREPDxQPDxcUDQ4REBEZEBMVEBQQFxcPFBEQDxkVFhYXGxsODhAPFBUUEBAODwwSDQ4MExIRGRkXFxoWFhYZGRoXFRISDhYMDw8UFh0NEw8PChMbFBgZGhsVFRUQDw4UExMUExQUFhgaGBkRFBQTFBcRDhUVEhEVEg8PDxsaGBcMFxQSEw4MGBMQEBIQERAUFRYTEBESEBIUFxgbGQ0PEREMFhIODg8VEg8RERARCgoUEhMVExMTFQsLERYVEgwNGxEPFBIUDxAPEBISDg4SEhIUExMQFRQPFBYSExQTExUXFRgWFBQTGBsXFhQaGREPFBMUFBgWFhQQEhITGBISFBQOEw0KDA0QEhASExMWGRgXEBAQExIQDxEPFBgWFhMUFhAREA0PDAoLFRQSDw4PDxMXFhUWFA0PDg8ODhMVFREQFRYUFhQRFBQUFhUVFRQSEhQVExIYFBUTEBIUDBYVFRMUGBsZDhsVExQPEQ0NERQTFA4SEhQSEhITFhoPFg8YFxAUFBYWFRMWFBQMDRMOFBQODg8RFRQTEA8WFBsYGRYREhQRDxAVGBkUFhYREg8MEhUTERASExQUEw8VExETEhIaGxcTFBoZFhkaEhYbFhYVFgwNEhMUEhAUFhUREBEVFhcWFw8MDRQWGBMUEA8PDxgZFhUTFBAQFhQTEhESEQ8UFxkUDw8SFhUYFhEUExYVFhgZExEVGhsWFBQUFRYUEhUVFhQUFBERERANEQ8XFxgaGRgXGBMSFBQWFhgWFhYVGxUWExQTEA8SFRkUExIPDRMQEhQNFQ8WDxMaEhISDxAPFxYWHBIMFBISFhIQDxAPEQ8RFBQUFBkWFxMSEhESDQ4NEBQUERARDAoUEREQEhUTERESERARERIPDhAQEg4QFRkbFhIKDxUVFRIUFhMTFRIUFhkWEBIQERQVFRYWFxcSEhEMERQQFRUVExMREA4UDxMWGRQUFRUTFB0NFRMVFRIRFBUXDA8TEhQUEQ4RExQUERYWExQZFhYNDhkREhYVFhYWGBkWHBAPDw8RDRERERMMFhQUEw8TEhIWFBISExISEg8QHBMQDBIREg8SERcUFhUWFwoSExYSFBMbFhYQEBIPEg8REg8SDw8MDBkVFR0cHBQTExQXEhMSExMTDxISEwwREg8XGBUTFxcVDg0KDA8XERAQEhETDQwbFBIUERUdHBEQEA0ODw8QEBATEhIOEBwcGxsUExQWDxAQFBQWExQTEQ8PEhYWERMVExYWFRURFBcVERQTGhkQDRIWGRcVFBoXFBQUGRQWEBAWFxgWFBEQFxgWEhAREBAQEhEREhIRExMQExUTEBISDBUWFhYXDQ8aFRUTExAQExMSEhMSExIREhMSEhIQCw4VFBYWGQ8NEBwbFhMPEhERExQUEg8TExkbDBISFxUWFhYWFRUREhMPDw8REBIUGBcTFBQTGBYQDg8UDhISCg4QDg4SFRQVERASExIPERYWFRQREg4TFBAOGxsbHBMQDxISFhUVFhgYGRgTEBkZFhYXGBYVFRUUDRUVFBQSERANDxEbFxoXFBUVFBIQExkKDBgWFBUYGQwSFRYTDA8NEQ4PFBQSGBobGBQWFxkUFBUYGhoVFxYPEhEUFBYVFRQVFBAREhITFBQTExMUFRIdFxcWFBUVGRYTEBQWGRcYGBcTGRgXFhcWGxgZFRIOExYWGxcUGxgSFBMSDxATFAwPFhsdGRYTDg8REBIREhATFhgODxQWDxIXExkZGhgREAwQExMVExUUFhMUEhIWDQwTGh0WGBUXGBQTFg8REBAOFRYWGxobFBUZExIPEhIUFBMRERINDQwMDxsVFBUUEQ4KDA8ODw0NEBISDw8OEREREhETFBMSFRUVExQSEhASDxUWEhISEhITEhMUExEUERQSEhgYFhkbGRQQEhAaGRYVExEQFBcXGBgSFRITFBgbDwwaGBYYFhIMExgYGhoaFRUXFhUQEhEQFBQPEhgZGRYOExQUEBMWFBMSExEUFBMWGQ8OFBIZFg8RDxYTFhYUExIRExQSEhQWFBIMCg8MDg8PDxMbGx0bEBIZGBgOFBgWFhkUFBUVEhQTGhYVFRETFxEUDxAVFA8UDBYSDxsTDxcYEhIbEw8TEA8PEBUUFRUXFBAOFBcXGxQWCwsMGx0dFg0TFBASDRMSEhMXGBUYGBUUGxQRGBcSDBwUEhISEhQTERQWFhAPERQYFxgbFhUTExQSFBQWFxIRFRUWFRETGhkaDRISEA8VFRYXGhcaGBYXFRQUExQVEhIREwwMEBIVFBMaGhwTERISEhQTFRISERAQGxsTEw0MERITExgaHRAPEA8SEhMUFw8aEA0SDxISEhQPDA0MERMTExAPDBAQEhUWExYYFxgXFhkaFxMTDhkaGRYSEhIRFRURFhYUFQwPEBUUFBAWERENCwsMCw0ODxESFgwMDA0MDxQRGRIQCxAVFhcYFRQWGxQYEhIQEhQSExUZFhAPExcWFhYQExAQEQ4KDw8MDg8TFBYVExQTDxISExIaFBQUEhEYFxcVFhQSFRYPFBYWFhUaExQTExMWFBITDQwQDw4UFBESEw8RFRETExQQFBUWFg4UFBYSFBUUDBEQEBYUDhASFBcQFBAVEREODQ0QExwbFRMYFxYLChYWGBkZFxMTERMTFxgUEhITFBYRFBMZGhsUFBEPEA8TFRIREhgaEQ8QDxYSFBgZGg8UFhUWERAOCg8WFBQSEhMPCxIVFRYVExITEw8ODgwMFhYPExQSFBYRFBQRFBASERANDw8PEA8WFxMREA8QEBARFBQREhIPDQ0SERIPEhIVEhQUEA4bHRISFhYWFREWGBYVFRMSFxkQExQNDw8QCgsKDhkWEhYRDwwWGRIQDxIREw0MDwwQFRIUFRUSERYSEhERExIQExgZFBQPExIUEQ0MFBQWGBUWFBEODBIPFBkYFhkXFxcUExUYFRUUExMRExYaFxYUGRYWEhUWExUOEA8MEBUTExYWEhERDBMUFBYTEQ8NEREQEhQZFxMSExQMDQsNERQdGxIRERERFQwRERMTEhISDA8TEg8NEBETEhQVFBUTERYUEQsPEhYWGxIPERIUFBQUFhISEBMQEhMTGx0dFhkSExIUExISERMZEA8NDw4WDwoNEBUVFBQRExIVFBYTExISFBQVExoXEg0MDw4ODg4RER0cDBARFBwWFBMSDw0SERIYGBkbGxUUGBobFBISDxkSDxUUFhUTFRMTFQ8PERAaHREMDQ4PEBEPEBYXGBkXFxgQExoZGhUVGBkWExIVFxIUExMSFBQODA8SEhITGhgXFhYSERcVDQsMDxUaGBgWFRUUFBQSEBERDhAUEREVFxgUEhIVFxgVFRQUFhUVEhITEhAZGRcTEhETEQ8NFhMNDA8UEhYSGhcZFhIRERAOEBQUFBsbHRQWGBgXFxYUFRETFRESEBIUDxITFwwNDBAPDQ8PDAsVFxUWGhYUFRMSEhQSExASERQUDwwUERMZFxcWFg4PEhEZFBUVGhgTExAQDw8REhQUFxYUEQ0NDxMVFRUOFBQUFhMMCxcbExETDxIRDwoNERERDQwLCxEWFhETExQSFRETExEWGBcWFhMPERQZGxYUEgwSEBEUFhMUDRITFA8QERAODg4ODQ0OFBMPEhcXGBMQEBEQGBcQEw0PEBIUFBQUERIUFRUVFhYXGxQZFhwSEg8NCg4PDxoYFg4QEhYWGRgXFxYQFBAWFRUWEhQODBUUEhMRERISDw0SGhUTDxQSDAoMFBURDxATFBAUERQTEhIQEAsMGhsXGRgWFxYXEhQKChMWFRkWEhQTExIWFhQUFBQUFRMWGBQYEBEQEhIREBETExIUFRMTEhISDRQVFRUTEhUVEw4MDQ8RERMYExETExATGBYXFxkSExMUDAwMEBEMDA8PDxAXFBQUGxkTFRMVFhMSEhMWGRUSEhQTFhsbFxUVFhsXFhUYHRMNDg4WGBUTEBMVGxobGxQVFRUXFBURERITExUWFRQUFBcYFhATFhIUFhUWGRsZExQUFRYUFBYWExQQDQ0OEBMWFxgWFBYVERQTGBUNEhQYFBYYFhYOFRQTExIPDw0WExAREhMTEg4VFhQRDxEXHBsbFRMVGBkWGBcYEg8XFhcWFxQUExIKEBgTFRIQGhcSERUNDxAQFhYUERATEA4SEBIUFhsYGRYUFhENDREPFRQVGhcZFBQUEA8TEBQREhMSDxAQEhAQERYXFRQUFBMVExQVEBcXDw8RFBIQFRMUERERDxEYFhQdHBQTEhEPEhUTEBQOEhQPDRIQFBIPERsaFRYZEREVExUWFxMaGxYWFxUWFRISEw8OExEQEhgPEA4QFRUVEQ8PDBAPEBMXDREQEBQTFBUWFBYUFA0QERISExMXFBQSEhQSFhUTFBQUFBUVFRcYFxkRFBQWFRESDQ8PExYQFQsXGRMRFhUMDAwKChISEBQWFRUVFBsWGw0OEg4REhQUFxcVFRYUExAQDxQUFRQPEhESEBAUDxcdGBYUGBYVFRYSDw8UFBYOEg8PEg8PDw8SDA8KEhEUEhMTFhISEhIUDQ0TEw0QEhoWFhYUFBUUFRMREBITExANFRUTExIRFxoSFBYPFBYQDw4TExEPEhESDBkYFhQWFBAPDxMYFxgREhgSCw0UDg4OEhEREw8UHRkTFRgWEhMSFxQQFxITEg8QERATFQ0NDxEPDAsODw0MDw8aGxcVFBYLDxIUEBEQEhESFBMSExQSEBobFA0MDw8TEg8SDw8QEAwTDRISFA8PDhMSEhMOCw8PDhISFA8TFBQSExUUFBARDxMSEhARHBcXGBkUDhQZGBoRFxQUDhQNFRQbFhcWFBQTEhIUFBgSExITEhIRExIODw4PEhMTERkXFBITEBIUExQUFRUTGBgXGhQUFBEODxcXFhQSEBAPEhEREBMTExETFBMREBITFBUVCg8SChQTFBMSEhgWGBQQEBIZGhIaGBYXGRMSFBQTFRQZEBIMDQ8SEBMTFRAWFBISDxccGxsaGhcVFBsbDAwSFhQQERIUFBMPEBIREw0MDxIPEhUUEA0NDhMUFRQWEhUSEhIQEhMTFxMQExMUExISFhQSDRAUFBYXExISDwwNDhMaGxYRERYYFRUUFBQZFAwMEQsODgsNFhAQEhAMDBQUFA8WFBQPERIUFRMUExUUFRUSExAQERQPExUTFRMVExEWFhcXFhgUEgwKDA4UEhEPFBMSFRcXDw8NDRQTExYYFxkQFBkXFBQUEhISDxIVEBQVFRYXGBQYFhUPERYZFhQWFg8PGxQaFwoXFhYXFxEQEBYYFhUUGhYSEhQUExkaGhcUGBsbHBMVFRIPEA8QEg0OFBsMDQ4OEhINEBMTFBQUEQwSEhAPDRYaFxMVERQQEA4OFBUWGxQUEAwOFRQUExQWFhYVFxMUGRYYFA8MChARExAQEQ0TFBcZGA0TFBcTFBYYFRIQEBUREhEPEBAMDhARFhQUFBEQFw8UEw8WFRcZGhkaGhgYFhUUFhsVGhYUExQSEhIREBMTFRgWDxARDgwOEBQUFBUVGRgSCg8MEBAPFBQWFhQMGxsXGhwbEg8NEhAOEA4MDQwPEhUWERINEhQTEBUSFhQUEQ0PGhUVGBIRFA8QEBQUGxsWEhQbGw8SFhYWGBQTFhcXDhAZGRkZFRIRERAUGhASFRcZGBgVFBcWDw4SEBISEhQUEhMTGxoaFBIUFxkSDAodHRYVFBQUFhUTFBQSDgoSFBQPExgWEBQQFBYUEhMTExIaGhgVGRQTDxYWFRQTDRAQGRoVFA8QEBIRFBAYGRsYGhkaFxMTExQTFg8PEg8NFhgYGxkOExMVExUUEBAPGQ8PDRASERkUFA0ODxQRERYWFRUbFhcXFhQUFRYVFhMQEhMVFBAYFxIUFRITEhESERQWFhYPDAsLDwwREhsSEhIUExYTEhAPDAsRERkbFhgSEhAQEQ8TDxYbGx0aGhYSFhgYFhYUDwsMDhISFhUWGBgVDxYSExMTEhYXGhMUEhQQExETEhIQEQ8REw8RCxAWGBgWFQ8QFQwLDRcUDBQWEQ8aGBUUEg4XFxYSExQUFBITEhMVEw4ODw8WDxAUFBMWFhQVFRUWFBUUFxoYGQ8UFB0LDg8TFRISEw4RFRYXFRcVGhsWGxsQGRgWFRcXFRQMDAoPChQbGBcUFRQVFRUWFRcUFhELDxQRDRcbGxYWFhEUEQ8REhMUFBYVEhILFhYYFhwbFQ8QGRYSDRIREREUFBYWFBAREhIUFhcTEw8OERAMGxQUFREUFxMVGxIUFxEYFRUUFQ0MFRMSDw4OERERFhYZGBsdGhQUFRYVFRYUFAwQExIPDw8MFhMaGBMXFhQPEhkRERUQEhIQEBMZGBgWFxkWExQUFBYVEBQSDgwVFBAPEg4PDxERERIREA0NEhIWFRYPChAMFhIVFhgdGxYUFBEREBYVFxMTFg8MDBQPDw0UFBQODwwVFRYXFRUXFxkWEhETFxIUFBQVFhQVERISGRcTEwoMCgoSDxUUExMTEhIREhEQDQ0QEhYTExAREhoZDhEYFxgWFhUREhIREAoSFBQTExAPDxMUDxgUEhIWFBcVFhYYFRQVDxERFBQUFBQUDAoOERcXGhUVGBcUFREREQwPFQoWGhEODBAZFhEPExYbFBQXGRsOEBMREREPEhIPFBQVGBESEBMPEhUVExMQDBMPERAQDxEMFhQVExQVGRkXGxMTDBESDxsdGxQQGxUUFBIQERISFA0PFRYVFQwWGRYbGx0bGw8OEBAVEg4ZEQ8UHBoTEhIPDxYLDhQVExMTFBQRFhYbGB0XFhodDRENEQ8QDxEQERIUERAZGRgYFg8QEhUVEhAQEBEWFwwWEhQTEhoaExUXFBcZEBYZGRgZGxQUGxsbGxwcHREREBIQEhoYFBsVFBIRDxQTFBgaFg4KFRUSExISEhYWFhQWFBMTGxgZEhEREg8SFBISFhMUDBAWExYSEBIUEAwYEhQSEhgZGBkVGg8PDhITEhITFA8QEBcWFxwbGhQTEhQTExUPEhQSDxUUFhsbFhYXGBITEwoSEhEOExMTFBYWEhMWGBQTDBQUExQNExYWDBEaGxgWGBMSEhUaGx0dGxYXFg8SDAoREAwPDhARERkYGRYYFRUVDwwWFhQaEAoMDxUSERIPFBkZGRgMERIUFBQOExIZFBQVFBQXGRQQDwwPEhINFRAWFAoKEBYVEBQSGBQTDRIQERMSEBIPFhIPExUUHBgZGhgPEhEMEhITEw8PGBIWFhQbGBUcGBcWERQNHRYTFBQUEw4NDQ4KEBAVFRcaGBcREA4PExUMFRQSExITEBETFRMTFRITDh0UEhQUFBIUEhUWFBYTFBIQDw0PDxAREhIRExENDAwUFhUTExIUExkOFBUYERETExIVFBcdFBQXFhMWFhITEhEQExMXFBUSGRESEhISFRkQEBAREBMTERAPERASDg4SExQQEhEUEBISFhQWFRUMEBIREBAQExQVEw4PEhQZFhgTExMaFBIQEBEVFBkLDhEWFRYVFRYZFhISERIQDA0NEg8NDw8MERIQERMTFBQSFBQSDg0OERITDA4MDQwQDhERExQWFxcWFRcXFBQTFRIVFhcREBISDQ0aFBQUEhEQFRYZFxIWFhUVGxgUFRgVGRUVEAwUFhsTEQ8UFhYWEBMSFxsdGxQYDw8TEREQFhcZGg4ODhcXFA8UEhQSFBYTFg8UEBASFhMTGBgZGBQXEhcWEhEMDAwODg8RERMREA8MDBQSFBsWFBISDw8SERISDRMUEhQUEQwNExcRDQ0UFg8PDxENDw0QEREREBEQEhkWGxYWEhIKEQ0SEQwPDhAUEBAQEA8QFhUZFhUWFBITEhMUDxISEhASERQMFhEPERISDw8QEhQUFRUNEBAQFBUWFBUUFhoVEhETFA4VDxAQFhoYGRkYExUTFhQdExAQCwsRFhYVGBgaGhgQFBQSDA8LDxYXGBQWFBIWDw8MEBYUFRYSERoaFhEXEhYXFx0bGxkRERMZFhUVGBsYFg8QExMYGBcWEhMNERAREBMUFBMMFRESFRYXFhESGRgWGBgVFhQUExMSDxYWFBMYGBIOEhYWFhYWFhYSFBUUERETERIUEhIPDxYZFxYXFxsWEhIRERkSDAsPERoUChUMEhQYFRIUExETFBEWEh0ZFRARDw8SERYdFw8SERIUEhEPGxsUEhATEBMUFBYUFBARExQSEhMPDREQEhESFBMQFhcXExIWFhgXFBMRDw8QEBESFBoXGRoZGRgXFBQUFxkaExobHRoXFBQRFRQYGhgSERIKChcUFhYTFA8UEQ0RFhMVGQ8RDxAQDhIQEBASExIWFxoSGxYTEBASEhQUFRQUFhMQEhYRFxgWFBIOEQwTFBQVDxAUFhIUDBQTDAwMCxUWFxYTEhIPEREVFhUWFhgVFAoREhIXFhQVFRoXEBMRExUVFBISFBMUERIUGBkRFhkaGRYVFg4WFhYPEhESGRUNDBcUEREREA0NDQwKDQ8WFhAUGBAPEhURDxMPDg8UFxQWExIPDxQVExMPEQ4PDAwQERMVFgsKDhISEBAMDhEVDRASEwsPDxYKFBMWExMQEhQRDQ0PERgXFxYMEhYXExQUFBQTFBYYExMVDw8MDA8PDxASFBMRERQWFBAUEhERDw8QEBMUERESERITFREPEhMSEhMTExMQEBkZFA4PEhMNHBQQDQwVFhYbFxsWEhYTEBQSFBQUEg8TFBUUFQ0OFRUSFRQWFRIUFBQSFRUUExMSDhESDxUYEhASExQUDxAODhAODQwODQ8SERISFBYVDw4UFBISDhIVFRUVHRkZFBQWERAMDQ8MDA0SFRIPFBYUFhoZGRcYFBUOEBIWFBIREBAPERITEhERERESEhERExYSFBgaFRQWGB0dFA8SEhQSEhQWHBkXFRkNExQZGRYYEw0QEw8RGw8MDBQYEhQVFhQUFBcXGBUVFRISHRcYFhQQDg8ODRMUFBYSEhAQDxMUExYUGBQTGhcVFxcWGRYWFRIWFxQTEwsVEBENEBETExIUEhMSERAQERUWEhkWFBQOERAODBsOFhcXERISEBIbFRoWFhMTEg8REQ8NCwwMDBQSEhUWGBUXEw0PExIYGRQUFRMTFBQUERITFBQUFhUTDxUVFRUUFhYUDxURFBcSEw8SEhQTFBMTERMWEREQERASGg8UGRYOCxQTEQ8QEhMNDRAUGxodExMVGhoZExQPDRMRDxoZHRYbEg8PFBUTDw8RDxATEhITFxcWFxcXFxQQDg4MDQwMFBQUFRIREA8UEhISFBcREhMWEhMTEhUUFxgUEhARExITERoZFBMWFhYOEBEWFhcWFhcXGxQdGhEPEBUXExMUEg8PDxESEhMUExsZHRsUEhgZEhERDxgYEBAOEBYWExQYGBMQEhkSEhESEBEQEhUWEhMTDg8RERIWGBQTExwbGxsaGBIQFRYVFhoaEhYVFRIPDw8WGBQUFBgaFRQcFxoXFhkcGBcZFRIMDBYRExMTFA8WExQREhITFBINFBYaEBANDRYVFBITFBUTExMTFBMWEhAPEA8PGRQPExIUDw8TExIRDxQZFx0WGRcVFBEQEQ8QDQ0PDxEWGhgWFRMTFBYTEhEREhITFRQUExQSFBMUExMWGBYWHRIPEA0aGx0WFRQTEhETExYWExAREhIVEhMSDg8TGBcPFhITGhcYFRYRDxYYGBoaGhYSEhESExMRERMRERIVEQ4MEA8SFxUTEhIVFRISERIUFg8RDxISEhIVGhATEhsWFBkbGBcXExUUHBwdFgwQEhASEBERGxYUEBEPDwoWDRcPFBQWFhQWFxUXGRoUFBYUFRQKCgoMEg8MDw0OERALDQ8QDw8PDBsaFxQUFRgaFhMUExMUFBESEhEKDgsPGRUMCxIMEBUOEhoZFBESFhMXEhQQEQ4WExIQFhYRDxESFRISEhcWFhMSExcVFQ0KCg8QEBISDw8NExAOEBUREg0PDxESExIREBIPHRkWFRYVEw4PFB0aFhAMEBYVDxMSEg4VFA8VGRoWFBQUFBQSExUUFhkYFhYUFhUUFhUVFhMQFBUUFRMQEBIRFBUSFAoMCgwMFBUWFhYUExMWFhQUExYZFxYWEBUUGQ8QERYXGxUSEhIPDxUVExESFBMUFRsXFhYWEhQTEQwKDgsPFhcPEBQLERIWEg8SEhYWDxYUEBMUFRQUEhAREhYODw8QEhQTFA8TEA8UFBITEhkYGhYWDxEYDxYdDwwOFxkbFhYUFhUaGxoYGg0NDAwPExcZGhgWFxMMChMMDA8PEhQQERIUExcVFRMWDg8WGhINDRAQEQ8RExIWGw4SEhQZGBcVFBQWGx0dHRcVERAQFBkWFRISERgWGRkUFhcYGRcWERQMDhEQERITERkYFBobGBkZFRESExISFA8QDw8RFBMSEhASFBYWDQwMCgoSChUUFBcaDxQSEg0PFAwUExkXERMTEBAPExcYGBUVEBQSFBQXFw4NEBQVDAwPDQ4PDAoQFRIaFw4XDRMZEhASEhMSEBEQEhMQDg0PExIUDA8MERATExYXFhYUFhYSFhISEgwSFBIQDgwNExQbEhUWFBASFBkbFxobFxMVFRQVEhIVFBETDxEVEA8WERAREhESEhISEBAOEBESExMTEBMQEhQTGRoXGRoZFhUUFBQUFBYVEhQUFhgbFRMUFhgbGhsaEw0NEhkWEBEMDA0NERAMExATFhUXFhgTEQ0WGhcYGxsbFBMVFhUUGhsSFQ8MDxMSEhMQERASExYWFAwPDBUWFhYTGBQVEhQSFBUVGxwcGBcSGBQXFBIYGhERFRUVFBIREA8PFRERERMPDA4ZEhQOGhoYFBMVFhYUFRcRGxscGBgUFhUQEhAQDAwRFhYVFRMVGhYUFBQUEg8SEhESEA8PEBIUDRMSFBEMExITDxQWEw8RFhYUFRQVExMXFxcWERMOEhAQDhALDg0OFBgVFBQSFhUQERITFBIREhUXFQ8PEBYQFBMZFBQPERIOERQXFxcSEhERExMQExQSDxsXGRUWGBYWEhAbFhQUFhYVEhQSExMVGBQNDxQaHRkWFBsWFRQWFBAQDRESEhYZGBYUGBoVExESERYWGBkZGRgVFA8REhQUFhISFA8PEhMTFRIVFBUUExcXFRMQDBQWFhMRDwwNEBMSEw8REhIRDxMRDQ8QEhERERkbGRgUEg8QFg8PEg8QExQTEA8TFRgVFhgVFBEQEBkUFhQUEh0UEhESEQ8KDxYWEg8SExUTDg8XFBMNEBAPDw8SERISFhsPDw8PDRAODhIYEhcUEhQQExoPExYXExQWFxcWGBsUERASEhcVFBQMDw8dFhYVFBsQEBMTEhQVFRcXGxkZFBAQFRAVFRQWFQ8MDgoOEhgYFxgXExgZGBsTFRUPDQoPEhMSERIWFhMUEhsaGRoSEhYWGRgWGBkVEhQTFBQSFRQRFBISFRQPEhIWExQWGRQQDBIPERYVFBYXFhcRExMTFxIVFhsUFhYZEQ4PEhQWGxsMChASEhEQCg8QDxQVFBsUFA0SDxMUExcTFhELFhQXFBgdFhIRDwwVFRMUEhYWEwwLDhYREQ8NDg0WFQ0ODgwMFBkWFxkbGBgYFhUSERYTExESERQUFBIVGRgZExYTERASFBIQExUWDw0RFhcYFhYXDQ0ODw8ZGBccHBAVDAsPEBQTExITFBUVFhIQDxQZFRYUEhEUFBUVEhYWGRcdFRAVEA8MDxIREQ4SExcVFRUPGxsdHRsYExUcGRMSFhQUFBIREhISFRQMDBMSFhMWFBQXFhgXFRYSExIUFBgaExISEA4QEBIWFxQSDxEOGRsWEQ8UFhYQGhsUEhcXFhYUFRMSERYWFRcYFxkZGhkaDAwPExESEBITFBUTEg0REQ4QEREVExUQEBAPEBISFBkUDw0PEBIQFhgYERUUEhQQExQWFhYaFxcOEBAUFxYYEg8OCxQQEhUXHBcVFBQVFBUXFBYWFxgaGBoXFxUUGRsRDwwNEhQYGRQUDxYbFRIVGhgZFBYWDxQSDw4QEA0NDhUcHRIODw8RFhoaGBcLDA0TExQUFBQXFxYTFhMWEhEREA8QChASFRoWEA4QEA4NDxYUFBAPEhcUFBERCxAUDBIWFxQUFhodFRISEA4VExITDxMTFBUVDw4SEhIVEhAVFA0SExcYFRoRDxQSEhQWGBUTEw8SFBMTFA8bEREQDBIQCwwSExISEhMODxAVFhYUDxISEhQQDxIPEg0PEBARDw4PERIQEhAPDQwRERETFRYbGhMTDRAQDxEbEgwVExMYEg8TEQwODhMSFRMSFBUWExQRExsREBIYGhYSGhUREg4RFhYYFhcRFBEYGRYWFhYUEhUWFRUXGBkZGBgXExQWFBQUFhcVFRMSExUREQ8NEhESFBEVFxAOFBIUDAwLExISExwNEwoYGBITEhMTEBESDRIUFBYODxQREQwNEQ8VFBYTExEODhQUGhscFxMYFhQPDA0ODxQNDxIbFBobGBgYFhgZEhQKFg4LDxUWFBUaGBUVFxsWEhMSERISEhMVExYWExUbGBoSFBQUGhsaDREPEBQVFBALGRQVHBwSFxYXFhgQEwsOERgZFhANEQ8UEhQSDRQUFRIQDgwOFBQUFRIOFxgVFRQaDxEREBETEwwMDw8SGxYUFBIUFBYXFBMRFBQRERQUExQVFBUUEhYTFRQSExcSEBEUEhQWExQVEREUFRcXFxYSDxEPDQ0UFRYXFRQQEA4SFBQVFxYUFBQSDAwNFhUWFBoXEhIZFhIRFhIRDg8REBASEBYTFhYWFxcUFRYWFRYYFhkOEhISEw4NDRIWGxUWFBMUFhsdHRcTFhsaEBQPDQ4OERISEhIPGhYTERISExcWFhQODg0QEBgaHBsZFw0PDxYXFRQQDg8QEREPFhIRExIREhYRExYXEhEcEg8WFhQPEBESFxEREA8SDw4RFxcVFhAPERUTEhMZGBQNFBIPDwwNDRAUFg8REhsZExcYFRQRDxEOGhkXFRQdGxoTERAWEhISDBYNEBQXFBYVFRgWGA8UExITFBYSFh0aFBMTFhAMDw8UFhYWFBQUFBccGhYTEhIPDxYUFRQSEAoTGhYQEAwbFBISERETEg0OEhUTEhETExMSGBETFw8VExMTExEREA8OERAPEhMQFg8PDg4QEhYVFRYLDgoKFBEQEA4SDxYYFQwSEhEaFxQTEh0TFBEQDBIQExMTEg8MDwwRCg8TExMRExkWExMSERMUFBQVFBQUEhMOExITFxQWFBMXFxcXChUQFhMXFxcZFxMQEBAPFA8TExIXGhkXGhsWGwwXFhAPEgoKChkaFw8SFBQLDQsYGRMWEg4SEBIPDRAPDxEQEhUQEBUSFBYUEQ0OEhAREAwREAwTFxYVEREPCgoTDxAQEA4NFBMXEwsVFhURFBcPEhIMDA8QFRIUEhcUEhMSDg8UFA8WEhUTEhISEhMSEhEPDA0MDxAUFRYWGxUXEBIQEBMaEhEVFRUWFhETHBscFxYXFBAPEhQXEBASDAwPDw8OEAwNEhMPDxMUExQVGBYWFRQVFRIWFBQWFRETDxATERcXGBcUEhgYGRsbHRUVFRMSEBQWFA4TEhwTFhATEhMUDxMUEhIUEA8OEhAPERQUEQwPFBUWFxcWFxgSERQYEBENDgwMDhYVGBcaGhUYFhUVFhQUFBYUFRYUFRUVFBcVEhQVEg4ODw4PEhQSDA8VFRQTFhUSFxkXFRURDw8OEBYWEBUUFhgRExQVEhAXGRsdFRIWFRQPDg4PERAWFRYYExQYFxQUFhITFBQOFBENEBEREhIPEBUVFBgUExkXFhMWEhQUEBIZDw8PEhMUFhQQExMSEBERFxYXExERFBMTFRQXFhUYDQ0REw0SCwsREREaGxIPFBQTExQXGhsWFhYKEBEODw8PFBIPFhgYFBUPEhIPDxMSEgwNDxERDw8WGx0SDQwODg4bGhQSEhAUFBoUFBITFhsaGhEQERcUFBQRERYWFRUPDgwPDxIMDAwKDAwUEQ8RDQwSFRUWFBQVExIcFhYUFhQWFhIPDw8SExAPEBcSFBcbEwoLExMTEg8PEw0QFhEVFA8TDxIUDw0MDxQPDxcZGhcWExYXGxsNDQ0LDBEWGBYXEwwWFhARERERDxIQDg0UFhAPDxAWEhYVGhUVERMWFxUUFhQVExQSERQRDw8QERAUExQWGBUWERQRFBcYGBQSDxESEhQMDBAMEQ0PEhISFhMRGRIUDA4MDw8RFxoUGRgXFRQUFRYSDQ8RDxQXGxYaHBsbHRQMEBASFxoZFhcYGRobFRMSFBMWEhMTDw8UFBMUEg8RFBYSExASEREVExMRERAREhYSFhESFBwVEhYWFxIOEBISDgwRDxIYDRMMEAsPDxAPDRISEhYWGBoWEh0PFBMRDQ8REA8TFg4SExANDA0WEhMTExAUFBIMDRcSExIOFxQNEA8QERIQDxIPDhAUExEQEhQPEBQVDRISDA4REBQQEA8ODQ8SEBgTERIUFBQTExMUFBcWEhcXFhQVFRMUEhETFBITFBYWFBgWFxUWFxMVFBQWDxETFhgaEg8XFBkWExIREBIPEhUUFBMUFBMSFA8PDRQRFhUUFBIWEg8QEA8UFRYWFhQOFA4KDBYSEg4RExINDQwPEQ8PEBATFBYWDwwOFxoZEA8UFxwMDA8LCw0SERISFRYVFRISEBISExMMDhMUEhIWFBQWFhIWFBEREhUYFhYVFxsaGRoTExUUGRsbFRISDw8aERIUExUUFRIPCw0PDg8QDxQVFRQVFhYUFhUVFBUVGBgVCwsPDxEXFxESFBUMFRAQDxQTDw8VHAwTEhIUEhITFBQUGRsUExQPEQ8SFQ8UExcWGxYWEw8UFhgbEhIREg8NDw4OERYVFBYUDxAPEBATEw4QGQ8VEBIQDgoUFBISFBIVEBQcGxYWFhsdExsXFhIUGBkZGxoPEQ8REREPEhQSExMRDxITDxQPEBQUFBQTExYSFxYVDxQOExQaGhcUExUZGhcXFhIKDA8TFBQSFxQWDBYSEg8MDgsMFRsbGxcSEQ8UGRcaGhkVDxQaGRgVEA8REBQSFRAOEBAPDxITFBQWGBwYFBIREREQDg4QEhIWFRoWGRUSEhgYFxkXFBMSDhgVFBEWEhIPDxYUEhQUFhMUERIUFxYWFg0YFBARDxISDg8PFRgXFA8PDRYWFhQTERQSDAsREBERDA0MEhYYGBMUFRQSEBMWFxQWGBMWEhgcEhMTFBIQDxIUERQNDA0XExURFRMSDRAQEhIRDgwUFBMTExkbFRgaFBMUEhMTEhANDxEPFQ8PDhESExcbGhUWFRASEREREBIUFREUFBQZFBsPDg8SFBQTFhUYFBcaHRsYGBsVEhISFBQUFwsLChIYExQSEBUVGBgXFRMTFBQVFhYTEhQWExYXFhQWGhUODxIUFBcXGxcYGRgVFhYZGhoXGxoYFQ8QFRYUFRkWERILEhIUEhcXGBYUFRUWFxcWEw4PEBMUDxAQEQ0SFBESFhUWEhYWHRMXERQVFRQYGBEODxAQEBUVEhQUEhMUExMZExUaGRYUFBUQDg0OEBAQFxYWExIPEBASFBISFRQUFRYVFhUYFhcXFRIQExUUERIOEBAVEBQVGBcTDg8TFBEQDw4LERISERIRGBcTFBISDhIZFxUVEhIWFBoaGBYXFg8PDgsOFx0ZFhESFBUWFRMRDRQdGxoQCgoPDw4REhYREg8SDxIYFQ8TFQwNEhwWEBIREhITEBcQDhQXFxUVFRQUFhQWExISEhQWFxYUEg8MDAwMExIUFhUWFxkYFRITDQ0PDA4QEA4PDxMWFBUPEhEQERQSEBEUFA8WFxgREhEPDg0VFBYUFRIVGBQTFBQbHRwZGBQTFBcZGBgVFRobGxcaHxUUGBQUDRcRFRIVFREVFBUSExATEhMZHBISExMNEBgYERYWFhYUFxQdHhoYEhIYFxcVFRQYFhQUFBgYGBQZGRYWFxoYEhMNDRAQGBYTFRYVExMTExMTFBUXEBkUEhscHxsYFxIUHRcXEQ0MEBQbFhYQExEUFBEUFRgUGRwbHBcWGBgSExMZGRgXEBcUEBMTFBMQDxYVFRYVGBkXGBQVFhgYGBcaERYYFhQUFBYWGBcYEBERFBgaGhMREhIVERISFRQUFRQSDxIREhcUFhETDg0OExgYFBQTFRYRERMTDhgZGBITFRgbGhocHx4cGRQXGBkXFBQSFxYWFxQTFBESFRcSDxYVFBYVExMRExYUExYVFhUUFhgYHBkMERYWHx8YGx0bEhMVFRQTEBMWGBgYGBUPFBQUEBETExASEhMPDxAcFxgbERcVGRgUExEOFg4SFhccFRMRGBcWGRgaERUWEBMcGRMTFR0cHxgYFhQTEQ4RFRUVFBkaHx0dFhkaGBcOEBEPEw8UGBYUEhcYGRsZHREdGBQUEREUFhUVGBQQEw8XGBQTDRQYGRkZFBUaGhQRExQWFhYWGBYWEBISEw8ODg8TDhMWFhgWFhwfFBAQDRIVFB0aFxQWFxsUGBoZFhQRExIREBMYFxcXGBcWFRQVFRQSFRQMEREREhMfGhsQEBMXEhIVFxYaGBQWExEVGhkRDgwNEA8QFRQXFRQQGhcYFBAYGBwaGxgYFhgWERAREREUExQbGBgWEQ4ZGRkcFxEVFBUXFRYUGR0UEx8fGBgfExQUFBQPEB0cDwwOFBEQDhYTExUWFhYVEh8VDhUcFxMSExARExQWFhQUERESDhITEA4WFhIYGBcZGRgYGhQUFBYVFREWHRwYExsZFRMWDAwXERMUFRYNDRkbGRQWFRUTEA4dERYWGBoZGRgVFRQTFBERFRQUFBIRFBQSFRYVFBUXFBYOEhAXGxoPDhEOERgYGBkUFBMSERQWFhcWGBAYGBgVEhUSGRkSEhMWFxMREAwSEhETExQTFRIVFRgVHRocFh0TFRESFRIPEQ0PFhcYEhQZGxcaHBkZGhUYHBMTFRAQEA8PERQZFBYUFBYUFRQUFhkVFhUWFBIYGBcRERoZFBQVEhMTEhUQDQ4QGB4XHRcWHBwWGBMWFRYVFxcYERQWFxQTGBgWFRESFA8WFhoVFhUZGhoZFBQSDhQUGRUWFhgYFRIVFhUYGhscGhQRERISExoRExMVFhAUFRcWFhMYFhcXGBgUExUXFhYREhQTEREUFBkZFBMSFBwdHRsWGBgXGBkcFx8dERMUERgVFx0ZGBgaFxEQEBMYGRsaGRkUEhQUFxUYGRkPERQXGBsWGBwZEhMWEhgRFBMUFRkcFhUTFBQVGBYYFxcfGxcYEBMUFxgUEBQSFBQTFRcYFhcWFxoYGRkZFxcRERQaHRYTERYRDhENFRodGhQWFRcXGRwYFxoVFhYWFRQVERERExEUExETDxAYExQWGx0aERUYFhcSEhkXEhIRExQVHBkWGBsRDBQUFxgTFhYWFhUXFxYbGRQWGBYWGhYXGRkeFx0aFhQVFRETDg4PGBgWGhkYFxkZEhMYDAwMFhsYFhcRDhMREREVFBgVFB8dGBYWFw4UFRoVFx4ZFBYUFxIVEBASEBAMERMVFBkZGBgVERERFRcZGBUWGBgWGxYXGBYWFhYWFhEUFRcUEBYVFhAcHRwdFhQVERMUFBQRFAwREg0OGBYZGBcOEhMWHR0eExYbHRcXFhQXFhQRGBgdGBgWExMRFRoWFRgVFhcWGA4aHBcWGBMWFREUFhQTEhQTEg4VFBUOFhERFxgbGxcYFhQVFREUFhUWFBUXFx0YDBETFRMNERITHBYVFhMTExUXGhcREw8RFBQZGRgVGxoVExAQGBoWExgWExIWGBgWFB0cEw8YGxgVGBsWFRUVFBoYGBwXFhcVExMUGxkQEBEPEg4UFBUYGRgTFQ8YFh0dFRMSFhYWFhMWFBgYFxgXFxgZFRYUHQ4VEhATFBgVFBMTFBMTExQYFRQUFBQPHR0SGxsYGxYUHB0TGRkZFBQVFxgRExQXFRkVFhYeHhUXFBUXFxkVExITFA0NFhgXFxIWFRUTExUVGBwcHBwbGhMdGxgYGBkaGBMOGhcXFxYXFRYVFBobFw8OERIQEhMSFhgUERQUFxMSEhYXExIQEBQUFBgUFBUUEw8UFxYUFBUYHBkYEw0UHR8QFhQQEBEUDQ4VFRYdFRMSEhYYFBQSFRYSExIVEg4WFxYWERYMDQ0WFBQOEBEUExYWFRgYGhUWFRUWFxkaGRgWGBgRERwWGBcWFA4MFxQaFhcUHxoRFxcdFRoTFBgbGxgUFBMWFQ4WHxcWEhAYGRcYFhMRFxYVFBUWFhQaFBEREg0SExMRERYUFxwZFhMUFhcXFBYTFhgUExUdGhsZEhcYFhgXFhEYEhsZGBYTEg8RFhESEhQRExkaGhkXGRobGBMUEBEVFQ4SGRQYFhMTHRsSFg4PEBQTFhETEhEWFxYPDQ0dGx0cHRgVHRwYFxMQGBgWFRcUFBMTFxwdGRUQEhMUDhMYFRcUExQTFRUWFBgVEREZHB0WFBQaGxESGhQREBkUEhQTFRUZFhMNEhQOFRUcHBwcGhsZGRYWFRkXERUcGBYcHBoZExITEhUUGBYVFhoeFhQQFhAWFhYWFhcWFhUUEhEOEQ4UDxgXExIMEQ4aFxETEhEUFhcVFBEWGBYTExIODQwMERQWFhYbFRMVFxQUFBQRFBMWGRcUFRMTExIXGhISEREUFhYdFhETEg8WFRQUFRYYFxEWDA4UGBgYFhIVFRMSEBMUFRgRFxYUFxMUFBYVERIUERkWGhkaFBMVHBgREhMSGRYYDBQVHBUTExgbGxMRGBQUExEWFBUSFBQWGB4dERARFBESFRsWGRcYFBUWGRQVFxUSFhQREhUYFxkYFhUVEhYZEhIUFRcXFxscExESFRUTExkdHRYYFBsaEhITExIRExIREBQPFxUREA0PEBIOERMXFhUUDxQVGBMUFBcXGBARFxgPExkcGBsWExQTFBIOGxgXGBcYFwwRERIXFhkaFBYVEBAQFxoZGBcWGxoWFhgXExQSFhoZFxUWFxYTExYYFh0TFBsdFxMQERATEBQUDxATFBcXGhkTFhkVDhIUFRYWEBARERQTEh8dGx0cDBIXFhoYGRYMDRISDxARFhQVFhYWFxUYFxoXDhMWEhUVFhcUEBQVGRkUEgwMFhgYHBkWDBYSDhAPFBMVDg4QFhoZDBQaDg0OFBETFhYNFBMVFRYWGBcXFRQWGRgWGBcXFxwZEhQUEA8WFBgWDBYYExQSFhkRERQUGhsRERgdHR4VFhQZGBcXFBUYFhQUGBcaFhMUFBYVFhUYGhgYFhwcHR0aFhYXHBMSERUXFg4SGRgaGBIVEhQUFxUVHBoYFhYXGBQZGRYSExYXGRcXGRYWFRcXFBoaGRwTExUWGxgWEBAPERQUGRMVFhkWExMRERAUFhwdHRYVGhkZFBMdHB0WGBcYFxcTEhMUFhoWGR0YFxUcEhcYGB0ZFhkZFxcVGxgYFRMUFhoaHBcYFhIQEhEQFxgPEBUVDREMDxEODA4PEBcZHR0WFhQWHBUVEhAZGhESDw8OFRYUEhEQDxIRFRUVGBcTFBYWFhgUFBMTGRkREBAXGhYTFB8TERQSFBMQERETExISFhUWEhUYEhgZHBEUFBYWEhYZGhEWFRgbGhsWEQ0MHBgaFxUcGRQUFhUPDxERGBAOFBQaGRIRExIXFxEUFBQUDAwUFBMVFBQZGBsaGRYUEhEPFBIREhMSEhMSExcXGBoeGRQYGBwaFBgSGBcWDxMUHBkZFhcWExQdGBgWExQVFxwcHRUSERQVFBcWGBQdExUVFBQTEBQRERIVFhQWFhETFBQTEhMUFxcUFRYWGBQTDRIWFhQODhMUFBkZGBsQERQSFBsaHR4XFRcZGBkYFxgUEBQWExQUEhMSExQPDhAWFxUUERETFRYQFBQPEhQcHR4eGhgYGRMSEhMWFBMTEBMVFxYVFBYXFhkZGBQWFxUUHBAPERUTFBMUExQUFA0PEhUaHR0YFhQTFRUVFBYTEhMUERcRFBEUFBMNFhcSFxgZGBwZFBcVFxoRHR0dGBMWEBgdFxURFRQSEhESEREdGRwbGBUVFhgWFxYUERkZExEXGBEWFhYWFBIeGBYOERYYFBQRFxUWFxcZGRgUGRsaExcTEhESExMSExUWFBYcGBQUExEPEhYXHx4XFhcXERARDh0dGBYUGRQTEQ8PHhcYFBQUHRYWHRQTFA4XGBoaFhUWERYOEhgXFhIYFAwUFBAWFhUWFhUQERcXEQ0UGBYWFhcYFhQUERQTFBQZFxYTExQRExYQEhQVFxQXFRkVFxkTDxEUFBYOEREWFRgRFBMUFA4QERMWFRcZGBYfFBoYFBMYGxMSERAQFBMTDhESGBgUGBYOERUWFR0dFxQUEhkVEhYZGBofExYUFRQVFBcXGxkbGB0YFhgYDBEcGRQWFRgaGhsYFxITFBgZGBgYGBQdHxYXFBEdFBcWGhgVFhYWFh0MFBAUGBISFRcWGBoWFRQUEhYWFhUTFBESExQMEBESExcUEQ4TGRoYFhUUExQXGBERFRUXExQWFhcYFRQVFRgUExUQDxYUDxQQEREUFg8TDhMPExESGBQVERUVFhsZGhgUExQWGBQXFBQVFRgSFhEREhIXFxQUERcWFRMRERcUFxsZGhEODxIUGRkSFBgVEA0NDA0QDxEODhIUFBQaGhcXGBMXFhURExYWGRYVGRkYGhsZFhMVFxcXFhYREhYWGRkXFhUWFRsbEhQaFRcYGR0eFBwcGR8eFxcPDw8WDgwWFxYVGBMZGBwdGxgZGxkaGRcUEhMTFBcYGRoSEhcWFhMRDxAQFhUUERgYGRocEhYWEhYXGRQSExgfFBMdHxMRFBQUEBYWFBQTFxMPFBQUExsTFRgZFxsVFRQWFRQPHRgXFxkXFhYWFhYXFhgUFBkaGxUWFBIOEA8TFRQZGhAVDhEOGBYWFhUMDBAUFhgTFBYYFBMWFhodGRYdEhASERMSExMZGBgWFxQWFhUVFhcREhQUFhsbGQ4REBYTFBgUGhwZHRcXFhgYGxkUGBUUDxcTFBQUFhcbHBkZHRUSEhEREhYaGAwMDhAQEhAUFBUVExsYERERERMTExYaGBIRFBUQFxgZGBUWERAQFBQVFhQTFRMREA8cGBwdFxQbFBERDg8PEhYQEQ8UGRkYFxcTERgZHRoXHxYYGBkPEREVGRoYGhMSEQ4RGBQUEA4SERMTEhMWFhgYGBQSEREWFhYYEREXGhkYFxgfGhgZFhMVFRsWFRkaGBYTFBkdHRoXEQ4ODQ4RFxcXGREOExgSExQVExQWFhEODhAMDBMYEhQVGBcUEhUWFhgWFhYSGhscEBQSEg8QFBQSEhgXFg8REhMTExEUERgVFB0cHRgSFBUdGRgZEBISFBEWFRcYHR4eGhMPEBMSEQ8XFBgWExIcGRIXExQaGh0ZGhkWFBMTExUVFBcUFRoXFhURDxIVFBMXGBUUFBYVFxcWFBUVFhYWFhkYHBgYGRgZFRQUEhwaGRoUFBYWGRkZGRUXFBQTERYUDg4RGhUSFhwRDw4OHRMUGBodFhUUERAQDg8RDA4SFBEXEhwREREWFRYXFRgYExgSEQ4OGBkcGhEUERERFRUVGBQTExMSFRcVFBYXGRgUFBQSEhYYFh8YExgNERYXFRQSFREREREbEQ4dGBoaGhIWFhkaExYUExYUFBgUFhkTEhIYExYZGRgbEhMRDA8UFwwSERAOERUWGBkYFxkYGBYaGhkWFg4XGxYUEhETFhQRFhYYGBkXFxIUDg8cGBMVFhEUFhYYGxsYGRcUGBYXERURFRISGx4eFg8TFxQaGBcSFhUSFBkVERAXGRUUFRYYGRsZGBgYFhQWHxwbFBAQFBISFRoWFREdHREUEBATExIQGBwWEhgaEhQRGxcYERYRDhYWFBUOEQ4UFxMVFhYYFhoaFRUVFBUSFBMUGhISEhMQFhQUGBsYEA4PFRMWFhgaFBYREQ8SGRUWERMUFhQTGBgbGhoXFRoRDxQVGhcTEhMREBETEhAOEgwWGRkYGBYYGxgZHBEVExIZGRgYFRUWFxsZHxQYHhQSFBcYFhkcHRgVEhQUEBEZFxMUExAUFBURFgwVFBEPDxATGxgbHRgUEg8TFBcRFRQcHR0RFRcWDwwQDxoRDhYSDBEQEB0eERYTERAWFhERExETFhcXGBgWFRcUFBEWGB8YFhgWFhUYDhYYHRgWEBEREBEZFxYXFBMVFREQGBYWFhYZFhUWFhUWFBMREREVFRYWFhUYFRYYGBgbGBkeFBMYFRYWFhUWFBoTDxAPEBMVFxQTExQUFhUTFBcXFhcSEhUOEBIUFhEWFBUODg4OFhYbGxsbDg8YFhwVFhgaHRwUEhYcFhwWERMRExERFRQWERQXGRsaHBgXEw4OEBAREBEREBEZFxcYFRMUFhERFBcZERUVFB8VDxEdFRESEhIQERMSEhIUDhQREBEYGBkXGBMdGBYZEBMTFBQTExQZFBMQEhETEhgWFhUVFBUTEhUTHh4bGhoSFBIVExMSEhESFBURFBYYFhYTFRcRDhgWFBsaHRsWExIUERIWGRoXFBgVGB4YGBgTEhISFBgTFhIVFhcXEBEQEhkYGRMSERYVEBMXHB0ZEBATFRYTEw8ZFRQPERYWFBIVFBQUFRQZFxgZGRkaFBYYFBITERkWHRgXFBYRDRASERUVERASFxMXGBcfHx8dHhMRDg8VFxcbGxYWFA8TGBcVERUYER0ZGhMfFhEXFxASFhYXFhQWFhIWGBgdFxETEhMeGRYWDxgWFA4SDxMVFBITERERDxERDBUUFBIaFxEREQ8QFA4UFBERExkaFBcXExMWFRoaFRUWFhsREQwZGhUVExcVExUXGBITExYVFBIRExUUEhQWFxUWDw8SGBYVFBcRDh4dGBgYGhkZGRUVFxscGRkYFA8VFxcYGBgaGRgWFh4ZGhgYGBcZERIUEhQVFhITFA4NFxYdHRsYGBgWGBYWERQUFxgUGRUWEBAZGREREA0RFBsRDRQTExgUEhYVGhYVFBgbExkYGBgYFhMUFBMcGg4VGRwdGBYYFxUVFgwPExEWFhMUFR0SExQVFBYUFBEVFhgMFhIYFRwODBAUFhcWHB0dHBsaGhgTFxQYGhweGBcODhQYDhISFBgRExIQEBkPERITFBgYGRQOGBcVFw8MFBcZGRcXGRodFh0cGBcbGBgdGxgWDw8SEhYQFhYSExkYERUUFhIODhUWFxgWFhcaFA8UFA0RDgwcGhcWGxsaGRkZGBocGBgWFBgRERITERIWGhUUFRERDA8VFhESExQQDxAREBQTDhETERASExMTERIbHRYYGBYZEhUXGhAODgwWHR0YFhYWFBMREBIWGhQQDhcYDg8NDhYVGxkdHBoXFxMTHRcOFRsaGxsUERQUFRYVGRwcHRYdFhIRERgUFBASERAPExQQDhEUERUTExQRERIZGRgSEx8dFBQYFBERExESERgNFR0YFxkfExMVFxUWFhQTFRYWFhUUEQ4ZFxcYGBUVEhMRExQSERMQEA4RExQbGBMTGhoVEhgbGBUXFhYRGBoYFRUSFhMTEBANERMVEhUZGBQOGh0WGBAaGBgWERYXGhERDhQTExYTEhQVFRgYHxgYFA8UEhIODhAQEBYXGBUYEhQVFBcaHR4bDxQVGBsaFhQWGBcUFhIODxUREhUVExYVFhgXFhkaFBMTFxUSERQWFxYTFhEOHBgTFBgWERITERYTEREVFhEUEw8RDg4QEhITEhgaGRgVFA4MDxESFB0YFRQTFxIPFRUVGBgYGBcWEhETGBcUGhgXFhYWFBgTEhUZGhobFhUUFhYYExkaGxkXFRcWFBUUEhQWGhYaFRQUFhYUGRoYFBEODBQVGRoZGRQOFBISFRUSFBETFhgTEhQUFRcbHRgWFRQSFxgTEhcXERYYGRgUERYNFhoSFQ8MGBkWFhYUFh8fFhgRFA0cGxQUEhIREhIWEBkYFRQVFBMREhEREBocGxkUExMYFxERFhUOExQUFBYXGBsdGxcdGBgREhcaFxQOFRQUFBYVERYZFBgWGBUYGBkXGhscGBgZExYOFBMSFhUVFhgXFhcYGxUaHB0RDw4WHx0WFxEYFhMUFRUYFwwaHBgTEBMRFRQRFBEUFBkbGB0fGw4SFBgbHRwdHR0YGBUTGBoYFhYYFhUSFhYXExUUFBkUERQWFhcUDhYXExcVExITFBQUFhYTExcYGBgZGhkZGRccGBEUERQTGBYQDxQYHBkdGBcUFxcXGxgYFBYYERETFBYbGw4WFRkcGBsaHBgYFhgZFBQUFBYYFRcXGxoaGRgYGBodGhoaGBoXFxMUExEUEhQZGBgWFhENDhQXFxYVFBUUFBQSFBETFBQSEBUYGRkWFxgXGBoYFhUUFhMUFhIYHxkXFRQSGBQXEBUWFQ4WFhkdHB0ZGBQQERQVFRYeHRcXFhoVHBkUHRobGR0WHwwMHR0YFBgaGhoYGBcSFBkWFA8RERQOERMPEw4TEhEREhQUFg0UFRUVFBMVFxsbGxgUExobGxQSEhQVEBQOFhkWFBISExcXFBIVFhEPEBERExQVFhYSERkcEBESDRUTERETFhgZGBwXGxsdHBMTFxYUFhYWGBgbFR8NDxETERASEhcYFRURERgWExUWFhcYFhsaGBgZGBgYFhUVExQWFhcSEhoYFBcZDxERFBgZGBkWFBYQDhAPFhgTFBITEhQXFxcaGhoXEBYaFxITFRUcFxMSExwWFx0YHR4XFBUSERgYGBgZGRsXGBIXFxUYGBYWFhgUFQ4UFBYRFBYUFRQRERQWEBEcGxESDxATFBoZFhUVFBUTEBMXFhYXFRYUFBUWFBQZGBcRFg8RFhgYGBYWEBEODg4WFBETERQaFBUSFA4ODg4WGhYWFBYUDhkaFxMTFBYOGxgXFBsRDg4eEhQTFxcYFhgODQ8QERAQEhQYGRYWFhgYFxERER0XFBAUGhgUFBIUFhQWFREUFRQbHRsUERITFBQRFBgUExgYGBscGhoODg4SDxAQGhETExQVERQWFRIUExIODhYZGBccHBwYFhYYGBwSFBcTExYZHBwUFRQYGRgYFhURFxUWEhAUFBUXFxobGxoVFBQRFQ0VExIQFBEQExkbGBkVFh0dGRwYERISFw4PExMUFA4TExcUEhQVFBMZDBYWFREQGRsXFRYVFBgXFxYWHBkYEREUDA4OExQRExIUDBUWExYYGBYVExcWGBYWERMYFhQQEQ8QFhYVGxgYGBgYGBkVGxoUFhYVGRsdHRUVERQREBASExMVFBQSEgwSERUYExIRDBMVEhMRDhQOERQYFRESFBYZFxgPDhITExISFxcWFxQVFBcXGBwWFBcXHRYVFxcYGBkZFxkaFQ0UHBwSERIRFBQUFBIPEA8SFBYRFRccFxgaFxgXGBQQFBcVFBEPERMVFxMSDwwODhgaDxIdFxUTGBgRERETFRkZGhsdFRobGhcYDxMZFxUZHR0VGBgPFhUaFBEPEA4SFwwQFBMSExQXEQ8VFBQTFBMREA8NERUSEhATFBQXFhQTExUVDQ8WFRMTFBgZFhIVDhgUExUXGRQWDg4WHR0cGBQUExYYHh4fGA4RExQYFhYVFRcaExITFRQUGhkUFxQSFBQVGBkYGBoOEREWGxMWGRQdFBQQFBYUGBgXFRYTEhQREREOFBQOFBwYGA4WGRscGBQVFhsdHBkWHBIYEBYUERAQEREMEQ4TGhQRGBYWGA0QEhITERQQERAQDhUUFBQRFhQdGBoWExEUExITFBMSERMUDBQUFBUaFBQWFhYWGxYYFRcUFxgUFRcWFxQWFBoYEhQWFRUdHRwVEw8UFBQVFBUREBMSFBYUFRUXFxYXFhAVFhYbGBcUFBQTDxETGBsZFxYSFhYVFhMUGBobFRYUExQWDw0TFxcZFxcYGBEUFBYVFBUWFBYXFhIUEhcVEhISEhcYGRcOFRYOFBURGB0bEA8SERYbFhUXFhEOFBYREBQTERIYGhgXFxQUFRUTDhUUFhgXFhgVFRUTEhETEhMRDxUVEhQWFxUTEh8dFhERERgSFR8ZGBUWFg4TFhcYGRUVFhYTExARFBAYGx0aFhkUFhMUHR4eHxoaFxcUExQUFRYWFxYRERERFhkXFBcWFBIUFRYPFBUPDBEUFhcZFhkaGRUUEAwSGg4RDw4aFhcXFhcXFBQSEBAWGxsdFhgPEREPDhMVFRcUGBEXFBEPGBMTHBgcHBsWGRwVFA8OERERFhYWFxUXGBgcGRUWGRUUFBcUFhYWFBMUFhYWFhESERIUEw0OERITFBESDxYbFRYWGBgYExEPERIREhQbFBgZGx0QFxgSFRQZFBUUFhccHxgQFRUZGBMdHRgUEBobGRYUEA4SFxQUGBgXFRYXHxYWERQTEhMZFhQUEhQZGhkaGxgWGBYRERQTEhQYGBUWFRQTEA8UEBEVFRUVFRUWFA0UFxkUFxkYFxcYGhgaGhkaGBIMDhMUEhMTDRATFBYTGRkaGhQQEQ4WGBoRGBgYFRQWEg8QEQ8PGRwYFhkWFhcZFRsXFRMTERYSEBUWEQ8UGRMSExIQExYVFRUUFhsYGBQUEhQVERcYFhYXGhQTFhsWFhISGBsWFxgSGBoZFBUZGBgVFxkUFRYRGxERERwXGxkZFhwQEBASFBUUEhUbGxsbGxoYGBkRDxEbDhYUGhIUFhITFxcXGBwcHBwVFBQRGBQYGRQQEhAPERERGhsOERISFBEUFhQWGRgWFRgZGhEZFhgYFhYYFhYWFxsaEBEPEREXFxYZGxYWFhYWFBcUFhISFBQSFBgXFREMFBATEhMSFBoVFRMRExYUFhEOEBMUGBgWFhcRExESFxcTFhcWFhYZGxYWFA4aGBQTEA8OFBUWFxkaGRcYGRoaGRQRGBoYFxkZGBoYFhYYFA8REhERFRwbERUYGBkZFBEUERQWFxISFBUWGBYYGhQYFA8XFhUWDhERHRsWEhUXFRUXGRkWEBYUFhYYGBUWFxkYFxcUFxcVHBoeFBQVGBgYGhYUEBERGRoZHBgXFhQUEhYSFhgVFRQUERQdFg4WFBUVFxscHhcbFhYSExURERUUFRYTFhkWExkUExQREhYXFxMSERESExYWFRcTDw4QFhQSFBQTDg8UFRMTEhMUFhYVGxkWHBcYFBQVFQwRGRoaGhkWFhYVGBgYGBsZFRgVEhQZGBwVERISEg8PGhsYFxERFhQWFREcHBsYFhUWGRoXGBcXGBYVFRUaHx4YGBYaEhMYFhIUFBQZERQTExAQExYYFhUTFBEWEhQXGBYUFBUXFx0SHhUSEhQTFRUWFhkZHBYXFQ4YFBMTExYZGBUSExYZGRUTFhcVFhgbGxgWDxoXFBEYFBEYGRkUGA4QEREQFBUUDxARFRESExYWFhMNFREPDhkWDhYREBAYExEfHw0cExYWDhAUFRMVFx4dGRYWFhYUFxcYFhYYFB8VFBQTDhARDxETExIXGBYWFRYWGxkWFBEWFRITExkUGBcaFhQVEg4UFBcXFhYWGhgYGBYVFBgRGBoZFxoUExEUEREXFBMTGBgYFhMTExMQERUZGBscGBcWERARERsaExESExQWGxYUFhUXFxUZFBMQDw8QFBYPERYXGBUUFxERFBITFBQVFhYWFhMVDxESFBISDhkYGxkUFRYVFxMZGBoWFREWFBMYFxYRFhMUEhIVExIVFhQSERUTDxoWFgwdHxocHRYXFhYWFhcXFxkSExYdFhYTEBgYFhgYFBEUFhkZGxgTERESFxUUFxcaDhEOERERGBcWFBYTGA8RDBAcGhgYFxYXFhMQERITERUYGBIYFxUZDRAQERMUExQUExUWFhUYGxIPFRUYHBYXFhMTEhUfGhcVExMRFBUVHBUYHhgPEhUUHB0cExcMFBcOERQTGBgYExMVGBQaGhkYGxobGhgYGRYUFBUWFBQUFhgVDw8TFBIUEBQUDg4MFBkUERIVFhQWGBkZFhQXFBAPDhEaGx4SEg4SFBUXFxYXFhUUDhEMERIYGBcWFhkYFRIaGRwbEREOEQ4QERERExgYFxsYGRsYGBUUERESEQ4QEBAWFhQdGBgZFRYYFxgXGRUSEg0RFhEUFBMPEBIWGBoXFxYWEA8MEhERGhkYFgwZGxYTEhYXFxQRExMRDgwQFA8UFBITFBQYGhwZGBQPDxYZEhUYGBEWFhgUFRcUFRUWEBESFhQXFhIUDxIWFBYXFxcWDxASEh0aHR0aGBYUEBUUERARERsUDhQUERAOFxMSFhgcHRERFB8fHRIQFhYUExgWFBkUFhsWExIcGRcVERMRFxcYFxkREhQVGhsZGBgZGBkbGRcbGhYYFxgVExQSFRkZHRsVFxERFRATEhITFxgWDg4REREUFRMUERQVGBEUFBMUEhkWFh0cGRQVEQ4SFxQUExQUFRMYGBQSFBMQEhUXGRUWGBgaGhcYFxQXGBkZGRgaGRURDw4ZGhQYFhYUERgUFhQWFxYTFBEOEQwUDhsYExASFBYWFRAPDhITExIUExUWDxMUFhkdGxocGBYXFRcWFBMWEhcXFBcWFxcVFBQXFxcVFRYRDxAREhESFRYREhcWFBcWGB4eFhYfDgwYDhESFhYZGBYRFBMTGRkVFhcUExMYGBgaFBYRGhgTFBYZGBsTFBQTFBQYEhIVERQcFhUUDREQGRYcGhYRHxQTExUVFxgXGB8dGBQYGBQVFBQTFBcVGBgWFw8UDxYaFxYWFBkbHh8bGBQTEBcWGxYXFBodGhkaGBcXDQ0QDhIUGBgVFhQNDhkaHBcSExcPFBUSERQUEA8YGxYRGh4cEBoXFhMUFhQREhgaFhcSERoUEBcZHB0aGBYeFxkWHBYUERERFBYOExYUFBAdHBYWFxIWEhIOEhQSDhEUERoWGBYTFBQWGxMRGBkaGxsWFRUSEQ4REBIcFxcWEBsbHRsYFhYUFxcTDg4PEBgVFRwbHR0PEBsYGBYPFBQWGRYVFhQODxEUGBISGBkaDxETEREYFRUUDw8QFRYVFhQZGBgRERMSERESFRgdDxARFRARDhgYExUUFxgZGRUWFBQdFhYZFxcZGhkaFRQUFBMREhYVFxcWGBcaFxcXFhgdHRMdGxocHQ0SFR0YGhwZGRwbGRwcFxcWGRcdDhUWERQRFAwWEREWGBgaFRkXGBcVFBcTEBISExIYGRIWFBQVFRQOFB8VFBUWExEMGhYbFhQUGBUUFBESFhkZFhQUGRscFRERFBQWFRIQERITFRYWFBQTGBQdHx8aHRgXFhcQGhITGxUNFBgWHRgYGRgVFBMbGhodGxwTEBEYFhYSGRocFhcbGhgbGBgYGRcXGRwWGhwYFhQREBMVFhIUFRgYGxUTEhITFBYPEBEWGhoWDxUcHBQTGRYVExUbGhkZGhkWFhoSFBcYFhIRERISDw0XFA8XERIUFBYdGBwXFxYaGRgVExgVFxEPGRoWHR0YFBQPDRUWFBkUDRYXExIRERUNEREWGBkcHRkUEhgYFhYTGRgUFRQODxQWGRgYExIWFRUVFA4SEBIMFBsYEg4SFBEUGBgRFhYYFhYPEhYRFRobGx8SFhgVFBUWGRscExMSEhQYFxUXFBcXFBUVFhYaGxgdHRQXFxcTFBUVGBYQFBUcExYYFhARERMRFhgVFxYUGBIVFRIdFhAVHR0dGxsPFBIRExMTEhETGBgVEQwOFhMWGA4cGRgcHBcbGRoUFBkYFRYYFxgZEhYQEhQTExURFhYWExQWGBYUFBgYFhYXFhMREhISFBQUFBIYFh0YGRgUHBsdHx0VEhESGBQUGBYWFhkaHRYWHBcODxURDxIYGhsbFREVDg0REBMUFRofGBEQFBYQHQ4PEhIPDhQSExEUFhQWDxQUFBUUFRYUGBcXFhYZGRUTEAwSFBcWFBYVFxYUExITHhUbHBkSEhYTFBMRFg0QDxITFBAPEBIRFREOGBwZGA4UFBYWFBUYGhgYFBQRFA4TExgZGBAREQ8YGBYQEBMRERETDxQWExUUEhgTERMTGhsUFRQYHBgXGhgWFxUSDRYWFBYRGBUYFhUdFBQSFBQPEA0QFQ8TFxcYFBcUFBMTHBgWERYUFBMWFhgYGBIPEBEWHRIXFxYYGBQSExMTFxkZFRMUFxcVERoZFhoUFhgWGBQWFBMTFhQXFxYaGRcVFhYUFhYZFRQUFBkVFhUTExIVFhUXGBgXFRAQEQ8fFhcXFhMQFBIaHh8bGh0ZERIRERQSEhIUFhUYGBATExgTFhMSFBEXDxIUGhMUGBYPDxAZFhsaDxEPExgYFxsRDg4VFBQYDhcQDRETDRcUFRMZFhcUExYRFhUUExgVFhcXGA8WExIWGBcREhMQDhAPEREPGRgUFBQSFBAYGxgUGhsXGBYVGBUVExESEBUPExAREhMVGBYWFxYWEBUUERYWGBYWFRcXEhATFR8eEBIWFBUXExQWFxQZGBgZHBETEhIVFxQVFBUVFhYUFxsWFhcXEB0TERYVFBUVFBMRDhQSGBgVFxcWFhQeFhQPERgWGBYYFxYTEBETEBcSFRQWFRgYGBkaFA4UEhQXGRobGhEQERITFR0WDhgWGBcbGBkaGB0QDxEWGBUREhQRERQRHR4eHRYXFhcUHBcZGhUUERAQGBEPDhkYGBYUERAVExEVFRQYFxgVFxcYFRQXFhcaGhwbFRYZFwwZGBgUGBIUERIYGBgdFxYWEhQZFBMeFhQbHBwUHRoaGxsZGRsaHSAZGR4aFxcZFxkXIBoZFxYVICIXFw8ZHB4fHhcXHhwcHhsVGRsiGRQaFxQUExQXFhgYIRcSERQVGhkYGBkYGBkXGRkXFhcXExYaGRsbGxAWGhUUFRUWFh0gHx0cExIREhIRGRodGxkZGxoYGR4aIh8dISAaGBgXFhkXGRwXFhQWFRsiGxkZGhscFxcZFxgYGRcbGxsYHRsbHg8YFBETFBoaGxkbHB4eGR8fGBsUGCIbGBgaFRIWGBceGxweFRIVFhsbGxkaIBUiGh8ZHBMSERwXFhgZGxkYGhgYFxcYEhEXHyAfGBcVEhYYHBscGxcZFxQUGCEbGxsbEhEaHxoZGxIcHxgZGRkWFxgaGhwZDxUaGRoUEhcaFBcZGSEeHxweGBkWFRMWFRUUFR0bGxwXGRgaHBwaFhkbGxcUGRQXGBYcHBgVFBQVFxoUGBkXEQ8UGxkWFxkZGxcWFRgbGhoZGRsYGhkXFxkaFCIVExgVFBgWFxocGBYZGhcZGRoXFhcXGBgZGhcXFhQZGxUXFRwdFxcVGhgXFxsUFxETEhAfGh0WFRgbFxkcHBQVFRUZGhsUFBcYGRcZFBoaFRcUFBYaGBcVFxkfFBQYFBwbGxsYFRkWFRQWFRcbHBYaHRkYGRcXFxcZGBYSFRkZFxkUFBUbGRsYHxkTEhYWFRkbGBsZGBcYGBccGhobGhoWFxcPERUVFRsUGRkYGR4aGhoaFxQSFBgZGBMUGBIPEREWDxIRFRQdISEiIR8XHRwZGxscGRkYFhoaHRwaGRoXGRgZGBgWGhgVGRYRFRQVDxkaFxgZGxsaFhUaHRoZGxoaGxcXFRMXFxcXGRUTExUWFBcXFRwfHxcTFxgdHRwcGxwXFxUWFhcVFxgXFRcWGRgYFBQiGSIUGB4dGRkaFxYXExUaFxUVFhgTGBkXFRsZFxgbGhscGhQUIhQXFRQRGxwdDw8bGBkTGRsZGBIRGBgXHBsbGxYVEhIREiIiGhUdGhobGxkWFBkcIRYaFhEVGRYXHB0cFhUbFBcWGhgVExkWFhcWGBgXGCAdGhodFhsfHBcVHhwXFxsbGRoaGRcUFBYXFhYaGRQRExsdHB0cHBwbFxYZGRscGhsZExkZGBgVFxcWGhcXFxkcHBQZHRoSHR4gGxoZHR8bGRUVHRsbFhsbGRcdGRkYFxYRGRYaFRoWGRcZIRwZGhgYGBsdFBIaGBoXFBcdFBcXGxMUFRQUFRUREhYWGR4YFxYVGhcaHRoaGhsdHh8SFRweGRsTDxgXGRgRFRkZGA8ZERgQERMUEhsdHR4eHR8aGxoZGRYTERIVISEbGSIbGh0fFxgcGyAgGRoZFxgYGRgXGh0cGBkXFBQUFRkTFBcWFBcVFRAREhMUGRogFRMXFx8TFBkbHhYYFhUUExgYFBQZGxwRFRISGBgXFBUSERQZGRoZFBwgICAbFyATDw8UGxoYGxoZIiIiFBIRGBoZFCAZGBIaGRUVEhQaFxsVGBYXGRkaFxcYGBkZGBgZFxIUFBEXFxQWGRkbGxoVERQaGR0bGRkbGhgWFBcYGRoWFhkZGhkZGxwbERcRFBQVEhEUFBERFxgRERcYFxkYERsfGxsXFxcVFhgZFxkZGxcaFxcVGBgXHRYZFxYYFRQdFxcVFxcWFRkXFyAgHxQRFxQXGRYVFBsWFRQUFRQWFQ8XFhIZFxcbIBkTFB0aFRMSEhUYFR8WFhcXGRsYGRoaGRQZHxsaGxkZFxgaHBwbGx0YFxsYGBYfIBQZGSAUEhcXGB8hGxQUIhsXGxoWExYXFxgWHBwcHBwbFxcbGR4YFRUWFhUWFBQZFxkaHSAbFBQYFxcbFhsYGRYVFRQYGxoZHB4WExUVExUWFxkXFxMVFxgaFxcTERcXIB4cGRobGxsdFA8gGRQVFRcYGxoaFhEWFxYbFBQVFRQfICAYGxwcGRgZGh8dHx8bGBQWGRgYGBcYFxYQHBkdGRYVEhIUFBYZGBcZFBUVGhsdGxcWFRkYGxYZGhgVExcXFxkYGBkRFBsgGSAYGBYTDxUVFx4bEhQcHBsdGxkgHhsWFBcWFhcaGyIaGRYZGBYWGBsYGxkZGxkXGBcUFBQYGRgZGxsXDxsWFBUUFBwZHhghIiAgFRUYGRkdERITEhIYGRUVERcYFBsiGRcVFB4YGBweGx0XGRkTFxQZFA8RGxkYGRsaGh8XFxYYGRkdHhsaGRkXGhYbHBsfHR4bGBgYFxQeGBcXGxocHRoUFRkbFxscHR4cHxMSEBMXHBsiIiAZFBEgIBcUFhkbGRcXFxQSGA8ZGRcfHhEPESEbGxsZGRYTGxscFhsbGxsYGRUVGBkbGBcXFR4ZGh8eIhsbFxQXERkbFxoaHBwbHBwbFRUUFxoeHRoaGRsbGhQSFxYVFxcWFxUZFxgYFRYZGxcaFxwRFBQXFxYSGxsZGx4WFxkXGBcaHRgXERATGRkgGxsbHR0dIRsaERQXFBYVERIUFxkZGRcUFhkYHRobHBkdIB8bGxocGRkVFR0aGRYeIBkYEhIYGBsYGRgaGyAhGR8dHBgcGBYWFxoXFhcYGRcUFREWGxgZGhgYGRgeHR0bExcbHx4cHRshHBkcIBwZEhIiGyATFxwYFRYUExYYGBkdHyAiIhYREhUYFxodGyAbHxweGRobFBEWFRIUFBUbFhseGhgZGxcVGxYYFh0ZFxgZGhYaHBgYGBcRHhkbGxkbFhcZGRwdIA8bHRsVFxUUGBYXFxkVHxkdHhsZGRshFxsaGRcbGRQXGhogGxkZGxoaHRkZGBgaFx0dFCIaGxYhHB4ZFxUVExQPER0dGRgVEhETEQ8TFRYUGBoYGhsZGxobGBocGRsaHRwaHBwfHBMSEhUVFBESEhMXFR4fIRweGhoXFxYYGhoZHBkfFBUYGRoZGRQZER0UGhUWExQZGBEUFhgYFBIXGBkUFBYUFBsZGBQWFhgXGxoaGxsYGBcXGxUbHh8gEhISFxEVExcWFRUUGRsZGxcYGhoaGRsTEhYYGBgcFhwWFRcbGxkXISIbGSIXGBcdGRkZGBcXFRYZGBoZGBYVEBQUGhgZExMPFBMYHBMQFxQUHRscGxsaGRYbGBsXExgcFRISFRYSFA8gHxkYERYXHBsbHBcbHBkZGRwbHhcZIB8eHhwcGBkWFxkbGhwZGRcXGhoaHh4bFhsYGBkUFxsUFBQVDxcZHBETGBkbGhsbHSAWGxkcGhgdIhEVFBYUFRQVGRcYGxwgIBscFxkZGxsgGRgeHB0dGRkWFx4eHh8bHBcXIBkeGBgUFRIXGhgXGhoZHBobHBcVGhkcHh4XFBkYHRkXGBgaHBYTFRYVFRkgHBYiFRoYGBUUGBQVExUWGRoZFRQXFxERERAgHx0YGRAUFBMTGRweHyAYGB4bIB0ZDxUTGxsWFxwbGRkZGBcWEBkbGBcRGRsVGRkZGBUWFhUZGx0cGhsbGxgZFRgRFB0gHRkaGhERGBocGxsZFxkbGRwaGx8ZFxoVFRUXFRYZHRcZGh0WGRERERQVHxsbFR4VFxkfIBcRGxkWGxsUEhQZGxsbGxwWFRMSGRYSERMWHB4cFx0bFw8RGRcRGSAiHyIWFx0dICAbHxobFyIfFBkQFRcYGBcYGRkeFBQUExQeHxQXGh0UGh0ZGRkZFxgTEhQbFxcVFBYbHBwbFRIbFxUUGBgPFhUWFxcUGBYVHx4bFhQWFx0YFxsYGxocGBgcHBcaFxYVFBUXGxohFxYWFhMUFhUbGxscGxoaFxcbGhoZFxgcGRwbHRsbERYUEBARFhcXFxwaFRQUFx8XGBYbHxcRFBYWFiAdGBcWGx4cGRcYGBkVFBwSGBcVFBcVExQXGBYXFhocFBcYGxcgIhYcHRYUFxYaGhkYGRgYGRgUFhYeHh0bGhwaFBEVFxYYFRcREhQWFhQUFBUXGBkZGRccHBkZFx4XIh8gGxkYFxUVGRkYFxgaGhkYFRcVFRUWFhgZHB4cGBsXFxcVFhccGhsZFRQYHBsTExkZFBkaGRQWFxUVFhMUEhkXFxobGRQVGBkZGhodGRoVExYYHBoaGRcZGxIVFRUcGBIYGREPFhgYFBcTHRwaGBQcGBcWFxUVHBkeIBURGxsXGRsXFBcUGRoZFRcZGh8ZExkYFRkZFhYVFBEWERIeIBoZExUVFxcbGRgXGBghHxwaEBYRFBcQGRcYExMTFxoXExMXICAgIhQWFhwbFhITFBcXHB4bFxcbGhUWGhYZGRkXERwYGRobHBcZGRkWGBQWEx4cHBwgGRoVERQVFhMSFhkZERcSGRkXGxYZGB0fIB4YGRYVGRcZFRkaGBobGRcTEREdHBkaGxgbGx0XFhQUFhkbGRoeHxIdFxkZGRoYGR0eDxgTExQVGRsgHx8aGx4ZGxoYHhgcGhsVGBcZGhofIRUWGBgXGBgWFxcYExIXGRkVFxkaFhITFRgZGxweGxgaGhoYFhcVGRkYFhUWFRYWEREZGBcXGhoaGBkbHB0bGhoTFBERGRsUFRgWFhcYGBkcHRUVGRQWGBQUERERERYaGx0ZGRkXGRcYERQcHh4gIBYbFhcYFxQRFBsbGBsdGBcWDxsTHBQRERkbGhkZFxYeHBYUFRcXFBQVFhcYGRkaHQ8bHhkZGBYXHh0YHx8gGhYVFxYVFxgZDxcYFxQYIBkaGhgaHRURERURERsbHRsbGhsbFBQaFxsaGRQaFxgVFxcYGBcWFxYbFxYXGhoZGhgbHBoeICIXFxUUExMSExYTFhobFxISFBcbERcWGRgbFxMaGRgXGx0ZHSAYGxobHiAdHhobGhcUGRcfFhYZHhoXFRQbFxcYGRoYGBcZGx8eIB4bGBcXFBwcHRUfGxkZGRkbGRcaFBUVGRgYGRMUEhIYGRYZGhseICEgGxgWFRYaHhgZGhcYGhocGh4ZGhATFRcWFxcaFxoeFhgZERMZGRUVFRwXFBEVFxMUFxcVGBobFxkbHx0ZFxkZFxcXFRoWFxccGxkXGxsSFBgWFyEhGhsZFxcbGRcYHRsZGBQWIBsXFxYfGBcXGRsXExobISAbGRoREhQYFRERFBQaGhQcGRkaGRcYFhgYGRQVFRsgFhkZFhYVExcWFxcXGBgXFxYbGxsXIBobGRkXFxgZIBMTFBQVFxkXGBoYGBcaFxgYHxoZGRQbHSAWGxwdICAfGxsZHhoaGxsaGBccGx4aGRkdGBIUGh4dHRwfGxQWGRoaGRcZExodGxgWFBUXFhkaICAeFhQVGRAUExEZGRgYGBcXHBwbGxgaFRogGhAWFhcZGyAgIB0aGxsZFRUUFhcUFBQZFRMSEhQXFyAaGhoaGBkVGBcbFBcbGRobFBoaHRcUHRsaFxcYFxkbGxcYGBYXGxwfHRcXFR4cFxkXFRcdGxsUFxEdFxkfGhYSHR0bGx8fFhYUExkVIhsUHBsVFhkbGh0bGxcWGBQUExMSGRIYGB8fIBcZFyAZFhUXESAbHBwZGRcXGRsdHRkVHx4iGh0bGxkaERERHB0XFhocHxcXGRsVFx8XFBsbDxMVFxEXFxoXFxkYGBgcHBsaDxIcHBcXFxYWFxgdHx0eFhYdFBQaFxERFRQQERsaGx8aFxoZGh4iGBQUFBQeGhcXGBQVFBUfHCAaFxkWGhoYFRoXFxcVFRUTGRMYFxsbFhkaER0eHB8fIB0dGhcZGBwYFBsgHxcZFRYdHhsaGx0ZGRUVFxkUGBkYGxUYExYaGhUYGBQUFRYaIhUWGRscExISFBkYFBYWFhcYGRkbHhwdIhIdHR8dFhkZFRMXEhQfGREPGhoZGBkbGxYYFxUYFxQWGBoYFhYXFBESDxIRGRoXIBkZGxkXFBQXFRYTFxcaGRQXFhMbExMbGxUVExkZHyAZFxQWFRoaGBMUFxcSEhcZGxwbFhESEhMSFBMWFRUVFw8RGRscGRYXFBUYFxcaFBIRGRcYGBoaFhgZGSEfIiAPERUXGBUUFBMTDxEgGBYVFhQXGBkYFhQPGxwcExYbFx8dDxEWHhcWGR8hGhYVFBkUFBUVERERExEYFxUfHBMWFxkZFCIcFxcWFxkYExQWGBkgHBwdIBkVERcZHQ8RFxYZGRkbGRQUGRcXFBQXFBYVGBcSFxgWGRcUFhQUFRYUFBEbGxkXGRUZFx0VGxgaGxoaERQaGh4aHB0dGRoaGhgVFBUeHx4YFhkWFBwUGRgXFBMUFREUHBofGRkYFx4dHRcVFxcZFhQRGxEUHR0YGBYSEhgWFRQXFRkaGRQVHxUUGBEXGRoRFRUXFx0eGxcUFhkXHRkdHBsYFxYYGBkREhQXGRscGxcXGhUXGRgUGhMXFBcWExccIhkbHhkXGB4TFBYcGhcXHhYZGxocHBwbFxgXEBUVGBwZGhcXFBQXFxwdGRsbGhscGhYWFxgZGBgXGBcYGBseHRURExIUGRoUFRYTFh0dGBgWGxsaGRcZGhsgGhYaGBodGhcXFBMVGhceGyIRGyAZFhMbHBwdHxwWEhYWFRgbGRsfGxwcEw8RFBkaFxYTEhEXGRYgGxoXFxkZGxsXFRcXFxcTFhMWHSAZGBoWExUQExsZEhUVFhscGRcZGBMXFBgZGhoaGxoZFhgcGBsXFhcWFhgeFBgTERITERUWGxkZFx8bGyAiFhUbHR4eGBkfFBIfGhgcHBsUEQ8VGRwaHRocGBoYFR0ZHBoYFxUZGRkXIhsZFhUbHyAeGxUYFBcdHh8fGxsbGxgaHyIgHxwdHBscGxQTFRsUERQZGyAbGh8eGRkaIRsXExITFx8hGRMXFxcWGBcXHRoaISEfHRAbFxUXHhsbGxkVGBcSFxwbFhYTFBMRERAaGxkVFxghIBYiHxIaHB4iGxkZGRkbFBURGBcfExUaFBsZEhEbGBcZGRIZFhgVGBkRFxYXGh8TFRYYFRkZFxoaGRgYGxobGhsZFxgXGBoPHR4dExoXGxYUGhwcIB0eGRIaGhkaGB0aFw8SGBkWGRYVGBscFxgXFxsiERYTFxcXIBgZExIREhIXFx0eExQXHRkXFRQaFxgYHh0eEQ8ZExYXGRkWGRYVFRcaExIUFhQXFBQUFRQVFxwaFBQVFhUXGRsYIRgZGxkUGBcXFRcXGCEfGhsYGRUUFRAPEhQXGxYcFRcbGBYVEhEVFxcWFRkZGRAPGRQRExQZFxgXGhwdGxkYGiAgFhkVFxkXGRAUGBgXFxcVFRgZEhcZFxgYHBoPIBsbGRoSDw8ZGRAVGxscHR4bFx4ZGx8WERARERIYFxMbHhgYGRsaGRUXFRgaGxkcHx8eIBkXFBcbHRkVGhgVGxwZGRshFhgbGRkXFxwdHBsgGxUaERcYGxoZFRMZHh4UFRYgFBsaGhkUExcXGhsbGRobFBkZHRwcGRcUFhUVFBISExQVFhsbGBoZGRwbFxATEyAYGBQWGBgYGBkaFRkeGRcYFxcXFhgZGBgZGxkbGRkUGB4aGRsgIhsYGhkWGBgTGRcdGRsUFxkcGxsaGRcUFxgaFx0eGBcbGRgYFxwdGRcYGRcgDw8PGRsaHB0bGhoUFhkbGx8ZGRsdHRkaHBYXGBsZFRgZFhkZHxseHBMTGRcXExIRHRwcGRgUFRoXFBQZIBoYExkYGBobHxsXFRcYEhEPFxccGyIbGhMXHhoXFRgfHx4gGhsZGhkYFhkbGhsYFhQVHBobHBoaGhoUExsXFhcZGR4aGhobFBkbGRYXFBQbFxsbGhkYGBYYGh8YFxAXEhIZHR0cGRscGBcfGxQUEhYZHBcYEhIUFhUXFxkUFhoXFRYXGhweIhMXGRkYGhsZGRoUGBocHh8ZFx4iExEZFR4gFBsbFRQWHB0aGxsdGSAaGiAaFxMbEhgXFRYaGhsbHBoXFhcREBQVGhoVGBkYFhsWGRcUFBgbGBcWFxsZGxsVFRYbHhscHBoUGBoaGRUaGRITFBgWGBcYHBwaGRoZGhoZGx0VGBcXFxkRGBIZGRwZFxkcGxwbGBYZGBcSERYUFhkUGRgZGBoWGxsXGRgZGBEYFxkWGxodFxcPERMUIh0UFBkbHxcTFxcaHRkXGxkYFxgZGxgUFBIXFxcVFhYVFx4eIRsaGhYYGhwcGxsYGxsbFCIbGhsXHx8WFRQQEhAZGSAZGRogFxUYERcdGxsUGBgYFRcXIB8aGRkZGxsZGhYUHRAZGhUYGRcZGRgZGBYYGRsXERMUFxUbHh4UFxcXHh0bHBoaGRkWFRQTGRYVFBEWERQZGxcZFhgVFRcWHhQYFRgXFBUXGxITExMXFxcXFxcbFhobGxkZGx4eHxsbGRkYHRoZGBIRERUSFBUWGBwdGxwYFBQQGhYZIBkbHRMUEhISEhQUFh4cGxcUFBIbGRcWGBYWGhsgIBUUFxcTEREgHxodGhoYFxYXFRseHhUSFxkgGxoaFxcWFhgbGxUVFBcXExAPFBIVGRkTExcXGRMVFRoaFhcgIhkZFxgZGBYTFxUVFBMUGRsZExEVFREWFRUUERUXFhQVGh0dHR8gFxkYERMWGBcaFRYVFxYWGRcWGBEVFRgTERIVERIXFxoaFhUVFxgXFxkbHB0eHRoTGhsdGBoYFBcaFxkYGBQSFhkYFhUVGBYXFhcTHRoVEQ8RFRYZHx8dHRkdFxERExsbGxkbGxsYGBgYFxkZFxcYFxUZHRwaHRsdFhkcHB0cGxoaGRoZGBcXFhUWGRkaGBYXFBkZFBUVFBARDxsXGhcZFBMbGxcbGhkcFBQUFREUFBQWGBgZFRgZGhoaGxQRFBQQEBEVERkZGhgeGRUaGhYWFhMSFBIVFhYWFRYXGhoPFhcVHxsbFRgUFxsXHR0cGRwgFBoaHhkYFxgVGBcSGhwWEhIcGhQbFBkZEBMbERoXExUUHRkaGRcYGRgZGRQXExUaGBgYFxcYGBkZGRkVFxgbIBcYHxQgFBQaGx0ZFxgYFxcXFB0bFRsbEBQbFA8UGRMbHB4dHhQUFBoaGRcUFhcZFxkbGRYWGRcWEhQiGxUVFxwbHR0dHRYYGBsbEhQWFhcYFhkbGxsiGxQZFRIPEhYYFxcUFBgZFRkVHh8ZFhcYGh0cISAWFRQYGiAbHB0aFxcgIBQXFxgZGRsXGBkZGBUVGRkZGRcWFRIZGh4WFRcUDxkZFx0SGRkREBcWFxkYGxkbGRcWHiAgGRwaGhsbGxcZEQ8ZFxgUFRcYHR4cGRYUFBkWGxsXFxwZGBgeGhcaHyAdGxcTFBYXGx8dFxkcIRAQGRoZGSIZGhoUGBQWFhcYGBkUFBcYEQ8aGhkXGhkZFBYWFRseHRoYFxYUFhcZHBkZGRcZGhMWFRscHh0cFhEQFhkUGRYSDxYXFhQWGQ8YICAZFxcZGBkaFxcXGB4RERgWFRsYGRQXFxASFRcWGBkZGhsRERQSFBkSExcZGxoZGhsXEBEUFBQVFxITFxgSGx4eGR0bFxsWFhgXGBcXGBcbHBoaGR0ZGRQTGRgVGRoYFxYZGBUXFh0cFxcVFBUVFRcaGxYcHRkaFBccFBYXHBkXGBUXGRkUGhYVGhoeFRgXGRcSFxgXFBcaGRkUGhsRFBsdGxUUFRsgGBMXGRoSFxsgGRkiFR4cFxkUGRcYGBodHBoWFBQXFxUYFhUUDxAZFhcZGxQUExMTHBwcGSAXGRcYGRYVFxkZFB0YFxcWFhkVFhYZGxsZGx4ZFRUUExQWGBcXFxMZGRoYFxYTExMTFhgYFxUTERkaGhsbGxoWGRgZGhoVHxweGhcSGBQRGhkZFhoZEhcaHB4aGhkWGBkcGxscGxsaGRURFRcVFRgcGxkbGxoZGBkbFhcWFRYYGR0gGhsWGRcZFxsWFhoYFxcXGBoYGRsdGhcVFxYXFRUZGyIZFxsZERYUFBUVGBcXGR4XFhYXGRsbGx8fHxMYGRccHRsYGBkaGxwaFRYUFhcbGxsbGxwaHBsXExYYGxobGxsgHxkWIiEXFxYWGRkdGxweHxIQERgZHRscHB0WFxITFxUVExUUIBwgHxMREhQZFw8SEhQZGxsZFxQWGBcZGBQZHBsZGRQVFBIRFRUWGx0cGRMTExUXGhoVFxYYGBkUFxYUESAZGhgbGhkaGRoRHBcVFxcSDxoWGBcXFxcXGxgbFxIXFxYWFhYVGhgPFRcWGBYWFBcaHB0PGxkbHR0dFxgWEBEPGRQYGBkUExMRDxcTGRsbFxYUFRYXGBkXGhsaFBwdFxwiIB8ZGRsZGRcgGBMUFxgeFxQVFBcXHBsTFRERExcYFBkZGh4dGRcXFxkWFBUVHhscGx0aFhkUFhghHBcbFhkZERAXFxcXGBYXGRgSEhcZGh0gFxsZFxkUFxcVFx8ZFBQWFxkXFxgVFhkWFxsUGRoaGhoYFxQXExYTFBMQERsZGBcgHRcdGhkcGRkaFhQbGBYRFRgbGxsWGh4bGRsgGhgcICAcFxcXFxQWFR0gGRkeHyAcExYXExgYHhsZFhUXFRcTHxwaGh0SGxsTEA8RFxQYGRgUHRoVGRgZExQYGRoYGRofGBgZHB0dGxobHBgYGhYVGxoZGRcYGBQXGRYUICAbGBgYGRcWFxsbGxYWFhIaHRsZFxQYFxcYFhkeFxkZGxsZFBcZIiAbGhsYHBwbGh4eHBweHRobGRIUFhkdIB8bEBgZGhsaHR0ZHiAZGRodGBcZGBUbFxgUGRkaFxwXHCEgGBMWFxkaGBQYFhIRGBEdHBkbHBwcGx0fHyAXGx4ZERkXGREXFxwcGRkXFxkdHhsXGhoaGh0dGhwfIB0dHB0dIhwZGRUWGBwbGx0bGhkUFBISERQXFhEgIhwXFRgbEh4gIRgSFxUTFBYXFyAgGh8gHhsXFRcVFBkZGRUTERYXHBscGxwZGhoaGBUSFxcZEg8dIhcWEhYPEREVFhUXGhQWEA8YGRgWGB0bGxgWExYWFhoXGBkbGRcfHBscEhQXGBsgHhwaGRQUGSEgHh4cHB0bFRYZGBkaGxoaFxcaGxcaFxgQEBEdGRkXFRUXGR4ZFxkXFxgVFxARERoZDxsiGBgYGRkXGxsVGRkZGBcVHBsZGRkYGCIZGSAgFxgbGRcXIhsaHhgWGxkZGx0bGxgWFxQXGRUbGx4cFxUaGxkcGxkdHxMRExUXGxwcFRcUFBkYGhkVFRYYFxYXFh0eGhgWFxkYHB0iIB4bGxcVGBsbIB8bHh4eHhkXFxYaGBcXFhQUGRgTFhcYFxQYFBQWFxsdHh8cHRIYGRgdHyAaFhgXGBkYGBYXGBkWGBgcFBcTGhkXFRQYGxEcGRsZHB4bGxgZGRgdHRkXGhsUFBQXGRYYFhcZGRkYGhobGR0cIBsbFhUXFBYZGRIZGRkcIBIUFhcXERQgGxAWFBQREhoXFBgSGRkZGxwbGBQZGRwXGBobGxoWGRkSERMVGRweHiAUEhYYGhscHBgWHx8gFhQcGxoWGhsPDxcXFxcYGhcYERQXIh8bHBsaGRQXFRgXGhoWFRYXFxcXGBcZFxESGxcWHBwXFiAhIiAWFxsbHh8YGRwYGBsUFRYWFxsaGhwVFhcbHiEZFxcVGx8VFBQUFBobGxkaGxsaGBQQExcUERYVFBUWFxkaGxgUEhMaHCAXIiIaGxgZERscGBMTFBMQFBIUEhYUFBcXGhoQEBocHxkXGBkaFxkUHhsbIh0eGxgWFRcUERgSExMWGhgVFBwdGBgcHxcVERIeGh8gEBMZFxcVFhsVGBkZGxkXGRkZFRQZGxkXFBISGBgfGhcRFRQbIR8cGRkaGRkZEhMSFxcZFRMVGRgZGBkbGBkYGRkXGRMSFxsTFBcXERMWFxMTFxkUHhwZFBQWFxgXGR8cGhoXHBobGhcVEhsWFBQbGxsXFRgYGx4fHR0XFxwZFRwfHiAVHBwZHRwZGSIREBQUFxcSGhoYFxUWFBQWGRIVFRMUFxkTExceGhQUEhkZFhceHhYXEhQUFBcVFhgZGhcYFBsbGxkXFhsbGBcSGxsaGRMSEhIYGRsXICIbFxgYFRUYGRMTEBcYFhQUGRcXFhcYDxIVFRERFRgXFBkUFhQXGhsPEhkbFxUPGRcYFhoZFBcXFRgUERkUFRcaHxwbGxgUGxwdGRcWFhYYExUZFx0UHhsaGR0aGxYXFxYaGxwXGBcPGxgXFxcYGxcZGRceISAZGSAeHxkXHRkTFBYXFhYXIBkZGxobIB4WGRQYGhsYFBEXExQVExcdGx0eFhwbGRUZEBQeHxwcIB8aFBQbIB0dFxQTFBQXERQWFhQXFxcZGhcSFBQcGxsbGRsZFBUYFRkaFxgfGBkXFhgYGRsZGBkcHhsWFBcUGxgXFRYZGRkXFxgWFBUVFxgSEREVEhQSGR4gGxgaGRwcHBoaFxoYFRYRGRobFh8eHR8XFhQWFxkYGBkYGhgVGB4bFxYZFxwfICAYHR8fGhYVEBIZHhQXGCIgGyAZGRkdFxgWGxoaHh8bFxcYFRYcHBwfGhYTFRYaGhcaGxkZGRkYGBEREhYZGBYZERQUFxcbHB0fIh8SFRgXFRcSExYVFRQVFxsgIB4VGRITDw8VFRYZHBcTICAgIh4bERcYFBYZGx4aFhITFBcVGxwaEBkZFxgaFBgiDxkgIBwbHBwdGxsbGxcYGhkeHBwRERsTGBkXFRYbGRsdGhESFBMcGBUTGBcZGBcYFxgSExMeHR0UGRkZGxwbHhsXGxsXGBcTFxIZIBkYFRggFBkYGBkVEw8PEBAXGBoZHSAaFhQSGBcUEQ8UFBYVGxYZGBkXHBsbGRgQGxsaHR4eGRcVFxkUFBMaHRogHBobIBkPFBkaFxcbFxEUFhQbGRQTEhoaFhseFxgYFBITFhQUFBcVFRQbIB8bFRkZFQ8UEhQVFxkaGRoZGxoXEBkcHBsbFBYWFxwVGhkdGxgXFhESGhoUFRYWHCIUHxYYExYeHB4eFBQPExMSFRMWFxkXIBofHxsaFxMPDxESFxkdGhkUEhUXHRsbHx8dGRgcIhobGRYRGhcZFxseGRkSGRQWFhgXFRcZHBwbGhwaGBUXExkXHxsaGyAeExISFBMgIhgaGBgZGBoXExYcGRYXFxcaGxkZFxsZHBweHx8fHR0XFxYVGxobGhoZGBEYGRoXFBMWGRcgFhgVGhERIhsUFBMVFRQUGhsXGRkbGRcYHBocFhccHBkSEhUXFBEWGRofGBIPEREXExocFxgbHBsgGxkZGhYZHh8XFhYYFxYVFhUZGxQTGhcSFRwZGBUVGRkZFxoZGxgaHxsdGRYXFxYWIBwZHBAhGxsXGx0ZGx4cGCEXGBgWFhcXFRYUGRkYGxwZFhYYGRgWGx4aGREaHRwYFxQTExscHRkdGhocGxETGxofHx0XFhQUGhsXGRweGRYWFBYXFBAYGhoaGBgZHxsUFxEUGhgXFBsbHhoXFBkXFxkeHhofGhobGhgSGRgbGx0bGRoXFxQXFBQbDyAgHBwYEhgZGBkVFRcYGREWExkZGhcbGx8YGB0VExAXGBQSExIZHR4SDxcZGhMVGBYWFRkYFxgaHR0bFxkbGBoYFxgTFBcTGhkZFhcbGx0XHBsYHR8kJiUmJSMiJCMfHhoeHyIfHx4fHyElICEkIyUhISAfISEbGx4iIyIiIiAdGxwbHR0dHxsdFyAdISIjIBgZIB4fHicfIB4dGBsbHhsbGiMjHx4WGRwYGx4eJScpJx4iIB8eICAdHB8bGhsbGyUgIicjIiMoISMbGxYZGSEbIiIbGhobGhoYGRscHiEgJycmHR8gHhweHh4eISQpHRkgHhkfHiAgHx8eHx4hIyIpJCUhGyIjGyEgHx4aGx8eGRsZHh4fHiEkHB4aGxohIB4cHyEbHiAgGx4aGR0YHxkbHRwdHh4dHR0hIR8fIB4eGyEcHiIlGxskIB0bIh4fHh0cIx4jICEiJigeHh8bGh4cHhwdISIcHiMkIiEbIB4gJyEbHh4bHB4fIB0kIiEgIR8dIB4fHyIhJiAhIiIiIyEeHRwgIiEkHB0dHSMYGBgbIhseHhsiHBwcIiUkIiMjGxsaGCAfJycjJCUgIiEfIR4gICAgISEiHR4eGhsaGh4eICUoHyImHx4hISIgHx8WHh8fICIhIB8mKCIgHyAgIiEcFhYbIx8gHhsfIR0eIhofHxcbGhcYHiIeIR4fHiAkJiMeHx8gGxodGR0bGhoYGyUYIBseHCMdHBsaGSkhHh8hICAeGyQeHhgkJSMiHyIeIB8fIB4bGBgkISEdJxwWGhsdGhoaHhwdJSUkJSUgGhoaGiclJh0eJSIiIiUhGyAeIh4gIyYlJSQfHh8gHiAgHhwdHR0eGx0eIB8iISAbICQlIiIgHRoeIyIdHB4bGx4eHRoaIB8bHiMgIB4cHiAfIB8dIB4hIh4eHh8mIyMgGxwgIyQhHh0jJiIhHh4dGyImHhwhIyEfHh0fISMgHRsYHRoYGRsmJh0bHiIdHh8eHhgYHB8gGR0dHh0bGxsgISAjHyIeGB4hGCkkJB8iICAlHhsZGB4eHx8fGyEjISEkIx4eHiEgIBweICInIh8kIhwbIRsgHyEgHh8fIh4iICIiGhgnJiIlJBweHh8mJScjJScgIh4hIyMiJSQcHyIhIh8fJiAeHhcaGB0eGRoZHB4fJxwcIB4eICEjHyMiJycnJx0gGhkcISMkIB4eHB8bIR8gJSkgIR0dHyAgIB0cGyAhIBweHB0fHyYjIhkgHiEbGxsaGxshHR4cHSEiHBsmJxgeGR0cGxobGxsbGxwnJCclKB4fISUfIR4eHx4eISAeHhwiJyQgJSEeHhsdIh0XHR8fIhgbHCIjISAeHiIhHhwkISAZGx4eHSAkIh8hIiAfHR4pIiIeJx4eICIgICcpJiYjHyAgHCAjGxweIiEgICIpIiImISAeHyAdICAhIiQhICAgHBwdISEgIBwdHiAfHB0fHh0fHhoaHhkYGhoeICAnISEhIB0cGhYYHR4fGyIeGykiHx4fIh4cICEgFhgYICAjIiAfICAfHyAdHhkZHB0gHyAjJB8fHhkXIyIYIx8fHx4cHB4fICAiHx8gIyAhHRobHxwZHBYZICUiIyIdHiAeHx8bGxgeIB8gICIoJyQYHR8hICEhIx0eHRwiJR4dGyQlHCIeHSYmHRwaHR8eFh0jIB4eHx8gKSkgJx4eHh4gIyIaGh4iJiQfHiAdHh8fIBwbGxkYICAeICEnHigiIiIkHhsbHhoeHxwZIBseICEbJB4bGx4eHh0bHBshGyAeICEkIiEeIyMeHhkbJh4dGR4dHiEfHx8dIiMiIiAfICAcHRobISAiIiQhHSIbGBocHx4gIyAeIB4eHBweHh4gHBwiICAfHB8eFhsdFxwdGxkcIiEjICEgIiAhIR8dHh0cICQiJCMfICMeHB8dIiMiJCQlHhgdGxwfGBsaGRweHygiIh8fIBsaHB8jIiQhIyMjIh4aGRweHR4cHh0fIiAbHBsiIyMgHicpJyMfGyIhIRkfHhkZHh4bIBkfGxodHR4hGxYWGxgeHBwjISIfHhkiIiAeICEfHR4fHSIgJBwdGx4eICMlJR4gIB8iJh8ZGRsgFxoXHR4eISYmHxsbISInJCYhJCMnJSInISAjJyEjICIfHR0dHBoiIBYhJCEfHyEeJhwbHCAeGBsdIyMmHBwcHx8kJCMkIh8gHiMjISEhJCQlIhseGx8eGyEgISEfJiUfHyAnIR4dHBgaHSAiHyQcIBwZHiAdHx8gHhgeHB4hIh4bHB0gGRscIiQlIyMkHCMjHxoZFh8aGxscHhseISIbGR4fIx4eIB8eGBcZHRsbICEiJCEnHR0dHyAmGxwcICAhHiAaGSIhIiIfHRwcGB4hICAiIiAiISYcGxobGxsaGBgYGB8eHSEgHSAdHyUmJyEpICAgIhsbFyEeJyUeGhoeIB4eHR4hISAgICAhHxwcISIhICIgHyUjGxcbGxwZIyEiISEfIyYjHx0eHh4bHiQiISEgHyAfIiMeHh4gIB8fHBwZGBoYGRshIB4gHx8fIB0fHx8dHycgIh0iHh8fGxobHxYaGRkZGRsZGiUmGyIaFxogIx8fGxkWIBklHxwdHB4bIx8eHB8mJCYhHyAcHSAeICMgIRseICIhIB8eGh4mJiMeHyMjIyIjHxsbJCIgISIdIB4fHh0gIB8eICEiIiQaICIYGR4jHR4cHBwgIyQlISAfHCAfICAhHh4dIR4aGxsfICIgIB0fJSAgIiYeHiAYFxweIx8dHh4gHx8eGRsdJh4hIB4aHh8gGxwgHiMiIB4dGBchIyEiISIeHhsdHR8jGhsgHxsiFh4eFyEnHx8dIR4fHyUiISAfGiAiHBsZGR8fGyYdGx4bGhwgFxocIyQhIh8bHB4cHxsdIBobHCAcIiMcGRocHxgWFiIiHyIeHhsiICIpJyAiIB4hHB4fIB8fHCIgJx8jJyYkJCYlISEjIyIjIB4gIiEiHR0fJyMcIiIkGRgdHhkeIiEWHhsWGhocHSEgHB0ZHiAgHx4gIR8cISMaHRsbGBYbGxYYHh4iGhcZHR8kIiMiHx8fIh0eIB4eHiEiIhkYFyAiIR8lJSUeIBgaIBweIR8jIiAaHhsiKRsaHh4dJyUlGhwgGxwjIyMgHR4aHBghICcmIiQlJB4dHyAcHiMhIiQkJycgIhwfHiQiIiQiIB0cHh0bHyAdHh4gIh4cICIkJyEZHRwbGyUjJCMfICIjJiMkICEeGBggHyQlJSIbHiMoJyAfHx4hICIfHh0WGRkfGxkbHR4cGxweHCAgGx4eHSIgIB4cHR4fHh4eHhwbHiUeHCAhGhccJSQnIx4mJR0gISAgISIkJSclJSgkIB4gGx8dISEiJR4gICQiIiAeISAhHiIeIRkdIBgZGRkcGhwbJBgnJSAiIyIdHBodIyIiJCUiICApHRsaHhsfGCQlJhkeISIeGBseHh8bGCcbHiAhGx8eICAXGRsgIhscHiIjIyIhHyQfGR4dHx0eICAgGRsYHBogICAdHR4bIB8fFx8eHiIiGxsdHiUgICAZGBocHh4fIiYnKScoJycfICMkJCAeGxgYICAeHRwYHiAfIiMgJSMfHh4bIB8iJSAgIBwgHB0cHBodHh4iGxoeHyEbHBsdGyIhIyMhJiAcHR4gISMiIhskIyImJyAcHyMgICAeIB4cFhseIyUgIiMfISAeHyAdHSIeGRweICYnHBwhIyYdGyIdGx8hGx0eHhwcHx8fHh4gIB4bHR4jIx0dJCUiHx8nIR4eIB8aHyAgHh8fISMeHyAiHiEZFxcZGRgbHh4dJyAgIR8bGxkhIiUgHyAhIiEmJyQgJCclJSQgIiIgGx0gIh8fIiIbGB4YIB4nJykmGhsaHCUgISEhIiIjJBsaGhgZGx8fHyAfHSAhGBgYIiUiIiIhIiIaHSIiIyMkIiAZGRocIR0jJiAhIB8cISMhJx8cHR4lHyEiHR4iIiImJSUgGikbIB8fICAbGRsfHB0cHBoZGhoeICEgGx4bIB4eHh4eHiMjICIkIhocISMpGyAkHRwdHBwdJSAgHh4dIB0gHxsZGB0dJiAgFhocGhgiHyQlIiEhHR4eIBskHBoeIBgdHhseHB8eICEgGxshIiIkJR8eHRkcGyAjJBkaGyEaHyEhHyEgKB8gHCAkIhwhIR8ZGxsdHh4cHiAnIiEeHh4gHyEeHB4eICEeHyAcHx4iHBoaGx0eIh0bIB8jICMgIBkbGxokKCUiIh0dHh8ZHiInHhggIiYlIiAgHyAiHhsaGx0dHh4ZGh4ZIh8eHiEhHh4fHR4YJSQfIRseHyEgGh4cIyIiGRofICEiIBYiJSAdHR8hISAcHx4dJCYfHh4hJCkiISYhHyAeHx8hHx4eGxwcHB4gHh0cHR4bHBweJykeIiMgGRoXGB4eHx8fHx4gHxoaGx4mJSQnIB0bIB8gIyMkJCEcGxoaISMjHCEgISEgIx4eIBYeHCIhGBkgICIgHRsYIiMfJychHyEgHhgcGR0aHyEiJSYoHiQlKCQfGxwdGR0eGxgZHB0iIiAWIBgZGh0bICUgHB8dHBocKCcjIh8dIh4fHiIiHiMeIiAdGx0cGB0dHiIjIh4cHx8gHh0dGyImJSQfHiIgHh8eIxsdHyAgJiUjJCcjGx4fISQfHh4eGyEgIBseHiIgICIgJSkfIx8eHh4nJyElJRwcGSIbGCInHiIdHx4gIiIlIiIfHyIgISIcHh0cISIhJSIkICEhHRwZICInIyMhICYiFhseGx0iJyknHx4iIiAiHBseHB0gHSIeJRkiJiYfHB8jJxsWGxshJh8eHx8gHh4WGR4jJR8fHBgdIBofIh4eHR0cHh8eHh8nJyIkISEcHSEiHyEeHSEfGSEfGx4WGxgbHB4hFxgdHyAiICAcHR0gIR4cGyEgGBgjIyEiJCIhIB8gJSIfIB4cGh0aGxsbGx0aGxocGx4eHR0dISEbHBseHx8gIiYfHSAeIBYWHSMkJR0dHh4fHBwcJCQmIyAiICAgJh4eHiAfJSEmGxsbGx0fGyMgIiclJCQlISEcHRweISAgHCAfHBsdHiYnJR8XIBwZHSAdHh4kJCEcJyAYIBwbFx4kISMjJCIhIB0dHiEeHR8iIiAfIR8gHh4kJCAhHSIjIiEeHRseJCIjJCAeIx8lHB8jISIiIyMhIiEiJiUiHiIkISQiICIiIyQnJyclJSYkIBseIR4bHyEgGCEgHBsbHh0fHR4aICcpIiEjJBsYGhwbHSAfHBsgISAeIB0fIiMcJCIbGyMkIiEfIyMnIx8iJCMgIB4eGhgYIBocHxoaGiAiIh0iHyAiHB4eGx4cGhkYGhsdHhsfISIkGxseJycnICAeIiEhHSAdGx0cIiUgISUlHhogIh8fHh8bHx4bGR8hHR0YJCQjIyIgIBsfHx4lIiEgHx8eISAfGRwcICAcGx0hISAeGhogHx8dHx0eHSQdHhkeHiEhICIjIyMhIyMkHh0jISIiIh4eHh4eJh4cHiIlHxkbHyknIB8aGx8nJSAdGx0eHR4eIh8cGxseHh4dHR0WGB4bHSYkICMhGxkZGxsiIh4eGyckGRopIR4YJSciHR4bGxsjHx8gICEgIB4cGhseJRohIiMgIh4cGh4fIh8dHh8eHR4gHhsdHx8dIBsgJSMkIiAfGx8eGxcdIB0eGCAiIiEiJCckIiAkKR8iHyAeHh8fHhsbIB4hJxoeHyAcICAeHhoeGyAaICMiIRkbGx8dHBsbGx8XGSYlIh0YHhseISEhIiMjICAeHR4bHiIkJSAhIB8eGBseHyYjIiQiHRYZHCYmICgiIBobIB8mJyAfIB4bGxwdGhsfHSYoIxgjIiAcGB0bGyIYHiIiHh4gJSYcHR4eHB0fHx8gHyQbHhogICQlJSIkJyUeICAjIBwhJB8eJSIkJSUiHxwcHR4ZHyEiHB4iISQnHykmICQeHyIkIiEdHR4cGhwgICQiICAfHCAeHx4cHB0gJx4iGxwdICAfHR0jJiQhHx4bJyUhIiQiJCIiIiQmISIiHiQbHCEeIh0bJSAjISEiIR4iIBYbGh0jGxsdHRwhHx4fICYlIiUiISUgGxkeICYbHCgfHhggIyIiIyIpGBkbHhsdHSIjIxwYGR0cJCMhICAhIiMgHSIeGBgeIhsaGyAhIyEfGSIaIicmHhwaGx4hHSAeJx0eFiEgGBceIh4bHhoiICEdJRogJx8hHxsZGhodHSEkIiIcICciIygiIiIeIiAeIBgYICAgHB0fHxseIiciIyIeHBsbHiAhHh4eISckIyAhIR8fGyApHh4gGx4hIiIjIyQiHR0dHiclGhskJyMcHhwYGiAeHR8cHyAgJCIfICMXHhgWHhonHh4iHiAfIiEgIB4kIiEfHyEfHh0iICAiIhgeHxoYHiAiIx4dHhciJyYhIiAgGyAmJignJCQdHyEhIycgGCQjIB0eIB0kJCQbGhkcHB4gICEgIB4hIB8eHCEiISAjIyUeHh8eHhsgIBweHR0bHhkaGiEYGyEiIyEfGyAeHCAiJCIiGx4aGxgcGhsZGiEiJSQgHRgbGxocHR4bGx4eGhweGx0aGRwbGxYYHh4eIiEhHSMgIicnKRsgJCQpIygkHxghIiIiHiIiIBkaHSEnJyUiICAiHCMhISAgIBkYFxgWIiciJRwcIB0dHB0cGyIeIB0cHx0dHCUkIiAfHB4cHxwdHxkmFhgpHx0fIB0eICEcHhwdHx8gJSQfHyEeHhgYHSAfHBwcHBwdGx8iIB8dHB8fGBcfHiAkHB4dICAgIyAcHiAXIiEcHB0hHh0fHyEgHxcWHB0lGh0fIBkeIR8hIiAgGx8gGRYcHhgYHh4gIB0eHiEiJxYeHyAgIR4dIiQiIyMeIB8eISAcICAkIyMhIx8fHh8gHSAeIRoaHCcYIiIgHx0cHRsbISAfIiQmHxsfJSQgHx4bHyAfJycmHB8hGRgYICAfIhwfHiAhHyAgIyMiKB4iICIiIyIeHx4ZHyIYGCAfHyAnHiAfHh4dGxspICAgICAfHxwZGx4gJSMdHBoeIBYiHR4iHiAgHR8cHiEiIiMgISEiIiEeHB8gISAkIBseHBwbIBsdIB4jICEjISgiHhsdJicdGxYbIiQjIyIhIB8gHh8cGyAdHx0dGxwbGBkbHiAdHBweHB0cGB4gHyAgHyMgHR0pIB0cIBsjIRodGx4fISAfIyMmISEiISYcHRwhISAhJBgjJyUpJSMiGxwcJCIhHx8dHRwbGyAeJiEcGx4bHx4eHSEiHB4eIB8aGyIiIB4hJBsaGhoeHx0YGx4fHyQeGxkfJxscGSQhJiAYGBsoICAeHhYiISYnIx8bGxgcHCAbHh8fHR8kGhwbHhwbHBwiISUiIiInGxwZGx4dHhsbHRgZGhoYGRgYHhwdHhkaHiAbGxYYHRwaHh0fIh0dHRwbGycmHyUgIBgaGRwiICAbHSAgIh8fIBsfICMgHxsfHR0bHyEcHRgjIyAcGxsaJyYhHiEiISMgISQfGyAiIiMkJCIgIR4eHR4eJSEkIh4bFhYaHBsbFhobHh0fHx0hHh8aHBobIB4eFxoZHRscJR4cGxscJB0gFicgICAiIR4gIiIfHyIiHRwdGRsbHSIhICAhISAgHx4fIR8iIyUmISQhISEhIBoZICAhHCIfHhsiIiIfHBgbIB0cISAcHh4jIiElIh4kIh4fIyQlIyMgIyAgHCIgIiImIyIpJCUhJR8hJCQiIyEeGxsYHB4hJR8ZHB4dHR8fHh8cJCIeHx0iHSAfHhgkISAhHyYhIBwdHhweHyAeICEjIR8gHh0hISImJCQgHyAdHhwdHxsYHBgZHRgiJycgGRgfHh0bHh4eKCcbGRgnKCMhICIjIigYHCEiIh4dHR0gIB4hIB0gIyIiIh0eIyMiIx4eIB0kGx4aGB8fGhojIiAcHBsdICEjIx4fHiEhHhsgGCAeHSIkJR0cHyAhISAkJBsdISImHxsgHB4hIiIiHB4XGhwgIh8gHBoaGxweIBwcGhscICAcHB4fHxwbHyUkHRwfHRkbHyAjHh4eHx8fGh4fIh0gHCAhICEnJScnIx8gIR4eHyAgISIfIB0cHiMjHx0eHCAlHh0ZGB8bHRweHRscFyIkJx8cHx0bIB8iIyQkHyIbGBweHR4eHhYiIh4cHB4bHR0eICIfISIhIiQiGx0eJiYfIB0kIyUnJyQeHh4WKSgpIiAfHx8dGx0YHR8iICEgICAlICIjIh4eGhsmICMgHyAdIx0eISIYGx0hHCMeHiAdHB4bGB4cHBweICAdHR4fHiAgICEcJSUkJiUiJCYkIB8gJCIkFh4fISEfISAjHB8cHyAfICAlGx8jIxseHyAjIyIlJhscGyEgISMkHhoZIBwZHiAgIB4fHx0dGxsbHRoeGBkjIhshHhwdHRgWFxgdHSAeGxwcGRshJh8bHRgYGB0cIiIhIxYYHB4ZGx8dHB0hIB4eHR4gHh4dHR4bGxwgHhoeHiEgHCEgHh4bGR0cHyInICIhGh8gGBgWGRsbHiEfGRsgISMdGCcmIh8dIB4dGRoaGh0eHh4eHyEmJiciIiQjJSUjIx4eHyIkJCEgIiYnIxweHh4fIiIgICMiJCIiIh0dIiUnHxokHRgWGh8fGxsaHRwiJB4eIRkdICYlKCEhHSAeHyQhGRYkJSQdIB0jJR0gHx0eISYjIh4oIiAjJyMiJCcjJCAlJBcYGR8gICEgICMkIyMiISEgIiIkISIeHicaGxkbHBweIR4jHh4cICAaICAjIiAnGx4iHyAgHR0nJR0dGh0gHiIhISAeHSIgHiMjIiIhIyIjICEjJB8dHR4gGyEiISIjIR4eGBgWGxodHh8hISEeJCMiISEdHR4fHR0fIiIgIBYaHyAfIiEgGxocHyccGBobHB4eHBwbGRkeIiIhIiAfISAfIRwXGRseHh0bGx0dIB4hIiEeHx8fHR4gHxwfHRwkJh8fGBofJSAXHSAiJyMYGR4hIB8kJCEdHBoaIh4iHiAjHyQlIBohIB4bHx4eIiUjIx4gHx0bKSgmKR4kJxkgIiEfHyEdGxsfIh8iHyMcHRwfHiEfIiIcHh0gGR0gGBgjJSQhHxsdIh0eHRwcHCAdHiAXGB0mIyAiJCAkJR4gHxwaISEgIRkWIB8eIiAjIh8bGRsWFiAgIB4dIBgXGiMiJh8eHiMjICEhHyAgJyUkIR4hICIgIB8iJh8fKSQoJiQjHx0pIiAZGhYiJyYnHh4dHicWGiEdGxwkFhYbHB8WGBspJyEfGh0eICEhIyUfHRoZIyUhISIaHyAhIB8WGhsgISAgHhkYHh0cHR0fIB4eHyIiGyAnHh4gHBscHBwcHR4gHx4eHRwfHR4iIhgYIRsgISEYHBsdGR4nJB8eHh0cGRkaICQmHiEmIB4jKSchIBsWGR4hHCEfIyMiIhsmJSUgIiUgIycbHiAfHx4dHBseIiYlIh4eHx8gIyEiJCAjHR0fJB4eHR4eIh0bIR4hHBgbGhsbHx4hIB4fIB4bICMkGhscGhgcHh0eICEhHRwdIBoeFh0cICEhISUnJycdHBsYIiIpIiIhIyIlGRgbIh4YHSAiKSInJyclIBodFx4eHigpJx0iIx0hGxobGx4YGB4gIB4gIB8fGx4eHhoZHR4bGxwcGSAbGRsjIR4bHiImIx4eICMgICAgHhoZGyEiJSEeIiIkGxscHR0gJCQiJCUiICIgGyIaHRsbHB0eIB4kJSQjISAbHSYmHh0fHxwcGhsmJSIcHiEhICEiGx0fIiUkIiAZIiEZIiQnJx4bFxwXGyAgIiAgICghIB4gISEeICAeISAgIhwdIh4bGhsZHh0nHxwaGhwgISUlIh4gHyAeISAcHCAnGx4dHB0hIiIjJichHyAkJygeHCAkIR4eHBwcHRwbGx0dHx0eGBweJyAiIB4eHR4bGSAeIB0iJCEmIiIeGxwcJSAgICIgISEnKSMiIhwdHiEfGxskICIcHh4jIyEhHh8dHyIfIh0eHx8jIBoYFyYhHiIfGBsmIBcfHiEdHhwfJSAeHBsfIR8eHB4fHyAhJiMjGx4fHyIkHSEcFxohIyIaHBocGhkpKSckIRwbGR0dHR4dIB8hISEhHiMmHh8fHBwbHSIYHx0eHSIZICAcHBsbHhocHiEhICggHxgbGhsmHR0eHh8cHyMhHyAhIR8cGh4bISAcIRwcHh8iICQiHSAgHiEfHCIeIRwgHBoYGx4bGx8fIyIfGxsgISUmJBsmIiEbHhwcIB8gHhsbIh8eHx4cHx0kIh4dHRsdIicoFxcYISEfHxwfIB4gISMlICAhIyAdHhwjHSAfICYlIhkgHR8hHCAgHh4iISUgICAeHyMhHx4jJhoeISEaIB8gIBcbGx4dHR4gHiAfGRsfIhskIB4nJSUdHRwcIBsdGBYWGB8eHBwcHB4fHiIhHhgaISIiIRonIyYeHyIkIx4eHx8bHSAgIR4gIBgdHRgYIiAfIiIjJiApJyUgICcnIBoZISAkIyIhISIkIh4aFyIbGhcaGB4gHB4eHR4dHiEhJycmHiAfGRkeHyAdGxoeHBseICEYHhgjJR8gIR4eHx4hJCEiJiAhGhoYFiAdGhkbJyIhHhcgJScgHSEgGhYYHR0bHB4hJicjJSAeHhsdGx0dISEeHh4fHiIfHh8fIh4jIyQgGhwhISEhHh4fHhYWGBgWHRwdGyAeICEiJyUlJRsfICAhJSIgHiAjIR4gHRsYHR8mICQjIhwYGx4eIiMfGx4cIR0gHx4YHB4gIyUhISEgIR4fHyAfICQnHSEhIyMjJCUjICEeHSEhIyEgHyAmHx4gGxgbFxcaIBwaFh0eGBkaHR8eHxoeIRsZHh4hIhgYHx8dIB8eIiEgGxwbHxobIiMmGxYcIh8cHiAgIyMlIBoeIBweHB8kIiQnJCEgHiEhISIgIB8eHx4fHxsdHh8fISMjIh4gIB8iHx8hHh8fIB0cICUmICUbICAeIiAjIyIgGxwdHBwfICEhHh8eHyIgICQkJR8gHBwgHyIiIiMfJB0bHh4kICAgGx0eHhsXHh4eICMfHB8eHyIhICAgGhsoJiUdGxwbGxogIiMgIiEgHSAhIB4dHx8cGyAgHx4dHiIhHh0YGxwlJhsgIiMdHyAbHSAgIiIhIx8fHyAoHhwhISEfGSAcHh0lIB4dIB4ZGiIfISAfIBYeJh0nJSIeHx0eHyEhJSUjJScpICAiIiInJSIcJCImJyAlJBwYHRwdHyEmIyMjJSUgHh8jKCgkJSIeHhkaHBsgISQgHiEhICEdHRscJSYhIiUaHhoYGhgfIyQeIiEkKSIfIR4eHBwdIiMmJyIgGCcnIiIgICAiHh4iIyMiJCIkHiIZHRopJSQmJiEfIiEiIR4aIRweICEhFhYjJyIeGh8lJiUjHiMmIiAnKBseIiQiHBsYGyIjICYkIxsaJCEdJCAiJB4eHBwcHB0gISIeIiEiISIeHx4bGhgeHBkYGxseIh8eJB8gJSUjJCcfGhkgJCUkJicnJychHiEiJCcgIichHh8gHhchKBwcHxwYIBskIB4bJCQiIiAdGxsdICAdGBsiHyAeHhsYICcnHh4cGxsiIyEiIBobHR4cHSAdISIhHRweHh8cHiAhKCIcHx0cISAlIiIkJyYkJyUgICEjHh0iIiAlJiMgHRwgJhogHhwaGx8gJiQoJxoZKSYnISYiGyAgHh4cHR0gISEbGBkYISMmHhwcICcjHiIcJigjJyMYIRsYHB4eJSAhIyIjJB0fIBkaIh8fHh0cGRkaGyEhHyAgJCUbGxsmICEhHiAeHRkeGRskHh8pIB8mIyciHx0eIB0dHR0lJCMkICAjHR4eHhwhJx8eHh0YGxwkJR4gIR8gIB4fHSAgHyIjIyEgKCUeHB0iIygZHRsaHyAiIRwbISMcICUjIiEfHh4fHyAiHhscHSAbGxskISAgIBsaGB4gIB0bHB8hHBwgISQbIRseISAlHRsbHyEhJCIgGSAdGx8hHiAeIiUmHxwdGxgYIh4eHR0eGSEiIR8cGx8eGx4XFyUiIiEiIB8iJR8dGxkaHh8iHyAgIyAfHx8eICIcGyQgHR4dGxseGxogICEgIB4nKSkpIiMfGxgdHCEgIyUhHx4nJicbIB4eICIiIiIkGyAhIRsZGBoZGBsYICAgISEgISEgHiAhGh0iIiIhHyEjIRceHh8WGBoaHhsiIR0YHiEgIB4gICAiISIgHiAbHiIfHSAiGyAnHSAhHyAgHh4cGxseISEdHR0fHRscGCEeJSQbHxwgHh4dGx4fHh4bIh4gJSUiIB4bGx0eJCQgIR0fICMlJiUjICAfJhspHhgbHhwdGyAdHRsaFxYdHyEkIh4aHyMhIiEgGh4eIh4fJyIdGBYYGBgcGx8jIyAYHCAeISIiHh4iHiAcGhseGyQmIyAfHiIiIyAZGRkaHB0eKCImJxsdHSIhHiEfHR4gHSAgIyMhHCAcHhknJSMhGxgbGx0bGRscHiAgIiQfHSIjHRwdIR8dHBseHhseISknKR0dGhkaHB0bHBwdIiYgJyIiJh8oHhsmISAcIB4lIyYgIR4hIB4bGx8bHR4gHiEhIiM="},"xaxis":"x","yaxis":"y","type":"histogram"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Delivery Time (Minutes)"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Orders Count"}},"legend":{"tracegroupgap":0},"margin":{"t":20,"l":20,"r":20,"b":20},"barmode":"relative","shapes":[{"line":{"color":"#EF4444","dash":"dash"},"type":"line","x0":30,"x1":30,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"annotations":[{"showarrow":false,"text":"30m Benchmark","x":30,"xanchor":"left","xref":"x","y":1,"yanchor":"top","yref":"y domain"}]},                        {"responsive": true}                    )                };            </script>        </div>
+
+                    <!-- Day Type Comparison -->
+                    <div class="col-12 col-lg-6">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-calendar-week text-danger"></i>
+                                    Weekday vs Weekend Volume & Spend
+                                </div>
+                            </div>
+                            <div id="chartDayType" style="min-height: 360px; width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Top 10 Restaurants Leaderboard -->
+                    <div class="col-12">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-store text-primary"></i>
+                                    Top 10 Performing Restaurants by Revenue
+                                </div>
+                            </div>
+                            <div id="chartRestaurants" style="min-height: 400px; width: 100%;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ROW 3: DETAILED TABLES & HOURLY ACTIVITY -->
-        <div class="row g-4 mb-4">
-            <!-- Hourly Curve -->
-            <div class="col-xl-6">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-clock text-info"></i>
-                        Hourly Order Density (24-Hour Cycle)
+            <!-- TAB 3: DISHES & MENU -->
+            <div class="tab-pane fade" id="tab-dishes">
+                <div class="row g-4">
+                    <!-- Top Dishes Bar -->
+                    <div class="col-12 col-xl-8">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-fire text-danger"></i>
+                                    Top 12 Most Ordered Dishes (Units Sold)
+                                </div>
+                                <span class="badge bg-light text-dark border">Dynamically filters by Cuisine</span>
+                            </div>
+                            <div id="chartDishes" style="min-height: 420px; width: 100%;"></div>
+                        </div>
                     </div>
-                    <div>                            <div id="ac4a919e-8dcb-4e3a-b8ac-883809eddf9a" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("ac4a919e-8dcb-4e3a-b8ac-883809eddf9a")) {                    Plotly.newPlot(                        "ac4a919e-8dcb-4e3a-b8ac-883809eddf9a",                        [{"fillpattern":{"shape":""},"hovertemplate":"Hour of Day (0-23)=%{x}\u003cbr\u003eOrder Count=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"","line":{"color":"#6366F1"},"marker":{"symbol":"circle"},"mode":"lines","name":"","orientation":"v","showlegend":false,"stackgroup":"1","x":{"dtype":"i1","bdata":"AAECAwQFBgcICQoLDA0ODxAREhMUFQ=="},"xaxis":"x","y":{"dtype":"i2","bdata":"XgeQB7QHxwfqB5oHsQemBwQIkgdUB4sHzAesB8YHdwd1B64H2weMB9cHnwc="},"yaxis":"y","type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Hour of Day (0-23)"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Order Count"}},"legend":{"tracegroupgap":0},"margin":{"t":20,"l":20,"r":20,"b":20}},                        {"responsive": true}                    )                };            </script>        </div>
+
+                    <!-- Veg vs Non-Veg Share -->
+                    <div class="col-12 col-xl-4">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-leaf text-success"></i>
+                                    Dietary Split (Veg vs Non-Veg)
+                                </div>
+                            </div>
+                            <div id="chartDietary" style="min-height: 420px; width: 100%;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Top Drivers Leaderboard -->
-            <div class="col-xl-6">
-                <div class="chart-card">
-                    <div class="section-header">
-                        <i class="fas fa-medal text-warning"></i>
-                        Top Rated Drivers Fleet (Min 50 Deliveries)
+            <!-- TAB 4: DELIVERY & LOGISTICS -->
+            <div class="tab-pane fade" id="tab-delivery">
+                <div class="row g-4">
+                    <!-- SLA Pie -->
+                    <div class="col-12 col-lg-5">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-stopwatch text-success"></i>
+                                    Delivery SLA Compliance
+                                </div>
+                            </div>
+                            <div id="chartDeliverySLA" style="min-height: 360px; width: 100%;"></div>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
+
+                    <!-- Top Drivers Table -->
+                    <div class="col-12 col-lg-7">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <i class="fas fa-medal text-warning"></i>
+                                    Top Rated Courier Fleet (Rating &gt;= 3.7 & Min 50 Orders)
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                                <table class="table table-hover table-custom align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Courier Name</th>
+                                            <th>Orders Fulfilled</th>
+                                            <th>Avg Rating</th>
+                                            <th>Avg Speed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="driverTableBody">
+                                        <!-- Dynamically Populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: DATA EXPLORER -->
+            <div class="tab-pane fade" id="tab-table">
+                <div class="chart-box">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+                        <div class="chart-title">
+                            <i class="fas fa-magnifying-glass text-primary"></i>
+                            Live Searchable Restaurant & Menu Records
+                        </div>
+                        <div style="min-width: 280px;">
+                            <input type="text" id="tableSearchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="Search restaurant, dish, or cuisine...">
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                        <table class="table table-hover table-custom align-middle mb-0">
+                            <thead>
                                 <tr>
-                                    <th>Driver Name</th>
+                                    <th>Restaurant Name</th>
+                                    <th>Cuisine</th>
                                     <th>Orders Completed</th>
-                                    <th>Avg Rating</th>
+                                    <th>Total Revenue</th>
+                                    <th>Average Ticket</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-        <td><strong>Brandon Luft</strong></td>
-        <td><span class="badge bg-primary rounded-pill">159 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.86</span></td>
-    </tr><tr>
-        <td><strong>Jeffrey Barton</strong></td>
-        <td><span class="badge bg-primary rounded-pill">163 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.85</span></td>
-    </tr><tr>
-        <td><strong>Harold Kallas</strong></td>
-        <td><span class="badge bg-primary rounded-pill">182 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.82</span></td>
-    </tr><tr>
-        <td><strong>Nicole Jeffrey</strong></td>
-        <td><span class="badge bg-primary rounded-pill">175 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.81</span></td>
-    </tr><tr>
-        <td><strong>Courtney Bauer</strong></td>
-        <td><span class="badge bg-primary rounded-pill">177 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.81</span></td>
-    </tr><tr>
-        <td><strong>Paul Petrie</strong></td>
-        <td><span class="badge bg-primary rounded-pill">179 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.79</span></td>
-    </tr><tr>
-        <td><strong>Constance Lukow</strong></td>
-        <td><span class="badge bg-primary rounded-pill">180 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.79</span></td>
-    </tr><tr>
-        <td><strong>Gertrude Landry</strong></td>
-        <td><span class="badge bg-primary rounded-pill">152 orders</span></td>
-        <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>3.79</span></td>
-    </tr>
+                            <tbody id="explorerTableBody">
+                                <!-- Populated by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </div> <!-- End tab-content -->
 
         <!-- FOOTER -->
         <footer class="text-center py-4 text-muted small border-top mt-4">
-            <p class="mb-1">FoodHunter BI Dashboard &bull; Built with Python, Pandas, SQLite & Plotly</p>
-            <p class="mb-0">Powered by Antigravity Data Analytics</p>
+            <p class="mb-1 fw-bold">FoodHunter Data Analytics Hub &bull; Powered by Python, Pandas, SQLite & Plotly.js</p>
+            <p class="mb-0">Interactive &bull; Dynamic &bull; Fully Responsive Client-Side BI Platform</p>
         </footer>
 
-    </div>
+    </div> <!-- End container -->
 
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- EMBEDDED REAL DATASET -->
+    <script>
+        const RAW_DATA = {"matrix":[{"month":"2022-06","cuisine":"Chinese","day_type":"Weekday","orders":3043,"revenue":97496.9,"food_total":103402.0,"deliv_fee":8079.5,"discount":13984.6,"avg_deliv":19.2,"fast_deliv":3043,"mod_deliv":0},{"month":"2022-06","cuisine":"Chinese","day_type":"Weekend","orders":1238,"revenue":40893.5,"food_total":43847.0,"deliv_fee":3112.5,"discount":6066.0,"avg_deliv":19.2,"fast_deliv":1238,"mod_deliv":0},{"month":"2022-06","cuisine":"Indian","day_type":"Weekday","orders":1841,"revenue":43355.9,"food_total":42375.0,"deliv_fee":6299.5,"discount":5318.6,"avg_deliv":19.2,"fast_deliv":1841,"mod_deliv":0},{"month":"2022-06","cuisine":"Indian","day_type":"Weekend","orders":747,"revenue":17096.3,"food_total":16531.0,"deliv_fee":2590.5,"discount":2025.2,"avg_deliv":19.1,"fast_deliv":747,"mod_deliv":0},{"month":"2022-06","cuisine":"Italian","day_type":"Weekday","orders":2907,"revenue":71634.8,"food_total":71338.0,"deliv_fee":9784.0,"discount":9487.2,"avg_deliv":19.1,"fast_deliv":2907,"mod_deliv":0},{"month":"2022-06","cuisine":"Italian","day_type":"Weekend","orders":1031,"revenue":25961.4,"food_total":26046.0,"deliv_fee":3424.0,"discount":3508.6,"avg_deliv":19.2,"fast_deliv":1031,"mod_deliv":0},{"month":"2022-06","cuisine":"Thai","day_type":"Weekday","orders":1252,"revenue":38170.1,"food_total":40027.0,"deliv_fee":3658.5,"discount":5515.4,"avg_deliv":19.0,"fast_deliv":1252,"mod_deliv":0},{"month":"2022-06","cuisine":"Thai","day_type":"Weekend","orders":443,"revenue":12968.6,"food_total":13481.0,"deliv_fee":1377.0,"discount":1889.4,"avg_deliv":19.3,"fast_deliv":443,"mod_deliv":0},{"month":"2022-07","cuisine":"Chinese","day_type":"Weekday","orders":2828,"revenue":78507.5,"food_total":80701.0,"deliv_fee":8599.5,"discount":10793.0,"avg_deliv":21.1,"fast_deliv":2796,"mod_deliv":32},{"month":"2022-07","cuisine":"Chinese","day_type":"Weekend","orders":1110,"revenue":30696.5,"food_total":31418.0,"deliv_fee":3384.5,"discount":4106.0,"avg_deliv":21.2,"fast_deliv":1091,"mod_deliv":19},{"month":"2022-07","cuisine":"Indian","day_type":"Weekday","orders":1650,"revenue":46345.2,"food_total":47393.0,"deliv_fee":5025.0,"discount":6072.8,"avg_deliv":21.1,"fast_deliv":1626,"mod_deliv":24},{"month":"2022-07","cuisine":"Indian","day_type":"Weekend","orders":593,"revenue":15650.8,"food_total":15793.0,"deliv_fee":1937.0,"discount":2079.2,"avg_deliv":21.3,"fast_deliv":583,"mod_deliv":10},{"month":"2022-07","cuisine":"Italian","day_type":"Weekday","orders":2482,"revenue":68337.1,"food_total":70171.0,"deliv_fee":7512.5,"discount":9346.4,"avg_deliv":21.1,"fast_deliv":2457,"mod_deliv":25},{"month":"2022-07","cuisine":"Italian","day_type":"Weekend","orders":943,"revenue":26297.1,"food_total":27091.0,"deliv_fee":2803.5,"discount":3597.4,"avg_deliv":21.0,"fast_deliv":935,"mod_deliv":8},{"month":"2022-07","cuisine":"Thai","day_type":"Weekday","orders":1136,"revenue":31803.6,"food_total":32626.0,"deliv_fee":3451.0,"discount":4273.4,"avg_deliv":21.2,"fast_deliv":1121,"mod_deliv":15},{"month":"2022-07","cuisine":"Thai","day_type":"Weekend","orders":402,"revenue":10963.7,"food_total":11163.0,"deliv_fee":1262.5,"discount":1461.8,"avg_deliv":21.2,"fast_deliv":398,"mod_deliv":4},{"month":"2022-08","cuisine":"Chinese","day_type":"Weekday","orders":2648,"revenue":72981.5,"food_total":74724.0,"deliv_fee":8291.5,"discount":10034.0,"avg_deliv":24.2,"fast_deliv":2407,"mod_deliv":241},{"month":"2022-08","cuisine":"Chinese","day_type":"Weekend","orders":976,"revenue":28173.0,"food_total":29374.0,"deliv_fee":2870.0,"discount":4071.0,"avg_deliv":23.9,"fast_deliv":889,"mod_deliv":87},{"month":"2022-08","cuisine":"Indian","day_type":"Weekday","orders":1484,"revenue":42259.6,"food_total":43529.0,"deliv_fee":4606.0,"discount":5875.4,"avg_deliv":24.2,"fast_deliv":1361,"mod_deliv":123},{"month":"2022-08","cuisine":"Indian","day_type":"Weekend","orders":568,"revenue":15755.4,"food_total":16285.0,"deliv_fee":1733.0,"discount":2262.6,"avg_deliv":24.0,"fast_deliv":517,"mod_deliv":51},{"month":"2022-08","cuisine":"Italian","day_type":"Weekday","orders":2243,"revenue":61163.2,"food_total":62367.0,"deliv_fee":6914.0,"discount":8117.8,"avg_deliv":24.1,"fast_deliv":2069,"mod_deliv":174},{"month":"2022-08","cuisine":"Italian","day_type":"Weekend","orders":818,"revenue":23197.3,"food_total":23870.0,"deliv_fee":2421.5,"discount":3094.2,"avg_deliv":24.0,"fast_deliv":747,"mod_deliv":71},{"month":"2022-08","cuisine":"Thai","day_type":"Weekday","orders":1009,"revenue":29181.9,"food_total":30238.0,"deliv_fee":3037.5,"discount":4093.6,"avg_deliv":24.3,"fast_deliv":924,"mod_deliv":85},{"month":"2022-08","cuisine":"Thai","day_type":"Weekend","orders":361,"revenue":10654.0,"food_total":11098.0,"deliv_fee":1150.0,"discount":1594.0,"avg_deliv":24.3,"fast_deliv":333,"mod_deliv":28},{"month":"2022-09","cuisine":"Chinese","day_type":"Weekday","orders":2336,"revenue":65928.6,"food_total":67832.0,"deliv_fee":6950.0,"discount":8853.4,"avg_deliv":31.1,"fast_deliv":763,"mod_deliv":1573},{"month":"2022-09","cuisine":"Chinese","day_type":"Weekend","orders":842,"revenue":23029.6,"food_total":23659.0,"deliv_fee":2608.0,"discount":3237.4,"avg_deliv":31.0,"fast_deliv":261,"mod_deliv":581},{"month":"2022-09","cuisine":"Indian","day_type":"Weekday","orders":1426,"revenue":38910.9,"food_total":39743.0,"deliv_fee":4379.5,"discount":5211.6,"avg_deliv":31.4,"fast_deliv":426,"mod_deliv":1000},{"month":"2022-09","cuisine":"Indian","day_type":"Weekend","orders":476,"revenue":13543.8,"food_total":13943.0,"deliv_fee":1461.0,"discount":1860.2,"avg_deliv":30.6,"fast_deliv":173,"mod_deliv":303},{"month":"2022-09","cuisine":"Italian","day_type":"Weekday","orders":2168,"revenue":57821.0,"food_total":58878.0,"deliv_fee":6723.0,"discount":7780.0,"avg_deliv":31.2,"fast_deliv":681,"mod_deliv":1487},{"month":"2022-09","cuisine":"Italian","day_type":"Weekend","orders":789,"revenue":22291.7,"food_total":23015.0,"deliv_fee":2377.5,"discount":3100.8,"avg_deliv":31.0,"fast_deliv":262,"mod_deliv":527},{"month":"2022-09","cuisine":"Thai","day_type":"Weekday","orders":959,"revenue":26525.3,"food_total":27233.0,"deliv_fee":2933.5,"discount":3641.2,"avg_deliv":31.1,"fast_deliv":298,"mod_deliv":661},{"month":"2022-09","cuisine":"Thai","day_type":"Weekend","orders":369,"revenue":10110.2,"food_total":10336.0,"deliv_fee":1102.0,"discount":1327.8,"avg_deliv":31.3,"fast_deliv":114,"mod_deliv":255}],"hourly":[{"hour":0,"cuisine":"Chinese","orders":657,"revenue":19512.0},{"hour":0,"cuisine":"Indian","orders":372,"revenue":9681.8},{"hour":0,"cuisine":"Italian","orders":590,"revenue":15438.9},{"hour":0,"cuisine":"Thai","orders":267,"revenue":7959.6},{"hour":1,"cuisine":"Chinese","orders":678,"revenue":20421.5},{"hour":1,"cuisine":"Indian","orders":420,"revenue":11069.2},{"hour":1,"cuisine":"Italian","orders":584,"revenue":14715.6},{"hour":1,"cuisine":"Thai","orders":254,"revenue":7133.9},{"hour":2,"cuisine":"Chinese","orders":691,"revenue":19841.1},{"hour":2,"cuisine":"Indian","orders":437,"revenue":11158.7},{"hour":2,"cuisine":"Italian","orders":581,"revenue":16386.5},{"hour":2,"cuisine":"Thai","orders":263,"revenue":7386.6},{"hour":3,"cuisine":"Chinese","orders":714,"revenue":19089.1},{"hour":3,"cuisine":"Indian","orders":407,"revenue":11036.2},{"hour":3,"cuisine":"Italian","orders":606,"revenue":16526.5},{"hour":3,"cuisine":"Thai","orders":264,"revenue":7178.5},{"hour":4,"cuisine":"Chinese","orders":678,"revenue":20118.7},{"hour":4,"cuisine":"Indian","orders":425,"revenue":11173.3},{"hour":4,"cuisine":"Italian","orders":643,"revenue":17149.9},{"hour":4,"cuisine":"Thai","orders":280,"revenue":8836.8},{"hour":5,"cuisine":"Chinese","orders":672,"revenue":19091.6},{"hour":5,"cuisine":"Indian","orders":403,"revenue":11134.5},{"hour":5,"cuisine":"Italian","orders":595,"revenue":15391.0},{"hour":5,"cuisine":"Thai","orders":276,"revenue":7705.4},{"hour":6,"cuisine":"Chinese","orders":670,"revenue":19899.6},{"hour":6,"cuisine":"Indian","orders":402,"revenue":10914.5},{"hour":6,"cuisine":"Italian","orders":616,"revenue":16340.8},{"hour":6,"cuisine":"Thai","orders":281,"revenue":8172.6},{"hour":7,"cuisine":"Chinese","orders":676,"revenue":19770.7},{"hour":7,"cuisine":"Indian","orders":384,"revenue":10136.0},{"hour":7,"cuisine":"Italian","orders":625,"revenue":16709.6},{"hour":7,"cuisine":"Thai","orders":273,"revenue":8016.5},{"hour":8,"cuisine":"Chinese","orders":732,"revenue":21269.4},{"hour":8,"cuisine":"Indian","orders":421,"revenue":11507.0},{"hour":8,"cuisine":"Italian","orders":622,"revenue":16350.4},{"hour":8,"cuisine":"Thai","orders":277,"revenue":7516.6},{"hour":9,"cuisine":"Chinese","orders":684,"revenue":19833.5},{"hour":9,"cuisine":"Indian","orders":382,"revenue":10124.6},{"hour":9,"cuisine":"Italian","orders":619,"revenue":17009.0},{"hour":9,"cuisine":"Thai","orders":253,"revenue":7481.0},{"hour":10,"cuisine":"Chinese","orders":660,"revenue":20106.3},{"hour":10,"cuisine":"Indian","orders":389,"revenue":9630.3},{"hour":10,"cuisine":"Italian","orders":579,"revenue":15678.7},{"hour":10,"cuisine":"Thai","orders":248,"revenue":7244.2},{"hour":11,"cuisine":"Chinese","orders":674,"revenue":19552.7},{"hour":11,"cuisine":"Indian","orders":387,"revenue":10119.7},{"hour":11,"cuisine":"Italian","orders":595,"revenue":15662.6},{"hour":11,"cuisine":"Thai","orders":275,"revenue":8039.6},{"hour":12,"cuisine":"Chinese","orders":698,"revenue":19830.9},{"hour":12,"cuisine":"Indian","orders":385,"revenue":10995.0},{"hour":12,"cuisine":"Italian","orders":621,"revenue":17038.1},{"hour":12,"cuisine":"Thai","orders":292,"revenue":8515.8},{"hour":13,"cuisine":"Chinese","orders":656,"revenue":19318.9},{"hour":13,"cuisine":"Indian","orders":391,"revenue":10515.6},{"hour":13,"cuisine":"Italian","orders":650,"revenue":16907.4},{"hour":13,"cuisine":"Thai","orders":267,"revenue":7678.8},{"hour":14,"cuisine":"Chinese","orders":699,"revenue":21483.4},{"hour":14,"cuisine":"Indian","orders":410,"revenue":11091.1},{"hour":14,"cuisine":"Italian","orders":605,"revenue":15550.6},{"hour":14,"cuisine":"Thai","orders":276,"revenue":8627.0},{"hour":15,"cuisine":"Chinese","orders":712,"revenue":20554.1},{"hour":15,"cuisine":"Indian","orders":360,"revenue":9271.4},{"hour":15,"cuisine":"Italian","orders":580,"revenue":15074.0},{"hour":15,"cuisine":"Thai","orders":259,"revenue":6606.9},{"hour":16,"cuisine":"Chinese","orders":667,"revenue":19389.8},{"hour":16,"cuisine":"Indian","orders":399,"revenue":10907.4},{"hour":16,"cuisine":"Italian","orders":583,"revenue":15118.3},{"hour":16,"cuisine":"Thai","orders":260,"revenue":7561.3},{"hour":17,"cuisine":"Chinese","orders":632,"revenue":19331.3},{"hour":17,"cuisine":"Indian","orders":410,"revenue":10790.4},{"hour":17,"cuisine":"Italian","orders":650,"revenue":17911.6},{"hour":17,"cuisine":"Thai","orders":274,"revenue":7726.9},{"hour":18,"cuisine":"Chinese","orders":713,"revenue":20922.9},{"hour":18,"cuisine":"Indian","orders":416,"revenue":10889.1},{"hour":18,"cuisine":"Italian","orders":610,"revenue":15949.5},{"hour":18,"cuisine":"Thai","orders":272,"revenue":7373.6},{"hour":19,"cuisine":"Chinese","orders":681,"revenue":18263.7},{"hour":19,"cuisine":"Indian","orders":377,"revenue":9985.8},{"hour":19,"cuisine":"Italian","orders":594,"revenue":16029.2},{"hour":19,"cuisine":"Thai","orders":280,"revenue":8495.7},{"hour":20,"cuisine":"Chinese","orders":723,"revenue":22017.4},{"hour":20,"cuisine":"Indian","orders":400,"revenue":10466.3},{"hour":20,"cuisine":"Italian","orders":614,"revenue":16364.4},{"hour":20,"cuisine":"Thai","orders":270,"revenue":7478.1},{"hour":21,"cuisine":"Chinese","orders":654,"revenue":18088.5},{"hour":21,"cuisine":"Indian","orders":408,"revenue":10320.0},{"hour":21,"cuisine":"Italian","orders":619,"revenue":17401.0},{"hour":21,"cuisine":"Thai","orders":270,"revenue":7642.0}],"dishes":[{"name":"Hot and sour soup","cuisine":"Chinese","category":"Non-Veg","qty":2638,"orders":1966},{"name":"Peking duck","cuisine":"Chinese","category":"Non-Veg","qty":2569,"orders":1889},{"name":"Spring rolls","cuisine":"Chinese","category":"Non-Veg","qty":2353,"orders":1749},{"name":"Moo shu pork","cuisine":"Chinese","category":"Non-Veg","qty":1979,"orders":1455},{"name":"Kung Pao chicken","cuisine":"Chinese","category":"Non-Veg","qty":1773,"orders":1310},{"name":"Crab Rangoon","cuisine":"Chinese","category":"Non-Veg","qty":1754,"orders":1301},{"name":"Shrimp fried rice","cuisine":"Chinese","category":"Non-Veg","qty":1487,"orders":1087},{"name":"Dan dan noodles","cuisine":"Chinese","category":"Non-Veg","qty":1464,"orders":1084},{"name":"Korean-style fried chicken","cuisine":"Chinese","category":"Non-Veg","qty":1426,"orders":1083},{"name":"Wonton soup","cuisine":"Chinese","category":"Non-Veg","qty":1413,"orders":1054},{"name":"Vegetable lo mein","cuisine":"Chinese","category":"Vegetarian","qty":1403,"orders":1054},{"name":"Beef and broccoli","cuisine":"Chinese","category":"Non-Veg","qty":1189,"orders":865},{"name":"Pot stickers","cuisine":"Chinese","category":"Non-Veg","qty":1160,"orders":874},{"name":"Dim sum (various types)","cuisine":"Chinese","category":"Non-Veg","qty":1158,"orders":896},{"name":"Butter Chicken","cuisine":"Indian","category":"Non-Veg","qty":896,"orders":663},{"name":"Peshwari Naan","cuisine":"Indian","category":"Vegetarian","qty":895,"orders":650},{"name":"Garlic Naan","cuisine":"Indian","category":"Vegetarian","qty":881,"orders":659},{"name":"Chicken Saagwala","cuisine":"Indian","category":"Non-Veg","qty":864,"orders":639},{"name":"Lamb Biryani","cuisine":"Indian","category":"Non-Veg","qty":860,"orders":661},{"name":"Szechuan chicken","cuisine":"Chinese","category":"Non-Veg","qty":848,"orders":642},{"name":"Lasagna","cuisine":"Italian","category":"Non-Veg","qty":847,"orders":635},{"name":"Peas Pulao","cuisine":"Indian","category":"Vegetarian","qty":846,"orders":613},{"name":"Cozze al vino bianco","cuisine":"Italian","category":"Non-Veg","qty":840,"orders":639},{"name":"Poori","cuisine":"Indian","category":"Vegetarian","qty":830,"orders":608},{"name":"Cannoli","cuisine":"Italian","category":"Vegetarian","qty":801,"orders":600},{"name":"Seafood risotto","cuisine":"Italian","category":"Non-Veg","qty":628,"orders":455},{"name":"Mutton Korma","cuisine":"Indian","category":"Non-Veg","qty":621,"orders":446},{"name":"Egg drop soup","cuisine":"Chinese","category":"Non-Veg","qty":608,"orders":454},{"name":"Palak Paneer","cuisine":"Indian","category":"Vegetarian","qty":608,"orders":446},{"name":"Calzone","cuisine":"Italian","category":"Non-Veg","qty":605,"orders":453},{"name":"Americano","cuisine":"Italian","category":"Non-Veg","qty":600,"orders":436},{"name":"Spuma","cuisine":"Italian","category":"Vegetarian","qty":599,"orders":450},{"name":"Arancini","cuisine":"Italian","category":"Vegetarian","qty":589,"orders":439},{"name":"Gazzosa","cuisine":"Italian","category":"Vegetarian","qty":588,"orders":437},{"name":"Chicken Jalfrezi","cuisine":"Indian","category":"Non-Veg","qty":587,"orders":449},{"name":"Vegetable Pakoras","cuisine":"Indian","category":"Vegetarian","qty":583,"orders":433},{"name":"Bellini","cuisine":"Italian","category":"Vegetarian","qty":570,"orders":418},{"name":"Kashmiri Naan","cuisine":"Indian","category":"Vegetarian","qty":564,"orders":434},{"name":"Laab Ped","cuisine":"Thai","category":"Non-Veg","qty":561,"orders":443},{"name":"Samosa Sandwich","cuisine":"Indian","category":"Vegetarian","qty":560,"orders":432},{"name":"Minestrone soup","cuisine":"Italian","category":"Non-Veg","qty":557,"orders":404},{"name":"Prosciutto pizza","cuisine":"Italian","category":"Non-Veg","qty":555,"orders":421},{"name":"Samosas","cuisine":"Indian","category":"Vegetarian","qty":555,"orders":420},{"name":"Chicken Curry","cuisine":"Indian","category":"Non-Veg","qty":552,"orders":407},{"name":"Frappato","cuisine":"Italian","category":"Non-Veg","qty":547,"orders":402},{"name":"Pepperoni pizza","cuisine":"Italian","category":"Non-Veg","qty":545,"orders":407},{"name":"Keema Naan","cuisine":"Indian","category":"Non-Veg","qty":544,"orders":411},{"name":"Aperol spritz","cuisine":"Italian","category":"Vegetarian","qty":543,"orders":406},{"name":"Shrimp scampi","cuisine":"Italian","category":"Non-Veg","qty":541,"orders":399},{"name":"Chicken piccata","cuisine":"Italian","category":"Non-Veg","qty":537,"orders":410},{"name":"Tom Kha Gai soup","cuisine":"Thai","category":"Non-Veg","qty":537,"orders":420},{"name":"Italian soda","cuisine":"Italian","category":"Vegetarian","qty":534,"orders":404},{"name":"Aloo Paratha","cuisine":"Indian","category":"Vegetarian","qty":532,"orders":423},{"name":"Khao Soi Gai","cuisine":"Thai","category":"Non-Veg","qty":529,"orders":426},{"name":"Chinotto","cuisine":"Italian","category":"Vegetarian","qty":525,"orders":403},{"name":"Pad Sator","cuisine":"Thai","category":"Non-Veg","qty":525,"orders":399},{"name":"Lamb Pulao","cuisine":"Italian","category":"Non-Veg","qty":519,"orders":394},{"name":"Fried calamari","cuisine":"Italian","category":"Non-Veg","qty":339,"orders":253},{"name":"Pasta e fagioli soup","cuisine":"Italian","category":"Non-Veg","qty":338,"orders":240},{"name":"Barbera d'Asti","cuisine":"Italian","category":"Non-Veg","qty":335,"orders":244},{"name":"Fish Tikka Masala","cuisine":"Indian","category":"Non-Veg","qty":330,"orders":236},{"name":"Manhattan","cuisine":"Italian","category":"Non-Veg","qty":329,"orders":241},{"name":"Rogan Josh Kebab","cuisine":"Indian","category":"Non-Veg","qty":324,"orders":232},{"name":"Tiramisu","cuisine":"Italian","category":"Vegetarian","qty":324,"orders":237},{"name":"Shrimp Saagwala","cuisine":"Indian","category":"Non-Veg","qty":323,"orders":231},{"name":"Beef carpaccio","cuisine":"Italian","category":"Non-Veg","qty":322,"orders":227},{"name":"Special Pasta","cuisine":"Italian","category":"Non-Veg","qty":322,"orders":230},{"name":"Lamb Tikka Salad","cuisine":"Indian","category":"Non-Veg","qty":318,"orders":231},{"name":"Nam Tok","cuisine":"Thai","category":"Non-Veg","qty":317,"orders":231},{"name":"Lamb Seekh Kebab","cuisine":"Indian","category":"Non-Veg","qty":316,"orders":232},{"name":"Pasta e fagioli soup","cuisine":"Chinese","category":"Non-Veg","qty":312,"orders":235},{"name":"Butter Naan","cuisine":"Chinese","category":"Vegetarian","qty":311,"orders":231},{"name":"Pad Prik King","cuisine":"Thai","category":"Non-Veg","qty":310,"orders":222},{"name":"Stir-fried basil beef","cuisine":"Thai","category":"Non-Veg","qty":310,"orders":229},{"name":"Lamb Biryani","cuisine":"Italian","category":"Non-Veg","qty":309,"orders":219},{"name":"Margarita","cuisine":"Italian","category":"Non-Veg","qty":309,"orders":226},{"name":"Cappuccino","cuisine":"Italian","category":"Vegetarian","qty":308,"orders":232},{"name":"Chicken Soup","cuisine":"Italian","category":"Non-Veg","qty":308,"orders":229},{"name":"Cosmopolitan","cuisine":"Italian","category":"Vegetarian","qty":308,"orders":225},{"name":"Green curry","cuisine":"Thai","category":"Vegetarian","qty":308,"orders":222},{"name":"Veal Marsala","cuisine":"Italian","category":"Non-Veg","qty":308,"orders":219},{"name":"Chicken Kebab Salad","cuisine":"Indian","category":"Non-Veg","qty":307,"orders":234},{"name":"Falanghina","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":230},{"name":"Italian Wedding Soup","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":233},{"name":"Mulligatawny Soup","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":230},{"name":"Carbonara","cuisine":"Italian","category":"Non-Veg","qty":306,"orders":221},{"name":"Moscato","cuisine":"Italian","category":"Non-Veg","qty":306,"orders":223},{"name":"Gai Yang","cuisine":"Thai","category":"Non-Veg","qty":305,"orders":219},{"name":"Moo shu pork","cuisine":"Italian","category":"Non-Veg","qty":305,"orders":227},{"name":"Paneer Tikka","cuisine":"Indian","category":"Vegetarian","qty":305,"orders":230},{"name":"Coconut Ice Cream","cuisine":"Indian","category":"Vegetarian","qty":303,"orders":221},{"name":"Eggplant parmesan","cuisine":"Italian","category":"Non-Veg","qty":303,"orders":222},{"name":"Kana Moo Krob","cuisine":"Thai","category":"Non-Veg","qty":302,"orders":220},{"name":"Mango Lassi","cuisine":"Indian","category":"Vegetarian","qty":302,"orders":212},{"name":"Margherita pizza","cuisine":"Italian","category":"Vegetarian","qty":302,"orders":218},{"name":"Papadum","cuisine":"Italian","category":"Vegetarian","qty":302,"orders":219},{"name":"Affogato","cuisine":"Italian","category":"Vegetarian","qty":301,"orders":225},{"name":"Chana Masala","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":225},{"name":"Hot chocolate","cuisine":"Italian","category":"Vegetarian","qty":301,"orders":232},{"name":"Naan","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":233},{"name":"Papaya Salad","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":231},{"name":"Taurasi","cuisine":"Italian","category":"Non-Veg","qty":300,"orders":218},{"name":"Barbaresco","cuisine":"Italian","category":"Non-Veg","qty":299,"orders":216},{"name":"Egg rolls","cuisine":"Chinese","category":"Non-Veg","qty":299,"orders":220},{"name":"Kang Massaman","cuisine":"Thai","category":"Non-Veg","qty":298,"orders":219},{"name":"Fiano di Avellino","cuisine":"Italian","category":"Vegetarian","qty":297,"orders":226},{"name":"Mixed Vegetable Salad","cuisine":"Indian","category":"Vegetarian","qty":296,"orders":221},{"name":"Vegetable Jalfrezi","cuisine":"Indian","category":"Vegetarian","qty":295,"orders":229},{"name":"Aloo Gobi","cuisine":"Indian","category":"Vegetarian","qty":294,"orders":224},{"name":"Amarone","cuisine":"Italian","category":"Non-Veg","qty":294,"orders":226},{"name":"Gang Keow Wan Pla","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":218},{"name":"Green papaya salad","cuisine":"Indian","category":"Non-Veg","qty":294,"orders":227},{"name":"Moo Dad Deaw","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":216},{"name":"Panzerotti ","cuisine":"Italian","category":"Vegetarian","qty":294,"orders":213},{"name":"Rad Na noodles","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":212},{"name":"Valpolicella","cuisine":"Italian","category":"Non-Veg","qty":294,"orders":216},{"name":"Hoi Tod","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":217},{"name":"Panang Nuea","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":217},{"name":"Stir-fried pork belly with basil","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":232},{"name":"Piadina","cuisine":"Italian","category":"Non-Veg","qty":292,"orders":231},{"name":"Crying tiger","cuisine":"Thai","category":"Non-Veg","qty":291,"orders":222},{"name":"Pappa al Pomodoro","cuisine":"Italian","category":"Vegetarian","qty":291,"orders":211},{"name":"Chili Chicken","cuisine":"Indian","category":"Non-Veg","qty":290,"orders":214},{"name":"Mutton Biryani","cuisine":"Indian","category":"Non-Veg","qty":290,"orders":211},{"name":"Miang Kham","cuisine":"Thai","category":"Vegetarian","qty":289,"orders":237},{"name":"Jalebi","cuisine":"Indian","category":"Vegetarian","qty":288,"orders":207},{"name":"Khao Soi noodles","cuisine":"Thai","category":"Non-Veg","qty":288,"orders":217},{"name":"Gnocchi","cuisine":"Italian","category":"Vegetarian","qty":287,"orders":215},{"name":"Kachori","cuisine":"Indian","category":"Vegetarian","qty":287,"orders":215},{"name":"Ribollita","cuisine":"Italian","category":"Non-Veg","qty":287,"orders":222},{"name":"Parmigiana di melanzane","cuisine":"Italian","category":"Non-Veg","qty":286,"orders":227},{"name":"Rasgulla","cuisine":"Indian","category":"Vegetarian","qty":286,"orders":224},{"name":"Chicken parmesan","cuisine":"Italian","category":"Non-Veg","qty":285,"orders":212},{"name":"Pad Thai noodles","cuisine":"Thai","category":"Non-Veg","qty":285,"orders":213},{"name":"Pad Kra Pao Moo","cuisine":"Thai","category":"Non-Veg","qty":284,"orders":223},{"name":"Gobi Paratha","cuisine":"Indian","category":"Vegetarian","qty":283,"orders":228},{"name":"Lamb Soup","cuisine":"Indian","category":"Non-Veg","qty":283,"orders":208},{"name":"Pla Too","cuisine":"Thai","category":"Non-Veg","qty":283,"orders":221},{"name":"Peking duck","cuisine":"Italian","category":"Non-Veg","qty":282,"orders":209},{"name":"Focaccia","cuisine":"Italian","category":"Vegetarian","qty":281,"orders":208},{"name":"Pad Kra Pao Talay","cuisine":"Thai","category":"Non-Veg","qty":281,"orders":214},{"name":"Spaghetti with meatballs","cuisine":"Italian","category":"Non-Veg","qty":280,"orders":211},{"name":"Pista Kulfi","cuisine":"Indian","category":"Vegetarian","qty":279,"orders":217},{"name":"Kang Panang","cuisine":"Thai","category":"Non-Veg","qty":278,"orders":213},{"name":"Lamb Seekh Kebab","cuisine":"Chinese","category":"Non-Veg","qty":278,"orders":206},{"name":"Seafood pizza","cuisine":"Italian","category":"Non-Veg","qty":278,"orders":206},{"name":"Shrimp fra diavolo","cuisine":"Italian","category":"Non-Veg","qty":278,"orders":217},{"name":"Tod Man Pla","cuisine":"Thai","category":"Non-Veg","qty":277,"orders":213},{"name":"Tom Yum fried rice","cuisine":"Thai","category":"Non-Veg","qty":277,"orders":210},{"name":"Mooncake","cuisine":"Chinese","category":"Non-Veg","qty":275,"orders":210},{"name":"Thot Man Goong","cuisine":"Thai","category":"Non-Veg","qty":275,"orders":220},{"name":"Vegetable risotto","cuisine":"Italian","category":"Vegetarian","qty":274,"orders":201},{"name":"Zuppa Toscana","cuisine":"Italian","category":"Non-Veg","qty":274,"orders":199},{"name":"Pad Kra Pao","cuisine":"Thai","category":"Non-Veg","qty":272,"orders":201},{"name":"Vermentino","cuisine":"Italian","category":"Vegetarian","qty":272,"orders":214},{"name":"Falooda","cuisine":"Indian","category":"Vegetarian","qty":271,"orders":208},{"name":"Fish Amritsari","cuisine":"Indian","category":"Non-Veg","qty":271,"orders":207},{"name":"Chicken Francese","cuisine":"Italian","category":"Non-Veg","qty":270,"orders":205},{"name":"General Tso's chicken","cuisine":"Chinese","category":"Non-Veg","qty":270,"orders":202},{"name":"Martini","cuisine":"Italian","category":"Non-Veg","qty":269,"orders":210},{"name":"Gai Med Ma Moung","cuisine":"Thai","category":"Non-Veg","qty":265,"orders":182},{"name":"Gang Dang Nuea","cuisine":"Thai","category":"Non-Veg","qty":265,"orders":193},{"name":"Rose Shake","cuisine":"Italian","category":"Vegetarian","qty":265,"orders":200},{"name":"Schiacciata","cuisine":"Italian","category":"Vegetarian","qty":264,"orders":201},{"name":"Tamarind Chutney","cuisine":"Indian","category":"Vegetarian","qty":262,"orders":189},{"name":"Pla Meuk Pad Prik","cuisine":"Thai","category":"Non-Veg","qty":255,"orders":197},{"name":"Stracciatella alla Romana","cuisine":"Italian","category":"Non-Veg","qty":255,"orders":199},{"name":"Brodetto","cuisine":"Italian","category":"Non-Veg","qty":253,"orders":191},{"name":"Lamb Vindaloo","cuisine":"Indian","category":"Non-Veg","qty":253,"orders":193},{"name":"Kuay Teow Nam Tok","cuisine":"Thai","category":"Non-Veg","qty":250,"orders":193},{"name":"Lamb Saagwala","cuisine":"Indian","category":"Non-Veg","qty":250,"orders":185},{"name":"Khao Man Gai","cuisine":"Thai","category":"Non-Veg","qty":249,"orders":181},{"name":"Acquacotta","cuisine":"Italian","category":"Non-Veg","qty":248,"orders":194},{"name":"Prosecco","cuisine":"Italian","category":"Non-Veg","qty":248,"orders":183},{"name":"Pla Muek Yang","cuisine":"Thai","category":"Non-Veg","qty":244,"orders":191},{"name":"Beef Curry","cuisine":"Italian","category":"Non-Veg","qty":243,"orders":172},{"name":"Grilled chicken satay","cuisine":"Thai","category":"Non-Veg","qty":243,"orders":190},{"name":"Lamb Korma","cuisine":"Indian","category":"Non-Veg","qty":238,"orders":181}],"restaurants":[{"name":"Loring Place","cuisine":"Chinese","orders":1268,"revenue":38504.1,"avg_order":30.37},{"name":"Hwa Yuan Szechuan","cuisine":"Thai","orders":1225,"revenue":37696.4,"avg_order":30.77},{"name":"Totto Ramen","cuisine":"Indian","orders":1191,"revenue":33265.8,"avg_order":27.93},{"name":"Rubirosa","cuisine":"Italian","orders":1185,"revenue":31849.5,"avg_order":26.88},{"name":"SriPraPhai","cuisine":"Chinese","orders":991,"revenue":28805.5,"avg_order":29.07},{"name":"Bohemian","cuisine":"Chinese","orders":934,"revenue":26496.6,"avg_order":28.37},{"name":"The Modern","cuisine":"Indian","orders":969,"revenue":26204.8,"avg_order":27.04},{"name":"Adda Indian Canteen","cuisine":"Indian","orders":994,"revenue":25017.8,"avg_order":25.17},{"name":"Jeju Noodle Bar","cuisine":"Chinese","orders":868,"revenue":24793.1,"avg_order":28.56},{"name":"The Slanted Door","cuisine":"Indian","orders":875,"revenue":24083.6,"avg_order":27.52},{"name":"Casa Mono","cuisine":"Chinese","orders":854,"revenue":24027.4,"avg_order":28.14},{"name":"Eataly NYC Flatiron","cuisine":"Italian","orders":922,"revenue":23339.4,"avg_order":25.31},{"name":"Katz's Delicatessen","cuisine":"Italian","orders":773,"revenue":22205.6,"avg_order":28.73},{"name":"Tacombi","cuisine":"Chinese","orders":703,"revenue":21223.6,"avg_order":30.19},{"name":"Diner","cuisine":"Indian","orders":786,"revenue":20547.2,"avg_order":26.14},{"name":"Roberta's","cuisine":"Chinese","orders":724,"revenue":20188.8,"avg_order":27.89},{"name":"Via Carota","cuisine":"Indian","orders":765,"revenue":20096.5,"avg_order":26.27},{"name":"Mimi Cheng's","cuisine":"Chinese","orders":684,"revenue":18471.1,"avg_order":27.0},{"name":"Cote Basque Wine House","cuisine":"Thai","orders":622,"revenue":17771.9,"avg_order":28.57},{"name":"AbcV","cuisine":"Chinese","orders":573,"revenue":17464.5,"avg_order":30.48},{"name":"Marta","cuisine":"Italian","orders":650,"revenue":17247.6,"avg_order":26.53},{"name":"Scarr's Pizza","cuisine":"Thai","orders":546,"revenue":17131.4,"avg_order":31.38},{"name":"Caf\u00e9 China","cuisine":"Chinese","orders":641,"revenue":17062.8,"avg_order":26.62},{"name":"Uncle Boons","cuisine":"Chinese","orders":551,"revenue":16799.9,"avg_order":30.49},{"name":"Russ & Daughters","cuisine":"Indian","orders":618,"revenue":15958.6,"avg_order":25.82},{"name":"Superiority Burger","cuisine":"Chinese","orders":568,"revenue":15836.3,"avg_order":27.88},{"name":"Hao Noodle","cuisine":"Chinese","orders":555,"revenue":15811.1,"avg_order":28.49},{"name":"Nom Wah Tea Parlor","cuisine":"Indian","orders":520,"revenue":15177.0,"avg_order":29.19},{"name":"Bar Pitti","cuisine":"Chinese","orders":530,"revenue":15173.9,"avg_order":28.63},{"name":"Chez Ma Tante","cuisine":"Chinese","orders":399,"revenue":15150.7,"avg_order":37.97},{"name":"Burger Joint","cuisine":"Indian","orders":566,"revenue":14981.9,"avg_order":26.47},{"name":"Raoul's","cuisine":"Indian","orders":569,"revenue":14889.2,"avg_order":26.17},{"name":"El Rey","cuisine":"Italian","orders":526,"revenue":14361.8,"avg_order":27.3},{"name":"Roberta's","cuisine":"Italian","orders":515,"revenue":14209.6,"avg_order":27.59},{"name":"Barbuto","cuisine":"Italian","orders":537,"revenue":13787.2,"avg_order":25.67},{"name":"Hearth","cuisine":"Chinese","orders":500,"revenue":13414.3,"avg_order":26.83},{"name":"Le Bernardin","cuisine":"Italian","orders":513,"revenue":13198.3,"avg_order":25.73},{"name":"Balthazar","cuisine":"Italian","orders":422,"revenue":12858.7,"avg_order":30.47},{"name":"Gotham Bar and Grill","cuisine":"Italian","orders":462,"revenue":12579.2,"avg_order":27.23},{"name":"The Mermaid Inn","cuisine":"Thai","orders":345,"revenue":12078.1,"avg_order":35.01},{"name":"Estela","cuisine":"Thai","orders":469,"revenue":11980.0,"avg_order":25.54},{"name":"Marea","cuisine":"Italian","orders":432,"revenue":11801.8,"avg_order":27.32},{"name":"I Sodi","cuisine":"Thai","orders":466,"revenue":11335.1,"avg_order":24.32},{"name":"Pasquale Jones","cuisine":"Thai","orders":422,"revenue":11304.2,"avg_order":26.79},{"name":"L'Artusi","cuisine":"Italian","orders":422,"revenue":10830.2,"avg_order":25.66},{"name":"Upland","cuisine":"Thai","orders":387,"revenue":10783.9,"avg_order":27.87},{"name":"Osteria Morini","cuisine":"Italian","orders":441,"revenue":10711.6,"avg_order":24.29},{"name":"Cosme","cuisine":"Italian","orders":398,"revenue":10475.8,"avg_order":26.32},{"name":"Via Carota","cuisine":"Italian","orders":343,"revenue":10425.8,"avg_order":30.4},{"name":"Llama Inn","cuisine":"Chinese","orders":296,"revenue":10333.0,"avg_order":34.91},{"name":"Cafe Mogador","cuisine":"Chinese","orders":376,"revenue":10288.1,"avg_order":27.36},{"name":"Jack's Wife Freda","cuisine":"Italian","orders":352,"revenue":10242.4,"avg_order":29.1},{"name":"Balthazar","cuisine":"Chinese","orders":365,"revenue":10022.8,"avg_order":27.46},{"name":"L'Appart","cuisine":"Italian","orders":390,"revenue":9882.7,"avg_order":25.34},{"name":"Don Angie","cuisine":"Italian","orders":380,"revenue":9820.2,"avg_order":25.84},{"name":"Ops","cuisine":"Chinese","orders":276,"revenue":9507.1,"avg_order":34.45},{"name":"Eataly NYC Downtown","cuisine":"Italian","orders":345,"revenue":9031.4,"avg_order":26.18},{"name":"La Newyorkina","cuisine":"Chinese","orders":344,"revenue":9006.4,"avg_order":26.18},{"name":"Lilia","cuisine":"Chinese","orders":368,"revenue":8983.1,"avg_order":24.41},{"name":"Estiatorio Milos","cuisine":"Italian","orders":343,"revenue":8693.1,"avg_order":25.34},{"name":"Llama San","cuisine":"Chinese","orders":295,"revenue":8487.5,"avg_order":28.77},{"name":"Carbone","cuisine":"Chinese","orders":215,"revenue":8409.6,"avg_order":39.11},{"name":"Charlie Bird","cuisine":"Chinese","orders":320,"revenue":8079.4,"avg_order":25.25},{"name":"Babbo Pizzeria e Enoteca","cuisine":"Italian","orders":338,"revenue":8057.1,"avg_order":23.84},{"name":"J.G. Melon","cuisine":"Italian","orders":275,"revenue":7981.3,"avg_order":29.02},{"name":"Cote Korean Steakhouse","cuisine":"Italian","orders":352,"revenue":7772.5,"avg_order":22.08},{"name":"Mission Chinese Food","cuisine":"Chinese","orders":212,"revenue":7754.4,"avg_order":36.58},{"name":"Eleven Madison Park","cuisine":"Chinese","orders":277,"revenue":7746.1,"avg_order":27.96},{"name":"Empellon","cuisine":"Italian","orders":307,"revenue":7745.5,"avg_order":25.23},{"name":"Sushi Inoue","cuisine":"Thai","orders":311,"revenue":7745.5,"avg_order":24.91},{"name":"ABC Kitchen","cuisine":"Indian","orders":318,"revenue":7578.7,"avg_order":23.83},{"name":"Joe's Pizza","cuisine":"Italian","orders":200,"revenue":7437.3,"avg_order":37.19},{"name":"Il Buco","cuisine":"Italian","orders":316,"revenue":7433.3,"avg_order":23.52},{"name":"Chikalicious Dessert Bar","cuisine":"Italian","orders":298,"revenue":7342.3,"avg_order":24.64},{"name":"Sushi Yasuda","cuisine":"Thai","orders":281,"revenue":7329.2,"avg_order":26.08},{"name":"Satsuki","cuisine":"Italian","orders":234,"revenue":6006.6,"avg_order":25.67},{"name":"Xi'an Famous Foods","cuisine":"Chinese","orders":198,"revenue":5919.9,"avg_order":29.9},{"name":"Ippudo","cuisine":"Thai","orders":187,"revenue":5680.1,"avg_order":30.37},{"name":"Frankies 457 Spuntino","cuisine":"Italian","orders":219,"revenue":5657.4,"avg_order":25.83},{"name":"Casa Enrique","cuisine":"Indian","orders":230,"revenue":5589.8,"avg_order":24.3},{"name":"Milk Bar","cuisine":"Indian","orders":201,"revenue":5129.5,"avg_order":25.52},{"name":"Cervo's","cuisine":"Italian","orders":199,"revenue":4896.3,"avg_order":24.6},{"name":"Lobster Club","cuisine":"Thai","orders":104,"revenue":4460.8,"avg_order":42.89},{"name":"Peasant","cuisine":"Indian","orders":183,"revenue":4397.5,"avg_order":24.03},{"name":"Shuka","cuisine":"Thai","orders":162,"revenue":4077.3,"avg_order":25.17},{"name":"Kiki's","cuisine":"Thai","orders":130,"revenue":4076.7,"avg_order":31.36},{"name":"Cote","cuisine":"Chinese","orders":136,"revenue":3946.0,"avg_order":29.01},{"name":"Empire Diner","cuisine":"Italian","orders":94,"revenue":3768.0,"avg_order":40.09},{"name":"Atla","cuisine":"Thai","orders":156,"revenue":3666.2,"avg_order":23.5},{"name":"Santina","cuisine":"Thai","orders":118,"revenue":3260.6,"avg_order":27.63},{"name":"Di Fara Pizza","cuisine":"Italian","orders":98,"revenue":2873.5,"avg_order":29.32},{"name":"Via Carota","cuisine":"Italian","orders":100,"revenue":2180.6,"avg_order":21.81}],"drivers":[{"name":"Brandon Luft","orders":159,"rating":3.86,"avg_mins":22.9},{"name":"Jeffrey Barton","orders":163,"rating":3.85,"avg_mins":23.3},{"name":"Harold Kallas","orders":182,"rating":3.82,"avg_mins":24.0},{"name":"Nicole Jeffrey","orders":175,"rating":3.81,"avg_mins":23.4},{"name":"Courtney Bauer","orders":177,"rating":3.81,"avg_mins":23.5},{"name":"Paul Petrie","orders":179,"rating":3.79,"avg_mins":22.6},{"name":"Constance Lukow","orders":180,"rating":3.79,"avg_mins":22.8},{"name":"Gertrude Landry","orders":152,"rating":3.79,"avg_mins":22.8},{"name":"Stephanie Baisley","orders":162,"rating":3.79,"avg_mins":23.8},{"name":"Gwendolyn Mash","orders":184,"rating":3.78,"avg_mins":23.1},{"name":"Barbara Engelhardt","orders":180,"rating":3.78,"avg_mins":23.3},{"name":"John Cordova","orders":164,"rating":3.77,"avg_mins":23.4}]};
+
+        // Theme Toggle
+        const themeBtn = document.getElementById('themeToggleBtn');
+        let currentTheme = 'light';
+        themeBtn.addEventListener('click', () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', currentTheme);
+            themeBtn.innerHTML = currentTheme === 'dark' 
+                ? '<i class="fas fa-sun me-1"></i> <span class="d-none d-sm-inline">Light Mode</span>' 
+                : '<i class="fas fa-moon me-1"></i> <span class="d-none d-sm-inline">Dark Mode</span>';
+            renderAllCharts();
+        });
+
+        // Filter elements
+        const cuisineSel = document.getElementById('cuisineSelect');
+        const monthSel = document.getElementById('monthSelect');
+        const dayTypeSel = document.getElementById('dayTypeSelect');
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        const exportBtn = document.getElementById('exportCsvBtn');
+        const searchInput = document.getElementById('tableSearchInput');
+
+        // Events
+        cuisineSel.addEventListener('change', updateDashboard);
+        monthSel.addEventListener('change', updateDashboard);
+        dayTypeSel.addEventListener('change', updateDashboard);
+        resetBtn.addEventListener('click', () => {
+            cuisineSel.value = 'ALL';
+            monthSel.value = 'ALL';
+            dayTypeSel.value = 'ALL';
+            updateDashboard();
+        });
+        searchInput.addEventListener('input', filterExplorerTable);
+
+        // Export to CSV
+        exportBtn.addEventListener('click', () => {
+            const filtered = getFilteredMatrix();
+            let csv = "Month,Cuisine,Day_Type,Orders,Revenue,Food_Total,Delivery_Fees,Discounts,Avg_Delivery_Mins\n";
+            filtered.forEach(r => {
+                csv += `${r.month},${r.cuisine},${r.day_type},${r.orders},${r.revenue},${r.food_total},${r.deliv_fee},${r.discount},${r.avg_deliv}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `foodhunter_filtered_data_${Date.now()}.csv`);
+            a.click();
+        });
+
+        function getFilteredMatrix() {
+            const cVal = cuisineSel.value;
+            const mVal = monthSel.value;
+            const dVal = dayTypeSel.value;
+
+            return RAW_DATA.matrix.filter(r => {
+                if (cVal !== 'ALL' && r.cuisine !== cVal) return false;
+                if (mVal !== 'ALL' && r.month !== mVal) return false;
+                if (dVal !== 'ALL' && r.day_type !== dVal) return false;
+                return true;
+            });
+        }
+
+        function getPlotlyTemplate() {
+            return currentTheme === 'dark' ? 'plotly_dark' : 'plotly_white';
+        }
+
+        function updateDashboard() {
+            const data = getFilteredMatrix();
+
+            // Calculate Aggregates
+            let totalRev = 0, totalOrders = 0, foodTot = 0, delivFees = 0, discounts = 0;
+            let fastDeliv = 0, totalDelivCount = 0;
+
+            data.forEach(r => {
+                totalRev += r.revenue;
+                totalOrders += r.orders;
+                foodTot += r.food_total;
+                delivFees += r.deliv_fee;
+                discounts += r.discount;
+                fastDeliv += r.fast_deliv;
+                totalDelivCount += r.orders;
+            });
+
+            const aov = totalOrders > 0 ? (totalRev / totalOrders) : 0;
+            const fastPct = totalDelivCount > 0 ? ((fastDeliv / totalDelivCount) * 100) : 0;
+            const discPct = foodTot > 0 ? ((discounts / foodTot) * 100) : 0;
+
+            // Update KPI DOM
+            document.getElementById('kpiRevenue').innerText = '$' + totalRev.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('kpiOrders').innerText = totalOrders.toLocaleString('en-US');
+            document.getElementById('kpiOrdersSub').innerText = totalOrders.toLocaleString('en-US') + ' orders';
+            document.getElementById('kpiAov').innerText = '$' + aov.toFixed(2);
+            document.getElementById('kpiFoodTotal').innerText = '$' + foodTot.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('kpiDiscountSub').innerText = discPct.toFixed(1) + '% discount share';
+            document.getElementById('kpiFastPct').innerText = fastPct.toFixed(1) + '%';
+            document.getElementById('kpiDelivFees').innerText = '$' + delivFees.toLocaleString('en-US', {maximumFractionDigits: 0});
+
+            renderAllCharts();
+            populateDriversTable();
+            populateExplorerTable();
+        }
+
+        function renderAllCharts() {
+            renderMonthlyChart();
+            renderCuisinePie();
+            renderHourlyChart();
+            renderCuisineBar();
+            renderDayTypeChart();
+            renderRestaurantsChart();
+            renderDishesChart();
+            renderDietaryChart();
+            renderDeliverySLA();
+        }
+
+        // 1. Monthly Chart
+        function renderMonthlyChart() {
+            const filtered = getFilteredMatrix();
+            const months = ['2022-06', '2022-07', '2022-08', '2022-09'];
+            const revMap = {}, ordMap = {};
+            months.forEach(m => { revMap[m] = 0; ordMap[m] = 0; });
+
+            filtered.forEach(r => {
+                if (revMap[r.month] !== undefined) {
+                    revMap[r.month] += r.revenue;
+                    ordMap[r.month] += r.orders;
+                }
+            });
+
+            const xVals = ['June 2022', 'July 2022', 'August 2022', 'September 2022'];
+            const yRev = months.map(m => revMap[m]);
+            const yOrd = months.map(m => ordMap[m]);
+
+            const traceRev = {
+                x: xVals,
+                y: yRev,
+                name: 'Revenue ($)',
+                type: 'bar',
+                marker: { color: '#4F46E5', opacity: 0.9 },
+                text: yRev.map(v => '$' + Math.round(v).toLocaleString()),
+                textposition: 'inside'
+            };
+
+            const traceOrd = {
+                x: xVals,
+                y: yOrd,
+                name: 'Orders Count',
+                type: 'scatter',
+                mode: 'lines+markers+text',
+                yaxis: 'y2',
+                line: { color: '#F59E0B', width: 3 },
+                marker: { size: 8, color: '#F59E0B' },
+                text: yOrd.map(v => v.toLocaleString()),
+                textposition: 'top center'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 40, r: 40, t: 30, b: 40 },
+                legend: { orientation: 'h', y: 1.12, x: 0.5, xanchor: 'center' },
+                yaxis: { title: 'Revenue ($)', showgrid: true },
+                yaxis2: { title: 'Order Volume', overlaying: 'y', side: 'right', showgrid: false },
+                autosize: true
+            };
+
+            Plotly.react('chartMonthly', [traceRev, traceOrd], layout, { responsive: true });
+        }
+
+        // 2. Cuisine Pie
+        function renderCuisinePie() {
+            const filtered = getFilteredMatrix();
+            const cuisMap = {};
+            filtered.forEach(r => {
+                cuisMap[r.cuisine] = (cuisMap[r.cuisine] || 0) + r.revenue;
+            });
+
+            const labels = Object.keys(cuisMap);
+            const values = Object.values(cuisMap);
+
+            const trace = {
+                labels: labels,
+                values: values,
+                type: 'pie',
+                hole: 0.48,
+                marker: { colors: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] },
+                textinfo: 'label+percent',
+                hoverinfo: 'label+value+percent'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 20, r: 20, t: 20, b: 20 },
+                showlegend: false,
+                autosize: true
+            };
+
+            Plotly.react('chartCuisinePie', [trace], layout, { responsive: true });
+        }
+
+        // 3. Hourly Curve
+        function renderHourlyChart() {
+            const cVal = cuisineSel.value;
+            const hourlyMap = new Array(24).fill(0);
+
+            RAW_DATA.hourly.forEach(r => {
+                if (cVal === 'ALL' || r.cuisine === cVal) {
+                    hourlyMap[r.hour] += r.orders;
+                }
+            });
+
+            const hours = Array.from({length: 24}, (_, i) => i + ':00');
+
+            const trace = {
+                x: hours,
+                y: hourlyMap,
+                type: 'scatter',
+                mode: 'lines',
+                fill: 'tozeroy',
+                line: { color: '#6366F1', width: 3 },
+                fillcolor: currentTheme === 'dark' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.12)'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 40, r: 20, t: 20, b: 40 },
+                xaxis: { title: 'Hour of Day (24-Hour Cycle)' },
+                yaxis: { title: 'Orders Placed' },
+                autosize: true
+            };
+
+            Plotly.react('chartHourly', [trace], layout, { responsive: true });
+        }
+
+        // 4. Cuisine AOV Bar
+        function renderCuisineBar() {
+            const filtered = getFilteredMatrix();
+            const cuisRev = {}, cuisOrd = {};
+            filtered.forEach(r => {
+                cuisRev[r.cuisine] = (cuisRev[r.cuisine] || 0) + r.revenue;
+                cuisOrd[r.cuisine] = (cuisOrd[r.cuisine] || 0) + r.orders;
+            });
+
+            const cuisines = Object.keys(cuisRev);
+            const aovs = cuisines.map(c => cuisOrd[c] > 0 ? (cuisRev[c] / cuisOrd[c]) : 0);
+
+            const trace = {
+                x: cuisines,
+                y: aovs,
+                type: 'bar',
+                marker: { color: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] },
+                text: aovs.map(v => '$' + v.toFixed(2)),
+                textposition: 'outside'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 40, r: 20, t: 20, b: 40 },
+                yaxis: { title: 'Average Ticket ($)' },
+                autosize: true
+            };
+
+            Plotly.react('chartCuisineBar', [trace], layout, { responsive: true });
+        }
+
+        // 5. Day Type Comparison
+        function renderDayTypeChart() {
+            const filtered = getFilteredMatrix();
+            let wkRev = 0, weRev = 0;
+            let wkOrd = 0, weOrd = 0;
+
+            filtered.forEach(r => {
+                if (r.day_type === 'Weekday') {
+                    wkRev += r.revenue;
+                    wkOrd += r.orders;
+                } else {
+                    weRev += r.revenue;
+                    weOrd += r.orders;
+                }
+            });
+
+            const trace = {
+                x: ['Weekdays (Mon-Fri)', 'Weekends (Sat-Sun)'],
+                y: [wkRev, weRev],
+                type: 'bar',
+                marker: { color: ['#3B82F6', '#EC4899'] },
+                text: ['$' + Math.round(wkRev).toLocaleString(), '$' + Math.round(weRev).toLocaleString()],
+                textposition: 'inside'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 40, r: 20, t: 20, b: 40 },
+                yaxis: { title: 'Revenue ($)' },
+                autosize: true
+            };
+
+            Plotly.react('chartDayType', [trace], layout, { responsive: true });
+        }
+
+        // 6. Restaurants Chart
+        function renderRestaurantsChart() {
+            const cVal = cuisineSel.value;
+            let list = RAW_DATA.restaurants;
+            if (cVal !== 'ALL') {
+                list = list.filter(r => r.cuisine === cVal);
+            }
+            const top10 = list.slice(0, 10).reverse();
+
+            const trace = {
+                x: top10.map(r => r.revenue),
+                y: top10.map(r => r.name),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#4F46E5' },
+                text: top10.map(r => '$' + Math.round(r.revenue).toLocaleString()),
+                textposition: 'outside'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 160, r: 50, t: 20, b: 40 },
+                xaxis: { title: 'Revenue ($)' },
+                autosize: true
+            };
+
+            Plotly.react('chartRestaurants', [trace], layout, { responsive: true });
+        }
+
+        // 7. Dishes Chart
+        function renderDishesChart() {
+            const cVal = cuisineSel.value;
+            let list = RAW_DATA.dishes;
+            if (cVal !== 'ALL') {
+                list = list.filter(d => d.cuisine === cVal);
+            }
+            const top12 = list.slice(0, 12).reverse();
+
+            const trace = {
+                x: top12.map(d => d.qty),
+                y: top12.map(d => d.name),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#EF4444' },
+                text: top12.map(d => d.qty.toLocaleString() + ' units'),
+                textposition: 'inside'
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 170, r: 40, t: 20, b: 40 },
+                xaxis: { title: 'Units Sold' },
+                autosize: true
+            };
+
+            Plotly.react('chartDishes', [trace], layout, { responsive: true });
+        }
+
+        // 8. Dietary Split Chart
+        function renderDietaryChart() {
+            const cVal = cuisineSel.value;
+            let veg = 0, nonVeg = 0;
+            RAW_DATA.dishes.forEach(d => {
+                if (cVal === 'ALL' || d.cuisine === cVal) {
+                    if (d.category === 'Vegetarian') veg += d.qty;
+                    else nonVeg += d.qty;
+                }
+            });
+
+            const trace = {
+                labels: ['Vegetarian', 'Non-Vegetarian'],
+                values: [veg, nonVeg],
+                type: 'pie',
+                hole: 0.45,
+                marker: { colors: ['#10B981', '#EF4444'] }
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 20, r: 20, t: 20, b: 20 },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.1 },
+                autosize: true
+            };
+
+            Plotly.react('chartDietary', [trace], layout, { responsive: true });
+        }
+
+        // 9. Delivery SLA Chart
+        function renderDeliverySLA() {
+            const filtered = getFilteredMatrix();
+            let fast = 0, mod = 0;
+            filtered.forEach(r => {
+                fast += r.fast_deliv;
+                mod += r.mod_deliv;
+            });
+
+            const trace = {
+                labels: ['Under 30 Mins (Fast)', '30 - 44 Mins (Moderate)'],
+                values: [fast, mod],
+                type: 'pie',
+                hole: 0.5,
+                marker: { colors: ['#10B981', '#F59E0B'] }
+            };
+
+            const layout = {
+                template: getPlotlyTemplate(),
+                margin: { l: 20, r: 20, t: 20, b: 20 },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.1 },
+                autosize: true
+            };
+
+            Plotly.react('chartDeliverySLA', [trace], layout, { responsive: true });
+        }
+
+        // Drivers Table
+        function populateDriversTable() {
+            const body = document.getElementById('driverTableBody');
+            body.innerHTML = RAW_DATA.drivers.map(d => `
+                <tr>
+                    <td><strong>${d.name}</strong></td>
+                    <td><span class="badge bg-primary bg-opacity-10 text-primary">${d.orders} orders</span></td>
+                    <td><span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>${d.rating}</span></td>
+                    <td><span class="text-muted">${d.avg_mins} mins</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Explorer Table
+        function populateExplorerTable() {
+            const cVal = cuisineSel.value;
+            let list = RAW_DATA.restaurants;
+            if (cVal !== 'ALL') {
+                list = list.filter(r => r.cuisine === cVal);
+            }
+
+            const body = document.getElementById('explorerTableBody');
+            body.innerHTML = list.slice(0, 50).map(r => `
+                <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary">${r.cuisine}</span></td>
+                    <td>${r.orders.toLocaleString()}</td>
+                    <td><strong>$${Math.round(r.revenue).toLocaleString()}</strong></td>
+                    <td>$${r.avg_order.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterExplorerTable() {
+            const q = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('#explorerTableBody tr');
+            rows.forEach(r => {
+                const text = r.innerText.toLowerCase();
+                r.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
+
+        // Responsive Resize Handler
+        window.addEventListener('resize', () => {
+            const chartIds = [
+                'chartMonthly', 'chartCuisinePie', 'chartHourly', 
+                'chartCuisineBar', 'chartDayType', 'chartRestaurants', 
+                'chartDishes', 'chartDietary', 'chartDeliverySLA'
+            ];
+            chartIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.data) {
+                    Plotly.Plots.resize(el);
+                }
+            });
+        });
+
+        // Trigger resize on tab switch so charts render with perfect geometry
+        document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', () => {
+                window.dispatchEvent(new Event('resize'));
+            });
+        });
+
+        // Initial Load
+        updateDashboard();
+    </script>
 </body>
 </html>
