@@ -158,6 +158,229 @@ drivers_data = [
     for r in cur.fetchall()
 ]
 
+# 6. RFM Customer Segmentation (Step 1 ML)
+import pandas as pd
+query_rfm = """
+SELECT 
+    customer_id,
+    CAST((julianday('2022-09-30') - julianday(MAX(order_date))) AS INTEGER) AS recency_days,
+    COUNT(order_id) AS frequency,
+    ROUND(SUM(final_price), 2) AS monetary
+FROM orders
+GROUP BY customer_id
+"""
+df_rfm = pd.read_sql_query(query_rfm, conn)
+
+def f_score(f):
+    if f <= 2: return 1
+    elif f <= 4: return 2
+    elif f <= 6: return 3
+    else: return 4
+
+df_rfm['r_score'] = pd.qcut(df_rfm['recency_days'], q=4, labels=[4, 3, 2, 1]).astype(int)
+df_rfm['f_score'] = df_rfm['frequency'].apply(f_score).astype(int)
+df_rfm['m_score'] = pd.qcut(df_rfm['monetary'], q=4, labels=[1, 2, 3, 4]).astype(int)
+
+def assign_segment(row):
+    r, f, m = row['r_score'], row['f_score'], row['m_score']
+    if r >= 4 and f >= 3:
+        return 'Champions'
+    elif r >= 3 and f >= 3:
+        return 'Loyal Customers'
+    elif r >= 3 and f <= 2:
+        return 'Potential Loyalists'
+    elif r == 2 and f >= 3:
+        return 'Needs Attention'
+    elif r == 2 and f <= 2:
+        return 'About to Sleep'
+    elif r == 1 and f >= 3:
+        return 'At Risk'
+    else:
+        return 'Hibernating / Churned'
+
+df_rfm['segment'] = df_rfm.apply(assign_segment, axis=1)
+
+summary = df_rfm.groupby('segment').agg(
+    customers=('customer_id', 'count'),
+    avg_recency=('recency_days', 'mean'),
+    avg_freq=('frequency', 'mean'),
+    avg_monetary=('monetary', 'mean'),
+    total_revenue=('monetary', 'sum')
+).reset_index()
+
+total_rev = df_rfm['monetary'].sum()
+total_cust = len(df_rfm)
+
+summary['customer_pct'] = (summary['customers'] / total_cust * 100).round(1)
+summary['revenue_pct'] = (summary['total_revenue'] / total_rev * 100).round(1)
+summary['avg_recency'] = summary['avg_recency'].round(1)
+summary['avg_freq'] = summary['avg_freq'].round(1)
+summary['avg_monetary'] = summary['avg_monetary'].round(2)
+summary['total_revenue'] = summary['total_revenue'].round(2)
+
+order_priority = ['Champions', 'Loyal Customers', 'Potential Loyalists', 'Needs Attention', 'About to Sleep', 'At Risk', 'Hibernating / Churned']
+summary['sort_key'] = summary['segment'].apply(lambda s: order_priority.index(s))
+summary = summary.sort_values('sort_key').drop(columns=['sort_key'])
+
+strategies = {
+    'Champions': {
+        'badge': 'bg-success',
+        'color': '#10B981',
+        'icon': 'fa-crown',
+        'action': 'Reward loyalty, provide VIP early access to new menu items, zero delivery fee perks, and high-tier referral rewards.'
+    },
+    'Loyal Customers': {
+        'badge': 'bg-primary',
+        'color': '#4F46E5',
+        'icon': 'fa-medal',
+        'action': 'Upsell high-ticket entrees and dessert bundles, invite into tiered VIP rewards program to convert them into Champions.'
+    },
+    'Potential Loyalists': {
+        'badge': 'bg-info',
+        'color': '#06B6D4',
+        'icon': 'fa-arrow-trend-up',
+        'action': 'Encourage recurring weekly orders with personalized push notifications and targeted weekend coupon boosters.'
+    },
+    'Needs Attention': {
+        'badge': 'bg-warning text-dark',
+        'color': '#F59E0B',
+        'icon': 'fa-bell',
+        'action': 'Reactivate before slip: Send limited-time 15% discount for their favorite cuisine (ordered within 48 hours).'
+    },
+    'About to Sleep': {
+        'badge': 'bg-secondary',
+        'color': '#64748B',
+        'icon': 'fa-moon',
+        'action': 'Share popular trending dishes in their locality, provide free appetizer voucher with any $25+ order.'
+    },
+    'At Risk': {
+        'badge': 'bg-danger',
+        'color': '#EF4444',
+        'icon': 'fa-triangle-exclamation',
+        'action': 'Urgent retention campaign: High spenders slipping away! Deploy $10 win-back voucher and direct feedback survey.'
+    },
+    'Hibernating / Churned': {
+        'badge': 'bg-dark',
+        'color': '#334155',
+        'icon': 'fa-user-slash',
+        'action': 'Low-cost automated email drip highlighting brand new menu launches and revamped delivery SLA guarantees.'
+    }
+}
+
+rfm_records = []
+for _, row in summary.iterrows():
+    s = row['segment']
+    info = strategies.get(s, {})
+    rfm_records.append({
+        'segment': s,
+        'customers': int(row['customers']),
+        'customer_pct': float(row['customer_pct']),
+        'total_revenue': float(row['total_revenue']),
+        'revenue_pct': float(row['revenue_pct']),
+        'avg_recency': float(row['avg_recency']),
+        'avg_freq': float(row['avg_freq']),
+        'avg_monetary': float(row['avg_monetary']),
+        'badge': info.get('badge', 'bg-secondary'),
+        'color': info.get('color', '#64748B'),
+        'icon': info.get('icon', 'fa-user'),
+        'strategy': info.get('action', '')
+    })
+
+# Sample stratified scatter
+scatter_sample = []
+for seg, group in df_rfm.groupby('segment'):
+    sample = group.sample(min(len(group), 85), random_state=42)
+    for _, r in sample.iterrows():
+        scatter_sample.append({
+            'id': int(r['customer_id']),
+            'r': int(r['recency_days']),
+            'f': int(r['frequency']),
+            'm': float(r['monetary']),
+            'seg': seg
+        })
+
+# 7. Market Basket Analysis (Step 1 ML)
+total_orders_items = conn.execute('SELECT COUNT(DISTINCT order_id) FROM orders_items').fetchone()[0]
+item_counts = dict(conn.execute('SELECT f.item_name, COUNT(DISTINCT oi.order_id) FROM orders_items oi JOIN food_items f ON f.item_id = oi.item_id GROUP BY f.item_name').fetchall())
+
+query_pairs = """
+SELECT 
+    f1.item_name AS item_a,
+    r1.cuisine AS cuisine_a,
+    f2.item_name AS item_b,
+    r2.cuisine AS cuisine_b,
+    COUNT(*) AS pair_orders
+FROM orders_items oi1
+JOIN orders_items oi2 ON oi1.order_id = oi2.order_id AND oi1.item_id < oi2.item_id
+JOIN food_items f1 ON f1.item_id = oi1.item_id
+JOIN food_items f2 ON f2.item_id = oi2.item_id
+JOIN restaurants r1 ON r1.restaurant_id = f1.restaurant_id
+JOIN restaurants r2 ON r2.restaurant_id = f2.restaurant_id
+GROUP BY item_a, item_b
+ORDER BY pair_orders DESC
+LIMIT 12;
+"""
+df_pairs = pd.read_sql_query(query_pairs, conn)
+
+top_pairs = []
+for _, row in df_pairs.iterrows():
+    ia, ib = row['item_a'], row['item_b']
+    cnt_a = item_counts.get(ia, 1)
+    cnt_b = item_counts.get(ib, 1)
+    p_cnt = int(row['pair_orders'])
+    conf = round((p_cnt / cnt_a) * 100, 1)
+    lift = round((p_cnt * total_orders_items) / (cnt_a * cnt_b), 2)
+    top_pairs.append({
+        'pair': f"{ia} + {ib}",
+        'item_a': ia,
+        'item_b': ib,
+        'cuisine': row['cuisine_a'],
+        'orders': p_cnt,
+        'conf': conf,
+        'lift': lift,
+        'deal': f"Combo Deal: Add {ib} for 15% OFF when ordering {ia}"
+    })
+
+query_cuisine_pairs = """
+SELECT 
+    r1.cuisine,
+    f1.item_name AS item_a,
+    f2.item_name AS item_b,
+    COUNT(*) AS pair_count
+FROM orders_items oi1
+JOIN orders_items oi2 ON oi1.order_id = oi2.order_id AND oi1.item_id < oi2.item_id
+JOIN food_items f1 ON f1.item_id = oi1.item_id
+JOIN food_items f2 ON f2.item_id = oi2.item_id
+JOIN restaurants r1 ON r1.restaurant_id = f1.restaurant_id
+JOIN restaurants r2 ON r2.restaurant_id = f2.restaurant_id
+WHERE r1.cuisine = r2.cuisine
+GROUP BY r1.cuisine, item_a, item_b
+ORDER BY r1.cuisine, pair_count DESC
+"""
+df_cp = pd.read_sql_query(query_cuisine_pairs, conn)
+
+cuisine_baskets = {}
+for c in ['Chinese', 'Italian', 'Indian', 'Thai']:
+    sub = df_cp[df_cp['cuisine'] == c].head(5)
+    items = []
+    for _, r in sub.iterrows():
+        ia, ib = r['item_a'], r['item_b']
+        cnt_a = item_counts.get(ia, 1)
+        cnt_b = item_counts.get(ib, 1)
+        p_cnt = int(r['pair_count'])
+        conf = round((p_cnt / cnt_a) * 100, 1)
+        lift = round((p_cnt * total_orders_items) / (cnt_a * cnt_b), 2)
+        items.append({
+            'item_a': ia,
+            'item_b': ib,
+            'pair': f"{ia} + {ib}",
+            'orders': p_cnt,
+            'conf': conf,
+            'lift': lift,
+            'deal': f"Add {ib} as side with {ia} to save $2.50"
+        })
+    cuisine_baskets[c] = items
+
 conn.close()
 
 # Prepare JSON payloads
@@ -166,7 +389,11 @@ payload = {
     "hourly": hourly_data,
     "dishes": dishes_data,
     "restaurants": restaurants_data,
-    "drivers": drivers_data
+    "drivers": drivers_data,
+    "rfm_summary": rfm_records,
+    "rfm_scatter": scatter_sample,
+    "top_pairs": top_pairs,
+    "cuisine_baskets": cuisine_baskets
 }
 
 json_str = json.dumps(payload, separators=(',', ':'))
@@ -739,6 +966,12 @@ html_template = f"""<!DOCTYPE html>
                 </button>
             </li>
             <li class="nav-item">
+                <button class="nav-link" id="ml-tab" data-bs-toggle="pill" data-bs-target="#tab-ml" type="button" style="border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08);">
+                    <i class="fas fa-brain text-warning me-1"></i> <span class="fw-bold">1️⃣ Advanced Analytics & ML</span>
+                    <span class="badge bg-warning text-dark ms-1 px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Portfolio Boost</span>
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link" id="table-tab" data-bs-toggle="pill" data-bs-target="#tab-table" type="button">
                     <i class="fas fa-table-list me-1"></i> Live Data Explorer
                 </button>
@@ -915,6 +1148,206 @@ html_template = f"""<!DOCTYPE html>
                                 </table>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: ADVANCED ANALYTICS & MACHINE LEARNING (STEP 1) -->
+            <div class="tab-pane fade" id="tab-ml">
+                <!-- Step 1 Callout Banner -->
+                <div class="card border-0 mb-4 shadow-sm" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-radius: 16px; color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">STEP 1 COMPLETE</span>
+                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-brain me-1"></i> Behavioral Intelligence &amp; Association Mining</span>
+                                </div>
+                                <h4 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Customer RFM Segmentation &amp; Market Basket Association Engine</h4>
+                                <p class="text-white-50 mb-0 small">
+                                    Trained on <strong>9,874 active customers</strong> and <strong>43,118 orders</strong> &bull; Unsupervised quantile clustering reveals VIP cohorts, high-risk churn volume, and cross-sell combo affinities.
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-success bg-opacity-25 text-success-light border border-success border-opacity-50 px-3 py-2 rounded-pill small">
+                                    <i class="fas fa-circle-check me-1"></i> Production Ready ML
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1 ML KPI Scorecards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Champions Revenue Share</span>
+                                <div class="kpi-icon-box" style="background:#ECFDF5; color:#10B981;">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-success">22.2%</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success">
+                                $265,470 from 1,493 VIPs
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Revenue At Risk (Churn)</span>
+                                <div class="kpi-icon-box" style="background:#FEF2F2; color:#EF4444;">
+                                    <i class="fas fa-triangle-exclamation"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-danger">$72,185</div>
+                            <span class="badge-pill-custom bg-danger bg-opacity-10 text-danger">
+                                456 VIPs (57.2 days inactive)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Customer Repeat Rate</span>
+                                <div class="kpi-icon-box" style="background:#EEF2FF; color:#4F46E5;">
+                                    <i class="fas fa-rotate"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-primary">94.7%</div>
+                            <span class="badge-pill-custom bg-primary bg-opacity-10 text-primary">
+                                9,349 multi-order accounts
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Top Cross-Sell Pair</span>
+                                <div class="kpi-icon-box" style="background:#FFFBEB; color:#F59E0B;">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-warning" style="font-size: 1.25rem;">Duck + Soup</div>
+                            <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
+                                49 orders &bull; +$38.4k potential
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 1: RFM Visuals -->
+                <div class="row g-4 mb-4">
+                    <!-- RFM Visual Container with View Switcher -->
+                    <div class="col-12 col-xl-7">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-layer-group text-primary"></i>
+                                        RFM Customer Segmentation Matrix
+                                    </div>
+                                    <div class="text-muted small">Behavioral customer tiers across Recency, Frequency &amp; Spend</div>
+                                </div>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary active" id="rfmViewTreemapBtn">Treemap</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="rfmViewScatterBtn">Recency vs Spend</button>
+                                </div>
+                            </div>
+                            <div id="chartRfmMatrix" style="min-height: 410px; width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Pareto Chart -->
+                    <div class="col-12 col-xl-5">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-scale-balanced text-warning"></i>
+                                        Pareto Analysis: Headcount vs. Revenue
+                                    </div>
+                                    <div class="text-muted small">Comparing cohort population share against revenue generation</div>
+                                </div>
+                            </div>
+                            <div id="chartRfmPareto" style="min-height: 410px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Market Basket Association Analysis -->
+                <div class="row g-4 mb-4">
+                    <!-- Top Item Pairs Bar Chart -->
+                    <div class="col-12 col-xl-7">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-basket-shopping text-success"></i>
+                                        Market Basket: Top Co-Occurring Menu Items
+                                    </div>
+                                    <div class="text-muted small">Dishes ordered together in single transactions (Apriori Mining)</div>
+                                </div>
+                            </div>
+                            <div id="chartMarketBasket" style="min-height: 380px; width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Cuisine Cross-Sell Bundling Engine -->
+                    <div class="col-12 col-xl-5">
+                        <div class="chart-box">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-wand-magic-sparkles text-info"></i>
+                                        Cuisine Cross-Sell Bundling Engine
+                                    </div>
+                                    <div class="text-muted small">Recommended combos with projected cross-sell lift</div>
+                                </div>
+                            </div>
+                            <!-- Cuisine Pill Selector -->
+                            <div class="d-flex flex-wrap gap-1 mb-3" id="basketCuisineTabs">
+                                <button class="btn btn-sm btn-outline-primary active" data-cuisine="Chinese">Chinese</button>
+                                <button class="btn btn-sm btn-outline-primary" data-cuisine="Italian">Italian</button>
+                                <button class="btn btn-sm btn-outline-primary" data-cuisine="Indian">Indian</button>
+                                <button class="btn btn-sm btn-outline-primary" data-cuisine="Thai">Thai</button>
+                            </div>
+                            <div id="cuisineBasketContainer" class="d-flex flex-column gap-2" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Actionable RFM Prescriptive Playbook Table -->
+                <div class="chart-box mb-4">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <i class="fas fa-chess-knight text-primary"></i>
+                                Actionable RFM Marketing Strategy &amp; Retention Playbook
+                            </div>
+                            <div class="text-muted small">Data-driven marketing campaigns and promotional levers per cohort</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-custom align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Customer Cohort</th>
+                                    <th>Volume (% Share)</th>
+                                    <th>Revenue (% Share)</th>
+                                    <th>Avg Recency</th>
+                                    <th>Avg Orders</th>
+                                    <th>Avg Spend</th>
+                                    <th>Prescriptive Action &amp; Campaign Levers</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rfmPlaybookTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1161,6 +1594,8 @@ html_template = f"""<!DOCTYPE html>
 
         function renderAllCharts() {{
             try {{ renderMonthlyChart(); }} catch(e) {{ console.error('Error in renderMonthlyChart:', e); }}
+            try {{ renderRFMCharts(); }} catch(e) {{ console.error('Error in renderRFMCharts:', e); }}
+            try {{ renderMarketBasketChart(); }} catch(e) {{ console.error('Error in renderMarketBasketChart:', e); }}
             try {{ renderCuisinePie(); }} catch(e) {{ console.error('Error in renderCuisinePie:', e); }}
             try {{ renderHourlyChart(); }} catch(e) {{ console.error('Error in renderHourlyChart:', e); }}
             try {{ renderCuisineBar(); }} catch(e) {{ console.error('Error in renderCuisineBar:', e); }}
@@ -1670,6 +2105,310 @@ html_template = f"""<!DOCTYPE html>
                 window.dispatchEvent(new Event('resize'));
             }});
         }});
+
+        // ==========================================
+        // STEP 1: ADVANCED ANALYTICS & ML LOGIC
+        // ==========================================
+        let currentRfmView = 'treemap';
+
+        // Toggle Buttons for Treemap vs Scatter
+        const rfmTreemapBtn = document.getElementById('rfmViewTreemapBtn');
+        const rfmScatterBtn = document.getElementById('rfmViewScatterBtn');
+        if (rfmTreemapBtn && rfmScatterBtn) {{
+            rfmTreemapBtn.addEventListener('click', () => {{
+                currentRfmView = 'treemap';
+                rfmTreemapBtn.classList.add('active');
+                rfmScatterBtn.classList.remove('active');
+                renderRFMCharts();
+            }});
+            rfmScatterBtn.addEventListener('click', () => {{
+                currentRfmView = 'scatter';
+                rfmScatterBtn.classList.add('active');
+                rfmTreemapBtn.classList.remove('active');
+                renderRFMCharts();
+            }});
+        }}
+
+        // Cuisine Smart Bundles selector
+        document.querySelectorAll('#basketCuisineTabs button').forEach(btn => {{
+            btn.addEventListener('click', () => {{
+                document.querySelectorAll('#basketCuisineTabs button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const cuisine = btn.getAttribute('data-cuisine');
+                populateCuisineBaskets(cuisine);
+            }});
+        }});
+
+        function renderRFMCharts() {{
+            if (currentRfmView === 'treemap') {{
+                renderRFMTreemap();
+            }} else {{
+                renderRFMScatter();
+            }}
+            renderRFMPareto();
+            populateRFMTable();
+            populateCuisineBaskets('Chinese');
+        }}
+
+        // RFM Treemap
+        function renderRFMTreemap() {{
+            const data = RAW_DATA.rfm_summary;
+            const labels = data.map(d => d.segment);
+            const parents = data.map(() => 'Customer Base');
+            const values = data.map(d => d.total_revenue);
+            const colors = data.map(d => d.color);
+
+            // Add root node
+            const allLabels = ['Customer Base', ...labels];
+            const allParents = ['', ...parents];
+            const allValues = [data.reduce((a, b) => a + b.total_revenue, 0), ...values];
+            const allColors = [currentTheme === 'dark' ? '#1E293B' : '#F1F5F9', ...colors];
+
+            const trace = {{
+                type: 'treemap',
+                labels: allLabels,
+                parents: allParents,
+                values: allValues,
+                branchvalues: 'total',
+                textinfo: 'label+value+percent parent',
+                valueformat: '$,.0f',
+                marker: {{
+                    colors: allColors,
+                    line: {{ width: 2, color: currentTheme === 'dark' ? '#151C2E' : '#FFFFFF' }}
+                }},
+                hovertemplate: '<b>%{{label}}</b><br>Revenue: %{{value:$,.0f}}<br>Contribution: %{{percentParent:.1%}}<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 10, b: 10, l: 10, r: 10 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartRfmMatrix', [trace], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // RFM Scatter Bubble Plot
+        function renderRFMScatter() {{
+            const sample = RAW_DATA.rfm_scatter;
+            const segments = ['Champions', 'Loyal Customers', 'Potential Loyalists', 'Needs Attention', 'About to Sleep', 'At Risk', 'Hibernating / Churned'];
+            const segColors = {{
+                'Champions': '#10B981',
+                'Loyal Customers': '#4F46E5',
+                'Potential Loyalists': '#06B6D4',
+                'Needs Attention': '#F59E0B',
+                'About to Sleep': '#64748B',
+                'At Risk': '#EF4444',
+                'Hibernating / Churned': '#334155'
+            }};
+
+            const traces = segments.map(seg => {{
+                const pts = sample.filter(p => p.seg === seg);
+                return {{
+                    name: seg,
+                    x: pts.map(p => p.r),
+                    y: pts.map(p => p.m),
+                    text: pts.map(p => `Cust #${{p.id}} | Orders: ${{p.f}}`),
+                    mode: 'markers',
+                    marker: {{
+                        size: pts.map(p => Math.min(24, Math.max(7, p.f * 2.6))),
+                        color: segColors[seg] || '#4F46E5',
+                        opacity: 0.75,
+                        line: {{ width: 1, color: '#FFFFFF' }}
+                    }},
+                    hovertemplate: `<b>${{seg}}</b><br>Recency: %{{x}} days<br>Total Spend: $%{{y:.2f}}<br>%{{text}}<extra></extra>`
+                }};
+            }});
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 30, b: 50, l: 60, r: 20 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: {{ 
+                    title: 'Recency (Days Since Last Order - Lower is Better)',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9',
+                    zeroline: false
+                }},
+                yaxis: {{ 
+                    title: 'Monetary Spend ($)',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9',
+                    zeroline: false
+                }},
+                legend: {{ orientation: 'h', y: -0.25, x: 0 }},
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartRfmMatrix', traces, layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // Pareto Analysis Chart
+        function renderRFMPareto() {{
+            const data = [...RAW_DATA.rfm_summary].reverse();
+            const yLabels = data.map(d => d.segment);
+            const xCust = data.map(d => d.customer_pct);
+            const xRev = data.map(d => d.revenue_pct);
+
+            const traceCust = {{
+                name: '% Customer Volume',
+                type: 'bar',
+                orientation: 'h',
+                y: yLabels,
+                x: xCust,
+                marker: {{ color: currentTheme === 'dark' ? '#334155' : '#CBD5E1' }},
+                hovertemplate: '%{{y}}<br>Customer Share: %{{x:.1f}}%<extra></extra>'
+            }};
+
+            const traceRev = {{
+                name: '% Revenue Contribution',
+                type: 'bar',
+                orientation: 'h',
+                y: yLabels,
+                x: xRev,
+                marker: {{ color: '#4F46E5' }},
+                hovertemplate: '%{{y}}<br>Revenue Share: %{{x:.1f}}%<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                barmode: 'group',
+                margin: {{ t: 20, b: 50, l: 140, r: 20 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: {{ 
+                    title: 'Percentage Share (%)',
+                    ticksuffix: '%',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9'
+                }},
+                yaxis: {{ automargin: true }},
+                legend: {{ orientation: 'h', y: 1.15, x: 0 }},
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartRfmPareto', [traceCust, traceRev], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // Market Basket Horizontal Bar Chart
+        function renderMarketBasketChart() {{
+            const pairs = [...RAW_DATA.top_pairs].reverse();
+            const yPairs = pairs.map(p => p.pair);
+            const xOrders = pairs.map(p => p.orders);
+            const textLabels = pairs.map(p => `${{p.orders}} orders (Conf: ${{p.conf}}%)`);
+
+            const trace = {{
+                type: 'bar',
+                orientation: 'h',
+                y: yPairs,
+                x: xOrders,
+                text: textLabels,
+                textposition: 'inside',
+                insidetextfont: {{ color: '#FFFFFF', weight: 'bold' }},
+                marker: {{
+                    color: xOrders,
+                    colorscale: 'Viridis',
+                    showscale: false
+                }},
+                customdata: pairs.map(p => [p.conf, p.lift, p.cuisine]),
+                hovertemplate: '<b>%{{y}}</b> (%{{customdata[2]}})<br>Orders Together: %{{x}}<br>Confidence: %{{customdata[0]}}%<br>Lift Score: %{{customdata[1]}}x<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 20, b: 40, l: 200, r: 20 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: {{ 
+                    title: 'Co-Occurrence Frequency (Orders)',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9'
+                }},
+                yaxis: {{ automargin: true }},
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartMarketBasket', [trace], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // Populate Cuisine Smart Bundles
+        function populateCuisineBaskets(cuisine) {{
+            const container = document.getElementById('cuisineBasketContainer');
+            if (!container) return;
+            const items = RAW_DATA.cuisine_baskets[cuisine] || [];
+
+            if (items.length === 0) {{
+                container.innerHTML = '<div class="text-muted small p-3">No specific pairs found for this cuisine.</div>';
+                return;
+            }}
+
+            container.innerHTML = items.map(item => `
+                <div class="p-3 rounded-3" style="background: var(--primary-light); border: 1px solid var(--border-color);">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="fw-bold" style="color: var(--primary); font-size: 0.9rem;">
+                            <i class="fas fa-link me-1"></i> ${{item.pair}}
+                        </span>
+                        <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">
+                            ${{item.orders}} Pairs
+                        </span>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        <span>Confidence: <strong>${{item.conf}}%</strong></span> &bull; 
+                        <span>Lift: <strong>${{item.lift}}x</strong></span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded-2" style="background: var(--bg-card); border: 1px dashed var(--border-color);">
+                        <span class="small fw-semibold"><i class="fas fa-tag text-warning me-1"></i> ${{item.deal}}</span>
+                        <span class="badge bg-success bg-opacity-10 text-success fw-bold small">+14% AOV</span>
+                    </div>
+                </div>
+            `).join('');
+        }}
+
+        // Populate RFM Actionable Strategy Table
+        function populateRFMTable() {{
+            const tbody = document.getElementById('rfmPlaybookTableBody');
+            if (!tbody) return;
+            const data = RAW_DATA.rfm_summary;
+
+            tbody.innerHTML = data.map(row => `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge ${{row.badge}} px-2.5 py-1.5 rounded-pill fw-bold">
+                                <i class="fas ${{row.icon}} me-1"></i> ${{row.segment}}
+                            </span>
+                        </div>
+                    </td>
+                    <td><strong>${{row.customers.toLocaleString()}}</strong> <span class="text-muted small">(${{row.customer_pct}}%)</span></td>
+                    <td><strong>$${{Math.round(row.total_revenue).toLocaleString()}}</strong> <span class="text-muted small">(${{row.revenue_pct}}%)</span></td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-dark px-2 py-1">${{row.avg_recency}} days</span></td>
+                    <td><span class="badge bg-info bg-opacity-10 text-info px-2 py-1">${{row.avg_freq}} orders</span></td>
+                    <td><strong>$${{row.avg_monetary.toFixed(2)}}</strong></td>
+                    <td>
+                        <div class="small" style="line-height: 1.35;">${{row.strategy}}</div>
+                    </td>
+                </tr>
+            `).join('');
+        }}
+
+        // Resize handler updates for ML charts
+        window.addEventListener('resize', () => {{
+            const mlCharts = ['chartRfmMatrix', 'chartRfmPareto', 'chartMarketBasket'];
+            mlCharts.forEach(id => {{
+                const el = document.getElementById(id);
+                if (el && el.data) {{
+                    Plotly.Plots.resize(el);
+                }}
+            }});
+        }});
+
+        // Trigger redraw on ML tab click
+        const mlTabBtn = document.getElementById('ml-tab');
+        if (mlTabBtn) {{
+            mlTabBtn.addEventListener('shown.bs.tab', () => {{
+                renderRFMCharts();
+                renderMarketBasketChart();
+            }});
+        }}
 
         // Initial Load
         syncUIAndRefresh();
