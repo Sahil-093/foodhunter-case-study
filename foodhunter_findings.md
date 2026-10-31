@@ -79,3 +79,27 @@ The SQL for every figure is in foodhunter_analysis.sql.
   * Onboard 20 premier Thai, Indian, and Italian restaurant partners.
 * **De-prioritize (Low Impact, High Effort):**
   * Wholesale mobile app redesign (high cost, minimal direct revenue lift compared to pricing and CRM levers).
+
+---
+
+## 🎛️ What-If Scenario Simulator Findings (Step 3)
+
+### Real-Time Financial Sensitivity Modeling
+* **Conservative Scenario (Defensive):**
+  * 10% VIP Win-Back, +3.0% AOV (.40), 11.0% Discount Rate, 0% Volume Growth.
+  * Monthly Revenue: **,561** (+.4k topline gain).
+  * Discount Margin Preserved: **+,096/month**.
+  * Total Monthly Benefit: **+,496** (+.5k quarterly).
+
+* **Target Turnaround Scenario (Recommended):**
+  * 25% VIP Win-Back, +6.7% AOV (.42), 9.5% Discount Rate, +12.8% Volume Growth.
+  * Monthly Revenue: **,952** (+.8k topline gain).
+  * Discount Margin Preserved: **+,170/month**.
+  * Total Monthly Benefit: **+,961** (+,882 quarterly net ROI).
+  * Reclaims FoodHunter's peak monthly performance.
+
+* **Aggressive Growth Surge (Maximum Upside):**
+  * 45% VIP Win-Back, +15.0% AOV (.71), 7.5% Discount Rate, +25.0% Volume Growth.
+  * Monthly Revenue: **,397** (+.2k topline gain).
+  * Discount Margin Preserved: **+,758/month**.
+  * Total Monthly Benefit: **+,994** (+.0k quarterly ROI, +.84M annualized).

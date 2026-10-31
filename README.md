@@ -118,6 +118,29 @@ Step 2 bridges the gap between diagnostic numbers and C-Suite executive decision
 
 ---
 
+## 🎛️ Step 3: What-If Scenario Simulator (Interactive BI Tool)
+
+Step 3 transforms the dashboard into a full-scale interactive financial planning and sensitivity tool:
+
+### 1. Interactive Levers & Sliders (Real-Time 60 FPS Modeling)
+* **🛡️ VIP Win-Back Rate (0% – 50%):** Models the reactivation of 456 churn-risk VIPs with ,185 in cumulative historical spend.
+* **🍱 Apriori Basket Lift (0% – 20%):** Simulates Average Order Value (AOV) expansion through checkout combo meal recommendations.
+* **💰 Discount Rate Optimization (5% – 15%):** Tests the margin recovery achieved by gating discounts behind minimum spend thresholds (+) vs current 13.2% flat discounts.
+* **🌍 Volume Growth / Merchant Expansion (-10% – +30%):** Simulates organic customer acquisition and regional merchant expansion.
+
+### 2. One-Click Executive Presets
+* **🛡️ Conservative Defense:** 10% VIP win-back, +3% AOV lift, 11% discount rate, 0% volume growth. Projected monthly gain: **+\,496**.
+* **🎯 Target Turnaround (Recommended):** 25% VIP win-back, +6.7% AOV lift, 9.5% discount rate, +12.8% volume growth. Projected monthly revenue: **\,952 (+23.9% vs Sep)** with a **+\,882 quarterly net gain**.
+* **🚀 Aggressive Growth Surge:** 45% VIP win-back, +15% AOV lift, 7.5% discount rate, +25% volume growth. Projected monthly revenue: **\,397 (+50.4%)** with an annualized impact of **+\.84M**.
+* **🔄 Baseline Reset:** Instantly resets all parameters to actual September 2022 performance (,161).
+
+### 3. Dynamic Visualizations & Financial Sensitivity Table
+* **Baseline vs. Simulated Performance Bar Chart:** Compares Gross Revenue, Net Food Volume, and Discount Spend between baseline actuals and simulated projections.
+* **Peak Revenue Recovery Gauge:** Dynamic needle gauge tracking simulated run-rate against FoodHunter's all-time historical peak in June 2022 (.6k).
+* **Live Financial Statement & Variance Table:** Granular line-item variance bridge displaying Gross Revenue, Orders, AOV, VIP Win-Back, Discount Spend, and 90-Day ROI.
+
+---
+
 ## 🛠️ How to Run Locally
 
 ### 1. Clone the repository

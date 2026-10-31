@@ -472,7 +472,17 @@ payload = {
         {"phase": "Days 1 – 30", "focus": "Stabilization & Leak Plugging", "initiatives": "Launch 3-stage automated VIP win-back CRM campaign; roll out Top 5 Apriori combo bundles at checkout for Chinese cuisine; eliminate flat discounts under $20.", "owner": "Marketing & CRM", "target_metric": "+$16.1k/mo recovered, AOV +$0.80"},
         {"phase": "Days 31 – 60", "focus": "Margin Defense & Optimization", "initiatives": "Enforce $35+ basket threshold for promotional discounts; expand combo meal cross-selling to Italian and Indian menus; recruit first batch of 10 new regional restaurant partners.", "owner": "Finance & Merchandising", "target_metric": "Discount rate down to 10.5%, +$16.4k margin"},
         {"phase": "Days 61 – 90", "focus": "Scale & Institutional Loyalty", "initiatives": "Launch 'FoodHunter VIP Pass' tiered loyalty subscription; onboard remaining 10 high-demand merchant partners; establish automated Courier SLA driver dispatch incentives.", "owner": "Product & Growth", "target_metric": "+1,200 monthly orders, Platform MRR $320.4k"}
-    ]
+    ],
+    "simulator_baseline": {
+        "orders": 9365,
+        "revenue": 258161.1,
+        "aov": 27.57,
+        "discounts": 35012.4,
+        "food_total": 265378.5,
+        "discount_rate": 13.2,
+        "at_risk_pool": 18046.3,
+        "june_peak": 347577.5
+    }
 }
 
 json_str = json.dumps(payload, separators=(',', ':'))
@@ -1057,6 +1067,12 @@ html_template = f"""<!DOCTYPE html>
                 </button>
             </li>
             <li class="nav-item">
+                <button class="nav-link" id="simulator-tab" data-bs-toggle="pill" data-bs-target="#tab-simulator" type="button" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08);">
+                    <i class="fas fa-sliders text-success me-1"></i> <span class="fw-bold">3️⃣ What-If Scenario Simulator</span>
+                    <span class="badge bg-success text-white ms-1 px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Interactive BI Tool</span>
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link" id="table-tab" data-bs-toggle="pill" data-bs-target="#tab-table" type="button">
                     <i class="fas fa-table-list me-1"></i> Live Data Explorer
                 </button>
@@ -1600,6 +1616,311 @@ html_template = f"""<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- TAB 8: WHAT-IF SCENARIO SIMULATOR (STEP 3) -->
+            <div class="tab-pane fade" id="tab-simulator">
+                <!-- Step 3 Hero Banner -->
+                <div class="card border-0 mb-4 shadow-sm" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); border-radius: 16px; color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">STEP 3 COMPLETE</span>
+                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-calculator me-1"></i> Real-Time Interactive BI Engine</span>
+                                </div>
+                                <h4 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Executive What-If Scenario Simulator &amp; Financial Sensitivity Model</h4>
+                                <p class="text-white-50 mb-0 small">
+                                    Simulate dynamic growth scenarios in real-time &bull; Adjust strategic sliders or select one-click presets to model revenue, margin expansion, and volume recovery.
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-3 py-2 rounded-pill small">
+                                    <i class="fas fa-bolt me-1"></i> Instant 60 FPS Recomputation
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Presets Ribbon -->
+                <div class="card border-0 mb-4 p-3 shadow-sm" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px;">
+                    <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+                        <div>
+                            <span class="small fw-bold text-muted text-uppercase tracking-wider">
+                                <i class="fas fa-bookmark text-primary me-1"></i> Executive Scenario Presets:
+                            </span>
+                            <span class="small text-muted ms-2 d-none d-md-inline">One-click standard management scenarios</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 w-100 w-lg-auto">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold scenario-preset-btn" data-preset="conservative">
+                                <i class="fas fa-shield me-1"></i> Conservative Defense
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold scenario-preset-btn active" data-preset="target">
+                                <i class="fas fa-bullseye me-1"></i> Target Turnaround (Recommended)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold scenario-preset-btn" data-preset="aggressive">
+                                <i class="fas fa-rocket me-1"></i> Aggressive Growth Surge
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold scenario-preset-btn" data-preset="baseline">
+                                <i class="fas fa-rotate-left me-1"></i> Reset to Baseline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulated Real-Time Dynamic KPI Scorecards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Simulated Monthly Rev</span>
+                                <div class="kpi-icon-box" style="background:#ECFDF5; color:#10B981;">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-success" id="simKpiRevenue">$319,952</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success" id="simKpiRevDelta">
+                                +$61,791 (+23.9%) vs Sep
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Simulated Orders</span>
+                                <div class="kpi-icon-box" style="background:#EEF2FF; color:#4F46E5;">
+                                    <i class="fas fa-bag-shopping"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-primary" id="simKpiOrders">10,723</div>
+                            <span class="badge-pill-custom bg-primary bg-opacity-10 text-primary" id="simKpiOrdersDelta">
+                                +1,358 orders (+14.5%)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Simulated AOV</span>
+                                <div class="kpi-icon-box" style="background:#FFFBEB; color:#F59E0B;">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-warning" id="simKpiAov">$29.42</div>
+                            <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning" id="simKpiAovDelta">
+                                +$1.85 / order (+6.7%)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Discount Margin Saved</span>
+                                <div class="kpi-icon-box" style="background:#F0FDF4; color:#16A34A;">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-success" id="simKpiDiscSavings">+$12,170</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success" id="simKpiDiscRate">
+                                9.5% effective rate
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Quarterly Net Benefit</span>
+                                <div class="kpi-icon-box" style="background:#F5F3FF; color:#8B5CF6;">
+                                    <i class="fas fa-calendar-days"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value" style="color: #8B5CF6;" id="simKpiQuarterly">+$221,882</div>
+                            <span class="badge-pill-custom bg-info bg-opacity-10 text-info">
+                                3-Month Cumulative
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="kpi-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="kpi-title">Annualized Run-Rate</span>
+                                <div class="kpi-icon-box" style="background:#ECFEFF; color:#06B6D4;">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value text-info" id="simKpiAnnual">+$887,529</div>
+                            <span class="badge-pill-custom bg-success bg-opacity-10 text-success">
+                                12-Month Net Value
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Main Row: Sliders on Left, Charts on Right -->
+                <div class="row g-4 mb-4">
+                    <!-- Left: Interactive Sliders Control Panel -->
+                    <div class="col-12 col-xl-5">
+                        <div class="chart-box h-100">
+                            <div class="chart-header pb-2 border-bottom mb-3">
+                                <div>
+                                    <div class="chart-title">
+                                        <i class="fas fa-sliders text-success"></i>
+                                        Strategic Growth Levers (Interactive)
+                                    </div>
+                                    <div class="text-muted small">Move sliders to test sensitivity and projected outcomes</div>
+                                </div>
+                            </div>
+
+                            <!-- Slider 1: VIP Win-Back -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-bold mb-0">
+                                        <i class="fas fa-shield-halved text-primary me-1"></i> VIP Win-Back Reactivation Rate
+                                    </label>
+                                    <span id="labelWinback" class="badge bg-primary px-2.5 py-1 rounded-pill fw-bold">25%</span>
+                                </div>
+                                <input type="range" class="form-range" id="sliderWinback" min="0" max="50" step="1" value="25">
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                                    <span>0% (No Win-Back)</span>
+                                    <span>25% Target</span>
+                                    <span>50% (Max Campaign)</span>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                    Targeting 456 churn-risk VIPs with $72,185 cumulative spend.
+                                </div>
+                            </div>
+
+                            <!-- Slider 2: AOV Basket Cross-Sell Lift -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-bold mb-0">
+                                        <i class="fas fa-cubes text-warning me-1"></i> Apriori Combo Basket Lift (AOV)
+                                    </label>
+                                    <span id="labelAov" class="badge bg-warning text-dark px-2.5 py-1 rounded-pill fw-bold">+6.7%</span>
+                                </div>
+                                <input type="range" class="form-range" id="sliderAov" min="0" max="20" step="0.5" value="6.7">
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                                    <span>0% ($27.57 baseline)</span>
+                                    <span>+6.7% (+$1.85)</span>
+                                    <span>+20% ($33.08)</span>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                    Driven by automated side/appetizer combo pairings during checkout.
+                                </div>
+                            </div>
+
+                            <!-- Slider 3: Discount Rate Optimization -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-bold mb-0">
+                                        <i class="fas fa-coins text-success me-1"></i> Optimized Discount Rate (% of Food Gross)
+                                    </label>
+                                    <span id="labelDiscount" class="badge bg-success px-2.5 py-1 rounded-pill fw-bold">9.5%</span>
+                                </div>
+                                <input type="range" class="form-range" id="sliderDiscount" min="5" max="15" step="0.5" value="9.5">
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                                    <span>5.0% (Strict Spend Gate)</span>
+                                    <span>9.5% (Target)</span>
+                                    <span>15.0% (Current Flat Leak)</span>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                    Enforce $35+ spend threshold on promo codes (Baseline is 13.2%).
+                                </div>
+                            </div>
+
+                            <!-- Slider 4: Volume Growth Rate -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-bold mb-0">
+                                        <i class="fas fa-arrow-trend-up text-info me-1"></i> Organic Volume &amp; Cuisine Expansion
+                                    </label>
+                                    <span id="labelVolume" class="badge bg-info px-2.5 py-1 rounded-pill fw-bold">+12.8%</span>
+                                </div>
+                                <input type="range" class="form-range" id="sliderVolume" min="-10" max="30" step="1" value="12.8">
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                                    <span>-10% (Market Contraction)</span>
+                                    <span>+12.8% (+1,200 orders)</span>
+                                    <span>+30% (High Growth)</span>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                    Onboarding 20 high-demand Thai &amp; Indian regional restaurants.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Dynamic Comparison Charts -->
+                    <div class="col-12 col-xl-7">
+                        <div class="row g-4">
+                            <!-- Comparison Chart: Baseline vs Simulated -->
+                            <div class="col-12">
+                                <div class="chart-box">
+                                    <div class="chart-header">
+                                        <div>
+                                            <div class="chart-title">
+                                                <i class="fas fa-chart-column text-primary"></i>
+                                                Baseline vs. Simulated Performance Comparison
+                                            </div>
+                                            <div class="text-muted small">Comparing September 2022 actuals against modeled output</div>
+                                        </div>
+                                    </div>
+                                    <div id="chartSimComparison" style="min-height: 250px; width: 100%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Historical Peak Recovery Gauge -->
+                            <div class="col-12">
+                                <div class="chart-box">
+                                    <div class="chart-header">
+                                        <div>
+                                            <div class="chart-title">
+                                                <i class="fas fa-gauge-high text-success"></i>
+                                                Peak Revenue Recovery Gauge (vs. June Peak $347.6k)
+                                            </div>
+                                            <div class="text-muted small">Tracking whether simulated run-rate surpasses historical peak volume</div>
+                                        </div>
+                                    </div>
+                                    <div id="chartSimGauge" style="min-height: 220px; width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Financial Line-Item Variance Table -->
+                <div class="chart-box mb-4">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <i class="fas fa-file-invoice-dollar text-primary"></i>
+                                Financial Line-Item Variance &amp; Sensitivity Analysis
+                            </div>
+                            <div class="text-muted small">Granular mathematical bridge between baseline actuals and simulated scenario</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-custom align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Financial Metric</th>
+                                    <th>Current Baseline (Sep Actual)</th>
+                                    <th>Simulated Projection</th>
+                                    <th>Variance Delta</th>
+                                    <th>Strategic Commentary</th>
+                                </tr>
+                            </thead>
+                            <tbody id="simVarianceTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 5: DATA EXPLORER -->
             <div class="tab-pane fade" id="tab-table">
                 <div class="chart-box">
@@ -1845,6 +2166,7 @@ html_template = f"""<!DOCTYPE html>
             try {{ renderRFMCharts(); }} catch(e) {{ console.error('Error in renderRFMCharts:', e); }}
             try {{ renderMarketBasketChart(); }} catch(e) {{ console.error('Error in renderMarketBasketChart:', e); }}
             try {{ renderStrategyCharts(); }} catch(e) {{ console.error('Error in renderStrategyCharts:', e); }}
+            try {{ renderSimulatorCharts(); }} catch(e) {{ console.error('Error in renderSimulatorCharts:', e); }}
             try {{ renderCuisinePie(); }} catch(e) {{ console.error('Error in renderCuisinePie:', e); }}
             try {{ renderHourlyChart(); }} catch(e) {{ console.error('Error in renderHourlyChart:', e); }}
             try {{ renderCuisineBar(); }} catch(e) {{ console.error('Error in renderCuisineBar:', e); }}
@@ -2842,7 +3164,7 @@ html_template = f"""<!DOCTYPE html>
 
         // Resize handler updates for Strategy charts
         window.addEventListener('resize', () => {{
-            const stratCharts = ['chartStrategyWaterfall', 'chartPriorityMatrix'];
+            const stratCharts = ['chartStrategyWaterfall', 'chartPriorityMatrix', 'chartSimComparison', 'chartSimGauge'];
             stratCharts.forEach(id => {{
                 const el = document.getElementById(id);
                 if (el && el.data) {{
@@ -2850,6 +3172,309 @@ html_template = f"""<!DOCTYPE html>
                 }}
             }});
         }});
+
+        // Trigger redraw on Simulator tab click
+        const simulatorTabBtn = document.getElementById('simulator-tab');
+        if (simulatorTabBtn) {{
+            simulatorTabBtn.addEventListener('shown.bs.tab', () => {{
+                renderSimulatorCharts();
+            }});
+        }}
+
+        // ==========================================
+        // STEP 3: WHAT-IF SCENARIO SIMULATOR LOGIC
+        // ==========================================
+        // Sliders elements
+        const sWinback = document.getElementById('sliderWinback');
+        const sAov = document.getElementById('sliderAov');
+        const sDiscount = document.getElementById('sliderDiscount');
+        const sVolume = document.getElementById('sliderVolume');
+
+        // Labels elements
+        const lWinback = document.getElementById('labelWinback');
+        const lAov = document.getElementById('labelAov');
+        const lDiscount = document.getElementById('labelDiscount');
+        const lVolume = document.getElementById('labelVolume');
+
+        // Preset buttons
+        document.querySelectorAll('.scenario-preset-btn').forEach(btn => {{
+            btn.addEventListener('click', () => {{
+                document.querySelectorAll('.scenario-preset-btn').forEach(b => {{
+                    b.classList.remove('active', 'btn-success', 'btn-secondary', 'btn-primary', 'btn-danger');
+                    b.classList.add('btn-outline-secondary');
+                }});
+
+                const preset = btn.getAttribute('data-preset');
+                if (preset === 'conservative') {{
+                    sWinback.value = 10;
+                    sAov.value = 3.0;
+                    sDiscount.value = 11.0;
+                    sVolume.value = 0.0;
+                    btn.classList.add('active', 'btn-secondary');
+                }} else if (preset === 'target') {{
+                    sWinback.value = 25;
+                    sAov.value = 6.7;
+                    sDiscount.value = 9.5;
+                    sVolume.value = 12.8;
+                    btn.classList.add('active', 'btn-success');
+                }} else if (preset === 'aggressive') {{
+                    sWinback.value = 45;
+                    sAov.value = 15.0;
+                    sDiscount.value = 7.5;
+                    sVolume.value = 25.0;
+                    btn.classList.add('active', 'btn-primary');
+                }} else if (preset === 'baseline') {{
+                    sWinback.value = 0;
+                    sAov.value = 0.0;
+                    sDiscount.value = 13.2;
+                    sVolume.value = 0.0;
+                    btn.classList.add('active', 'btn-danger');
+                }}
+                runSimulation();
+            }});
+        }});
+
+        // Attach event listeners to sliders for real-time 60fps update
+        [sWinback, sAov, sDiscount, sVolume].forEach(slider => {{
+            if (slider) {{
+                slider.addEventListener('input', runSimulation);
+            }}
+        }});
+
+        function runSimulation() {{
+            const base = RAW_DATA.simulator_baseline;
+            const wVal = parseFloat(sWinback.value) / 100;
+            const aVal = parseFloat(sAov.value) / 100;
+            const dVal = parseFloat(sDiscount.value) / 100;
+            const vVal = parseFloat(sVolume.value) / 100;
+
+            // Update Labels
+            lWinback.innerText = `${{sWinback.value}}%`;
+            lAov.innerText = `${{parseFloat(sAov.value) >= 0 ? '+' : ''}}${{sAov.value}}%`;
+            lDiscount.innerText = `${{sDiscount.value}}%`;
+            lVolume.innerText = `${{parseFloat(sVolume.value) >= 0 ? '+' : ''}}${{sVolume.value}}%`;
+
+            // Math Model
+            const revWinback = base.at_risk_pool * wVal;
+            const simOrders = Math.round(base.orders * (1 + vVal) + (456 * wVal * 1.4));
+            const simAov = base.aov * (1 + aVal);
+            const simRev = Math.round(simOrders * simAov + revWinback);
+
+            const simFood = simRev * 1.028;
+            const simDisc = Math.round(simFood * dVal);
+            const baselineDiscForVolume = simFood * 0.132;
+            const discSavings = Math.round(baselineDiscForVolume - simDisc);
+
+            const revDelta = simRev - base.revenue;
+            const revDeltaPct = (revDelta / base.revenue) * 100;
+            const ordersDelta = simOrders - base.orders;
+            const ordersDeltaPct = (ordersDelta / base.orders) * 100;
+            const aovDelta = simAov - base.aov;
+            const aovDeltaPct = (aovDelta / base.aov) * 100;
+
+            const monthlyNetGain = revDelta + discSavings;
+            const quarterlyNetBenefit = monthlyNetGain * 3;
+            const annualNetBenefit = monthlyNetGain * 12;
+
+            // Update KPI Scorecards
+            document.getElementById('simKpiRevenue').innerText = '$' + simRev.toLocaleString('en-US');
+            document.getElementById('simKpiRevDelta').innerHTML = `
+                <span class="${{revDelta >= 0 ? 'text-success' : 'text-danger'}}">
+                    ${{revDelta >= 0 ? '+' : ''}}$${{Math.round(revDelta).toLocaleString('en-US')}} (${{revDeltaPct >= 0 ? '+' : ''}}${{revDeltaPct.toFixed(1)}}%) vs Sep
+                </span>
+            `;
+
+            document.getElementById('simKpiOrders').innerText = simOrders.toLocaleString('en-US');
+            document.getElementById('simKpiOrdersDelta').innerHTML = `
+                <span class="${{ordersDelta >= 0 ? 'text-primary' : 'text-danger'}}">
+                    ${{ordersDelta >= 0 ? '+' : ''}}${{ordersDelta.toLocaleString('en-US')}} orders (${{ordersDeltaPct >= 0 ? '+' : ''}}${{ordersDeltaPct.toFixed(1)}}%)
+                </span>
+            `;
+
+            document.getElementById('simKpiAov').innerText = '$' + simAov.toFixed(2);
+            document.getElementById('simKpiAovDelta').innerHTML = `
+                <span class="${{aovDelta >= 0 ? 'text-warning' : 'text-danger'}}">
+                    ${{aovDelta >= 0 ? '+' : ''}}$${{aovDelta.toFixed(2)}} / order (${{aovDeltaPct >= 0 ? '+' : ''}}${{aovDeltaPct.toFixed(1)}}%)
+                </span>
+            `;
+
+            document.getElementById('simKpiDiscSavings').innerText = (discSavings >= 0 ? '+$' : '-$') + Math.abs(discSavings).toLocaleString('en-US');
+            document.getElementById('simKpiDiscRate').innerText = `${{sDiscount.value}}% effective rate`;
+
+            document.getElementById('simKpiQuarterly').innerText = (quarterlyNetBenefit >= 0 ? '+$' : '-$') + Math.abs(Math.round(quarterlyNetBenefit)).toLocaleString('en-US');
+            document.getElementById('simKpiAnnual').innerText = (annualNetBenefit >= 0 ? '+$' : '-$') + Math.abs(Math.round(annualNetBenefit)).toLocaleString('en-US');
+
+            // Re-render Dynamic Visuals
+            renderSimComparisonChart(base, simRev, simOrders, simAov, simDisc, discSavings);
+            renderSimGaugeChart(base, simRev);
+            populateSimVarianceTable(base, simRev, simOrders, simAov, simDisc, discSavings, revWinback);
+        }}
+
+        function renderSimulatorCharts() {{
+            runSimulation();
+        }}
+
+        // 1. Comparison Bar Chart (Baseline vs Simulated)
+        function renderSimComparisonChart(base, simRev, simOrders, simAov, simDisc, discSavings) {{
+            const xMetrics = ['Gross Revenue ($)', 'Net Food Volume ($)', 'Discount Spend ($)'];
+            const yBaseline = [base.revenue, base.revenue - base.discounts, base.discounts];
+            const ySimulated = [simRev, simRev - simDisc, simDisc];
+
+            const traceBase = {{
+                name: 'Sep 2022 Baseline',
+                type: 'bar',
+                x: xMetrics,
+                y: yBaseline,
+                marker: {{ color: currentTheme === 'dark' ? '#334155' : '#94A3B8' }},
+                text: yBaseline.map(v => '$' + Math.round(v).toLocaleString()),
+                textposition: 'outside',
+                hovertemplate: '%{{x}}<br>Baseline: $%{{y:,.0f}}<extra></extra>'
+            }};
+
+            const traceSim = {{
+                name: 'Simulated Projection',
+                type: 'bar',
+                x: xMetrics,
+                y: ySimulated,
+                marker: {{ color: '#10B981' }},
+                text: ySimulated.map(v => '$' + Math.round(v).toLocaleString()),
+                textposition: 'outside',
+                hovertemplate: '%{{x}}<br>Simulated: $%{{y:,.0f}}<extra></extra>'
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                barmode: 'group',
+                margin: {{ t: 30, b: 40, l: 60, r: 20 }},
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                yaxis: {{
+                    title: 'Amount (USD $)',
+                    gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9'
+                }},
+                legend: {{ orientation: 'h', y: 1.15, x: 0 }},
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartSimComparison', [traceBase, traceSim], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // 2. Recovery Gauge Chart
+        function renderSimGaugeChart(base, simRev) {{
+            const trace = {{
+                type: 'indicator',
+                mode: 'gauge+number+delta',
+                value: simRev,
+                delta: {{ 
+                    reference: base.june_peak, 
+                    increasing: {{ color: '#10B981' }}, 
+                    decreasing: {{ color: '#EF4444' }},
+                    prefix: '$',
+                    valueformat: ',.0f'
+                }},
+                number: {{ prefix: '$', valueformat: ',.0f' }},
+                gauge: {{
+                    axis: {{ range: [200000, 400000], tickformat: '$,.0f' }},
+                    bar: {{ color: '#4F46E5', width: 0.25 }},
+                    steps: [
+                        {{ range: [200000, 270000], color: 'rgba(239, 68, 68, 0.25)' }},
+                        {{ range: [270000, 315000], color: 'rgba(245, 158, 11, 0.25)' }},
+                        {{ range: [315000, 400000], color: 'rgba(16, 185, 129, 0.25)' }}
+                    ],
+                    threshold: {{
+                        line: {{ color: '#10B981', width: 4 }},
+                        thickness: 0.75,
+                        value: base.june_peak
+                    }}
+                }}
+            }};
+
+            const layout = {{
+                template: getPlotlyTemplate(),
+                margin: {{ t: 25, b: 25, l: 30, r: 30 }},
+                paper_bgcolor: 'transparent',
+                font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
+            }};
+
+            Plotly.react('chartSimGauge', [trace], layout, {{ responsive: true, displayModeBar: false }});
+        }}
+
+        // 3. Populate Variance Table
+        function populateSimVarianceTable(base, simRev, simOrders, simAov, simDisc, discSavings, revWinback) {{
+            const tbody = document.getElementById('simVarianceTableBody');
+            if (!tbody) return;
+
+            const rows = [
+                {{
+                    name: 'Monthly Gross Revenue',
+                    base: '$' + Math.round(base.revenue).toLocaleString(),
+                    sim: '$' + Math.round(simRev).toLocaleString(),
+                    delta: (simRev - base.revenue >= 0 ? '+$' : '-$') + Math.abs(Math.round(simRev - base.revenue)).toLocaleString(),
+                    pct: ((simRev - base.revenue) / base.revenue * 100).toFixed(1) + '%',
+                    comment: 'Topline platform order volume and basket expansion impact.',
+                    color: simRev >= base.revenue ? 'text-success' : 'text-danger'
+                }},
+                {{
+                    name: 'Monthly Order Count',
+                    base: base.orders.toLocaleString() + ' orders',
+                    sim: simOrders.toLocaleString() + ' orders',
+                    delta: (simOrders - base.orders >= 0 ? '+' : '') + (simOrders - base.orders).toLocaleString(),
+                    pct: ((simOrders - base.orders) / base.orders * 100).toFixed(1) + '%',
+                    comment: 'Organic customer expansion + reactivated VIP accounts.',
+                    color: simOrders >= base.orders ? 'text-primary' : 'text-danger'
+                }},
+                {{
+                    name: 'Average Order Value (AOV)',
+                    base: '$' + base.aov.toFixed(2),
+                    sim: '$' + simAov.toFixed(2),
+                    delta: (simAov - base.aov >= 0 ? '+$' : '-$') + Math.abs(simAov - base.aov).toFixed(2),
+                    pct: ((simAov - base.aov) / base.aov * 100).toFixed(1) + '%',
+                    comment: 'Driven by checkout Apriori combo meal recommendations.',
+                    color: simAov >= base.aov ? 'text-warning' : 'text-danger'
+                }},
+                {{
+                    name: 'VIP Win-Back Revenue Added',
+                    base: '$0 (456 Inactive)',
+                    sim: '$' + Math.round(revWinback).toLocaleString(),
+                    delta: '+$' + Math.round(revWinback).toLocaleString(),
+                    pct: `${{sWinback.value}}% pool`,
+                    comment: 'Direct monthly revenue recovered from slipping high-value accounts.',
+                    color: 'text-success'
+                }},
+                {{
+                    name: 'Promotional Discounts Given',
+                    base: '$' + Math.round(base.discounts).toLocaleString() + ' (13.2%)',
+                    sim: '$' + Math.round(simDisc).toLocaleString() + ` (${{sDiscount.value}}%)`,
+                    delta: (discSavings >= 0 ? '-$' : '+$') + Math.abs(Math.round(discSavings)).toLocaleString(),
+                    pct: discSavings >= 0 ? 'Margin Saved' : 'Margin Diluted',
+                    comment: 'Achieved by enforcing $35 minimum basket gates on coupon codes.',
+                    color: discSavings >= 0 ? 'text-success' : 'text-danger'
+                }},
+                {{
+                    name: 'Quarterly Cumulative Benefit',
+                    base: '$0 (Baseline)',
+                    sim: (simRev - base.revenue + discSavings >= 0 ? '+$' : '-$') + Math.abs(Math.round((simRev - base.revenue + discSavings) * 3)).toLocaleString(),
+                    delta: (simRev - base.revenue + discSavings >= 0 ? '+$' : '-$') + Math.abs(Math.round((simRev - base.revenue + discSavings) * 3)).toLocaleString(),
+                    pct: '3-Mo ROI',
+                    comment: 'Total bottom-line financial value created over next 90 days.',
+                    color: 'text-success fw-bold'
+                }}
+            ];
+
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td><strong>${{r.name}}</strong></td>
+                    <td><span class="text-muted">${{r.base}}</span></td>
+                    <td><strong>${{r.sim}}</strong></td>
+                    <td>
+                        <span class="badge bg-opacity-10 ${{r.color.includes('success') ? 'bg-success text-success' : (r.color.includes('danger') ? 'bg-danger text-danger' : 'bg-primary text-primary')}} fw-bold px-2.5 py-1 rounded-pill">
+                            ${{r.delta}} (${{r.pct}})
+                        </span>
+                    </td>
+                    <td class="small text-muted">${{r.comment}}</td>
+                </tr>
+            `).join('');
+        }}
 
         // Initial Load
         syncUIAndRefresh();
