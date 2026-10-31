@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodHunter - Dynamic Interactive BI Dashboard</title>
+    <title>FoodHunter - Power BI Interactive Cross-Filtering Dashboard</title>
     
-    <!-- Meta tags for responsive & social -->
-    <meta name="description" content="FoodHunter Interactive Data Analytics & BI Dashboard. Explore revenue trends, cuisine share, dish sales, and delivery efficiency.">
+    <meta name="description" content="FoodHunter Power BI-style Interactive Data Analytics Dashboard. Click to filter, click again to reset. Full cross-filtering across visuals.">
     <meta name="theme-color" content="#4F46E5">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
@@ -69,7 +68,85 @@
             border-radius: 18px;
             padding: 16px 20px;
             box-shadow: var(--shadow-md);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Power BI Slicer Pills */
+        .slicer-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slicer-btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .slicer-btn {
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .slicer-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .slicer-btn.active {
+            background: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Active Filter Badges Container */
+        .active-filters-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .active-filter-pill {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid rgba(79, 70, 229, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .active-filter-pill i {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .active-filter-pill i:hover {
+            opacity: 1;
+            color: #ef4444;
         }
 
         /* KPI Card */
@@ -77,37 +154,38 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 18px;
-            padding: 22px;
+            padding: 20px;
             box-shadow: var(--shadow-md);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             height: 100%;
         }
         .kpi-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-hover);
         }
         .kpi-icon-box {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
         }
         .kpi-title {
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .kpi-value {
-            font-size: 1.85rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: var(--text-main);
             margin: 6px 0 4px 0;
             letter-spacing: -0.5px;
+            transition: color 0.2s;
         }
 
         /* Chart Container Cards */
@@ -119,39 +197,54 @@
             box-shadow: var(--shadow-md);
             margin-bottom: 24px;
             transition: box-shadow 0.2s ease;
+            position: relative;
         }
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .chart-title {
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             font-weight: 700;
             color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 10px;
         }
+        .powerbi-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Plotly Cursor & Clickability */
+        .js-plotly-plot .plotly .bars path,
+        .js-plotly-plot .plotly .slice path {
+            cursor: pointer !important;
+            transition: opacity 0.25s ease, filter 0.25s ease;
+        }
 
         /* Badges */
         .badge-pill-custom {
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
         }
 
-        /* Select controls */
+        /* Custom Dropdown Styling (Fixed padding & Crisp SVG arrow) */
         .form-select-custom {
             background-color: var(--bg-card);
             color: var(--text-main);
             border: 1.5px solid var(--border-color);
             border-radius: 12px;
-            padding: 9px 40px 9px 14px !important;
+            padding: 8px 40px 8px 12px !important;
             font-weight: 600;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             line-height: 1.5;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
             background-repeat: no-repeat !important;
@@ -209,13 +302,12 @@
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
         }
 
-        /* Responsive utilities */
         @media (max-width: 768px) {
             .kpi-value {
-                font-size: 1.5rem;
+                font-size: 1.45rem;
             }
             .filter-bar {
-                padding: 14px;
+                padding: 12px;
             }
         }
     </style>
@@ -250,21 +342,58 @@
         <!-- INTRO & BREADCRUMB -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
             <div>
-                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Interactive Executive Dashboard</h3>
+                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Power BI Interactive Cross-Filtering Hub</h3>
                 <p class="text-muted small mb-0">Multi-Dimensional Analysis of 43,118 Orders &bull; June 1 – September 29, 2022</p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
-                    <i class="fas fa-bolt me-1"></i> Live Real-Time Filtering
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                    <i class="fas fa-hand-pointer me-1"></i> Click Visual to Filter &bull; Click Again to Reset
                 </span>
             </div>
         </div>
 
-        <!-- DYNAMIC FILTER TOOLBAR -->
+        <!-- POWER BI SLICER TOOLBAR (Pills & Dropdowns) -->
         <div class="filter-bar">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-utensils me-1"></i> Cuisine Filter</label>
+            <!-- Row 1: Slicer Pills -->
+            <div class="row g-3 mb-3">
+                <!-- Cuisine Slicers -->
+                <div class="col-12 col-xl-5">
+                    <div class="slicer-label"><i class="fas fa-utensils text-primary"></i> Cuisine Slicer:</div>
+                    <div class="slicer-btn-group" id="cuisineSlicers">
+                        <button class="slicer-btn active" data-type="cuisine" data-val="ALL">All Cuisines</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Chinese">🥢 Chinese</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Italian">🍕 Italian</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Indian">🍛 Indian</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Thai">🍜 Thai</button>
+                    </div>
+                </div>
+
+                <!-- Month Slicers -->
+                <div class="col-12 col-md-7 col-xl-4">
+                    <div class="slicer-label"><i class="fas fa-calendar-alt text-warning"></i> Month Slicer:</div>
+                    <div class="slicer-btn-group" id="monthSlicers">
+                        <button class="slicer-btn active" data-type="month" data-val="ALL">All Time</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-06">Jun '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-07">Jul '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-08">Aug '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-09">Sep '22</button>
+                    </div>
+                </div>
+
+                <!-- Day Type Slicers -->
+                <div class="col-12 col-md-5 col-xl-3">
+                    <div class="slicer-label"><i class="fas fa-business-time text-danger"></i> Day Slicer:</div>
+                    <div class="slicer-btn-group" id="dayTypeSlicers">
+                        <button class="slicer-btn active" data-type="dayType" data-val="ALL">Full Week</button>
+                        <button class="slicer-btn" data-type="dayType" data-val="Weekday">💼 Weekdays</button>
+                        <button class="slicer-btn" data-type="dayType" data-val="Weekend">🏖️ Weekends</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Secondary Dropdown Controls & Action Buttons -->
+            <div class="row g-2 align-items-center pt-2 border-top">
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="cuisineSelect" class="form-select form-select-custom">
                         <option value="ALL">All Cuisines (All 4)</option>
                         <option value="Chinese">Chinese Only</option>
@@ -274,8 +403,7 @@
                     </select>
                 </div>
                 
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-calendar-alt me-1"></i> Month Filter</label>
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="monthSelect" class="form-select form-select-custom">
                         <option value="ALL">All Months (Jun – Sep)</option>
                         <option value="2022-06">June 2022</option>
@@ -285,8 +413,7 @@
                     </select>
                 </div>
                 
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-business-time me-1"></i> Day Type</label>
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="dayTypeSelect" class="form-select form-select-custom">
                         <option value="ALL">All Days (Full Week)</option>
                         <option value="Weekday">Weekdays Only (Mon – Fri)</option>
@@ -294,15 +421,26 @@
                     </select>
                 </div>
 
-                <div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end gap-2 pt-2 pt-lg-0">
+                <div class="col-12 col-lg-3 d-flex align-items-center gap-2 pt-2 pt-lg-0">
                     <button id="resetFiltersBtn" class="btn btn-outline-secondary w-100 rounded-3 fw-semibold py-2">
-                        <i class="fas fa-rotate-left me-1"></i> Reset Filters
+                        <i class="fas fa-rotate-left me-1"></i> Reset
                     </button>
                     <button id="exportCsvBtn" class="btn btn-primary w-100 rounded-3 fw-semibold py-2">
-                        <i class="fas fa-file-csv me-1"></i> Export CSV
+                        <i class="fas fa-file-csv me-1"></i> CSV
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- ACTIVE FILTERS BREADCRUMBS ROW (Power BI Style) -->
+        <div class="active-filters-box" id="activeFiltersBox">
+            <span class="small fw-bold text-muted me-2"><i class="fas fa-filter text-primary me-1"></i> Active Filters:</span>
+            <span id="activeFiltersBadges" class="d-flex align-items-center flex-wrap gap-2">
+                <span class="text-muted small fst-italic">None (Showing all data &bull; Click any bar or pie slice to cross-filter)</span>
+            </span>
+            <button id="clearAllFiltersBtn" class="btn btn-sm btn-link text-danger text-decoration-none fw-bold ms-auto p-0 d-none">
+                <i class="fas fa-xmark me-1"></i> Clear All
+            </button>
         </div>
 
         <!-- DYNAMIC KPI SCORECARDS (Live Updating) -->
@@ -447,7 +585,7 @@
                                     <i class="fas fa-chart-column text-primary"></i>
                                     Monthly Revenue & Order Volume Progression
                                 </div>
-                                <span class="badge bg-light text-dark border">Dual Axis (Revenue + Orders)</span>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-primary"></i> Click bar to filter month</span>
                             </div>
                             <div id="chartMonthly" style="min-height: 380px; width: 100%;"></div>
                         </div>
@@ -461,6 +599,7 @@
                                     <i class="fas fa-chart-pie text-success"></i>
                                     Revenue Distribution by Cuisine
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-success"></i> Click slice to filter</span>
                             </div>
                             <div id="chartCuisinePie" style="min-height: 380px; width: 100%;"></div>
                         </div>
@@ -493,6 +632,7 @@
                                     <i class="fas fa-ranking-star text-warning"></i>
                                     Average Order Value by Cuisine ($)
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-warning"></i> Click to filter cuisine</span>
                             </div>
                             <div id="chartCuisineBar" style="min-height: 360px; width: 100%;"></div>
                         </div>
@@ -506,6 +646,7 @@
                                     <i class="fas fa-calendar-week text-danger"></i>
                                     Weekday vs Weekend Volume & Spend
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-danger"></i> Click to filter day</span>
                             </div>
                             <div id="chartDayType" style="min-height: 360px; width: 100%;"></div>
                         </div>
@@ -517,8 +658,9 @@
                             <div class="chart-header">
                                 <div class="chart-title">
                                     <i class="fas fa-store text-primary"></i>
-                                    Top 10 Performing Restaurants by Revenue
+                                    Top Performing Restaurants by Revenue
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-arrow-up-right-from-square text-primary"></i> Click restaurant to search</span>
                             </div>
                             <div id="chartRestaurants" style="min-height: 400px; width: 100%;"></div>
                         </div>
@@ -537,7 +679,7 @@
                                     <i class="fas fa-fire text-danger"></i>
                                     Top 12 Most Ordered Dishes (Units Sold)
                                 </div>
-                                <span class="badge bg-light text-dark border">Dynamically filters by Cuisine</span>
+                                <span class="badge bg-light text-dark border">Filters by active Cuisine</span>
                             </div>
                             <div id="chartDishes" style="min-height: 420px; width: 100%;"></div>
                         </div>
@@ -639,7 +781,7 @@
         <!-- FOOTER -->
         <footer class="text-center py-4 text-muted small border-top mt-4">
             <p class="mb-1 fw-bold">FoodHunter Data Analytics Hub &bull; Powered by Python, Pandas, SQLite & Plotly.js</p>
-            <p class="mb-0">Interactive &bull; Dynamic &bull; Fully Responsive Client-Side BI Platform</p>
+            <p class="mb-0">Power BI-Style Cross-Filtering &bull; Interactive &bull; Dynamic &bull; Fully Responsive</p>
         </footer>
 
     </div> <!-- End container -->
@@ -647,9 +789,16 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- EMBEDDED REAL DATASET -->
+    <!-- EMBEDDED REAL DATASET & POWER BI LOGIC -->
     <script>
         const RAW_DATA = {"matrix":[{"month":"2022-06","cuisine":"Chinese","day_type":"Weekday","orders":3043,"revenue":97496.9,"food_total":103402.0,"deliv_fee":8079.5,"discount":13984.6,"avg_deliv":19.2,"fast_deliv":3043,"mod_deliv":0},{"month":"2022-06","cuisine":"Chinese","day_type":"Weekend","orders":1238,"revenue":40893.5,"food_total":43847.0,"deliv_fee":3112.5,"discount":6066.0,"avg_deliv":19.2,"fast_deliv":1238,"mod_deliv":0},{"month":"2022-06","cuisine":"Indian","day_type":"Weekday","orders":1841,"revenue":43355.9,"food_total":42375.0,"deliv_fee":6299.5,"discount":5318.6,"avg_deliv":19.2,"fast_deliv":1841,"mod_deliv":0},{"month":"2022-06","cuisine":"Indian","day_type":"Weekend","orders":747,"revenue":17096.3,"food_total":16531.0,"deliv_fee":2590.5,"discount":2025.2,"avg_deliv":19.1,"fast_deliv":747,"mod_deliv":0},{"month":"2022-06","cuisine":"Italian","day_type":"Weekday","orders":2907,"revenue":71634.8,"food_total":71338.0,"deliv_fee":9784.0,"discount":9487.2,"avg_deliv":19.1,"fast_deliv":2907,"mod_deliv":0},{"month":"2022-06","cuisine":"Italian","day_type":"Weekend","orders":1031,"revenue":25961.4,"food_total":26046.0,"deliv_fee":3424.0,"discount":3508.6,"avg_deliv":19.2,"fast_deliv":1031,"mod_deliv":0},{"month":"2022-06","cuisine":"Thai","day_type":"Weekday","orders":1252,"revenue":38170.1,"food_total":40027.0,"deliv_fee":3658.5,"discount":5515.4,"avg_deliv":19.0,"fast_deliv":1252,"mod_deliv":0},{"month":"2022-06","cuisine":"Thai","day_type":"Weekend","orders":443,"revenue":12968.6,"food_total":13481.0,"deliv_fee":1377.0,"discount":1889.4,"avg_deliv":19.3,"fast_deliv":443,"mod_deliv":0},{"month":"2022-07","cuisine":"Chinese","day_type":"Weekday","orders":2828,"revenue":78507.5,"food_total":80701.0,"deliv_fee":8599.5,"discount":10793.0,"avg_deliv":21.1,"fast_deliv":2796,"mod_deliv":32},{"month":"2022-07","cuisine":"Chinese","day_type":"Weekend","orders":1110,"revenue":30696.5,"food_total":31418.0,"deliv_fee":3384.5,"discount":4106.0,"avg_deliv":21.2,"fast_deliv":1091,"mod_deliv":19},{"month":"2022-07","cuisine":"Indian","day_type":"Weekday","orders":1650,"revenue":46345.2,"food_total":47393.0,"deliv_fee":5025.0,"discount":6072.8,"avg_deliv":21.1,"fast_deliv":1626,"mod_deliv":24},{"month":"2022-07","cuisine":"Indian","day_type":"Weekend","orders":593,"revenue":15650.8,"food_total":15793.0,"deliv_fee":1937.0,"discount":2079.2,"avg_deliv":21.3,"fast_deliv":583,"mod_deliv":10},{"month":"2022-07","cuisine":"Italian","day_type":"Weekday","orders":2482,"revenue":68337.1,"food_total":70171.0,"deliv_fee":7512.5,"discount":9346.4,"avg_deliv":21.1,"fast_deliv":2457,"mod_deliv":25},{"month":"2022-07","cuisine":"Italian","day_type":"Weekend","orders":943,"revenue":26297.1,"food_total":27091.0,"deliv_fee":2803.5,"discount":3597.4,"avg_deliv":21.0,"fast_deliv":935,"mod_deliv":8},{"month":"2022-07","cuisine":"Thai","day_type":"Weekday","orders":1136,"revenue":31803.6,"food_total":32626.0,"deliv_fee":3451.0,"discount":4273.4,"avg_deliv":21.2,"fast_deliv":1121,"mod_deliv":15},{"month":"2022-07","cuisine":"Thai","day_type":"Weekend","orders":402,"revenue":10963.7,"food_total":11163.0,"deliv_fee":1262.5,"discount":1461.8,"avg_deliv":21.2,"fast_deliv":398,"mod_deliv":4},{"month":"2022-08","cuisine":"Chinese","day_type":"Weekday","orders":2648,"revenue":72981.5,"food_total":74724.0,"deliv_fee":8291.5,"discount":10034.0,"avg_deliv":24.2,"fast_deliv":2407,"mod_deliv":241},{"month":"2022-08","cuisine":"Chinese","day_type":"Weekend","orders":976,"revenue":28173.0,"food_total":29374.0,"deliv_fee":2870.0,"discount":4071.0,"avg_deliv":23.9,"fast_deliv":889,"mod_deliv":87},{"month":"2022-08","cuisine":"Indian","day_type":"Weekday","orders":1484,"revenue":42259.6,"food_total":43529.0,"deliv_fee":4606.0,"discount":5875.4,"avg_deliv":24.2,"fast_deliv":1361,"mod_deliv":123},{"month":"2022-08","cuisine":"Indian","day_type":"Weekend","orders":568,"revenue":15755.4,"food_total":16285.0,"deliv_fee":1733.0,"discount":2262.6,"avg_deliv":24.0,"fast_deliv":517,"mod_deliv":51},{"month":"2022-08","cuisine":"Italian","day_type":"Weekday","orders":2243,"revenue":61163.2,"food_total":62367.0,"deliv_fee":6914.0,"discount":8117.8,"avg_deliv":24.1,"fast_deliv":2069,"mod_deliv":174},{"month":"2022-08","cuisine":"Italian","day_type":"Weekend","orders":818,"revenue":23197.3,"food_total":23870.0,"deliv_fee":2421.5,"discount":3094.2,"avg_deliv":24.0,"fast_deliv":747,"mod_deliv":71},{"month":"2022-08","cuisine":"Thai","day_type":"Weekday","orders":1009,"revenue":29181.9,"food_total":30238.0,"deliv_fee":3037.5,"discount":4093.6,"avg_deliv":24.3,"fast_deliv":924,"mod_deliv":85},{"month":"2022-08","cuisine":"Thai","day_type":"Weekend","orders":361,"revenue":10654.0,"food_total":11098.0,"deliv_fee":1150.0,"discount":1594.0,"avg_deliv":24.3,"fast_deliv":333,"mod_deliv":28},{"month":"2022-09","cuisine":"Chinese","day_type":"Weekday","orders":2336,"revenue":65928.6,"food_total":67832.0,"deliv_fee":6950.0,"discount":8853.4,"avg_deliv":31.1,"fast_deliv":763,"mod_deliv":1573},{"month":"2022-09","cuisine":"Chinese","day_type":"Weekend","orders":842,"revenue":23029.6,"food_total":23659.0,"deliv_fee":2608.0,"discount":3237.4,"avg_deliv":31.0,"fast_deliv":261,"mod_deliv":581},{"month":"2022-09","cuisine":"Indian","day_type":"Weekday","orders":1426,"revenue":38910.9,"food_total":39743.0,"deliv_fee":4379.5,"discount":5211.6,"avg_deliv":31.4,"fast_deliv":426,"mod_deliv":1000},{"month":"2022-09","cuisine":"Indian","day_type":"Weekend","orders":476,"revenue":13543.8,"food_total":13943.0,"deliv_fee":1461.0,"discount":1860.2,"avg_deliv":30.6,"fast_deliv":173,"mod_deliv":303},{"month":"2022-09","cuisine":"Italian","day_type":"Weekday","orders":2168,"revenue":57821.0,"food_total":58878.0,"deliv_fee":6723.0,"discount":7780.0,"avg_deliv":31.2,"fast_deliv":681,"mod_deliv":1487},{"month":"2022-09","cuisine":"Italian","day_type":"Weekend","orders":789,"revenue":22291.7,"food_total":23015.0,"deliv_fee":2377.5,"discount":3100.8,"avg_deliv":31.0,"fast_deliv":262,"mod_deliv":527},{"month":"2022-09","cuisine":"Thai","day_type":"Weekday","orders":959,"revenue":26525.3,"food_total":27233.0,"deliv_fee":2933.5,"discount":3641.2,"avg_deliv":31.1,"fast_deliv":298,"mod_deliv":661},{"month":"2022-09","cuisine":"Thai","day_type":"Weekend","orders":369,"revenue":10110.2,"food_total":10336.0,"deliv_fee":1102.0,"discount":1327.8,"avg_deliv":31.3,"fast_deliv":114,"mod_deliv":255}],"hourly":[{"hour":0,"cuisine":"Chinese","orders":657,"revenue":19512.0},{"hour":0,"cuisine":"Indian","orders":372,"revenue":9681.8},{"hour":0,"cuisine":"Italian","orders":590,"revenue":15438.9},{"hour":0,"cuisine":"Thai","orders":267,"revenue":7959.6},{"hour":1,"cuisine":"Chinese","orders":678,"revenue":20421.5},{"hour":1,"cuisine":"Indian","orders":420,"revenue":11069.2},{"hour":1,"cuisine":"Italian","orders":584,"revenue":14715.6},{"hour":1,"cuisine":"Thai","orders":254,"revenue":7133.9},{"hour":2,"cuisine":"Chinese","orders":691,"revenue":19841.1},{"hour":2,"cuisine":"Indian","orders":437,"revenue":11158.7},{"hour":2,"cuisine":"Italian","orders":581,"revenue":16386.5},{"hour":2,"cuisine":"Thai","orders":263,"revenue":7386.6},{"hour":3,"cuisine":"Chinese","orders":714,"revenue":19089.1},{"hour":3,"cuisine":"Indian","orders":407,"revenue":11036.2},{"hour":3,"cuisine":"Italian","orders":606,"revenue":16526.5},{"hour":3,"cuisine":"Thai","orders":264,"revenue":7178.5},{"hour":4,"cuisine":"Chinese","orders":678,"revenue":20118.7},{"hour":4,"cuisine":"Indian","orders":425,"revenue":11173.3},{"hour":4,"cuisine":"Italian","orders":643,"revenue":17149.9},{"hour":4,"cuisine":"Thai","orders":280,"revenue":8836.8},{"hour":5,"cuisine":"Chinese","orders":672,"revenue":19091.6},{"hour":5,"cuisine":"Indian","orders":403,"revenue":11134.5},{"hour":5,"cuisine":"Italian","orders":595,"revenue":15391.0},{"hour":5,"cuisine":"Thai","orders":276,"revenue":7705.4},{"hour":6,"cuisine":"Chinese","orders":670,"revenue":19899.6},{"hour":6,"cuisine":"Indian","orders":402,"revenue":10914.5},{"hour":6,"cuisine":"Italian","orders":616,"revenue":16340.8},{"hour":6,"cuisine":"Thai","orders":281,"revenue":8172.6},{"hour":7,"cuisine":"Chinese","orders":676,"revenue":19770.7},{"hour":7,"cuisine":"Indian","orders":384,"revenue":10136.0},{"hour":7,"cuisine":"Italian","orders":625,"revenue":16709.6},{"hour":7,"cuisine":"Thai","orders":273,"revenue":8016.5},{"hour":8,"cuisine":"Chinese","orders":732,"revenue":21269.4},{"hour":8,"cuisine":"Indian","orders":421,"revenue":11507.0},{"hour":8,"cuisine":"Italian","orders":622,"revenue":16350.4},{"hour":8,"cuisine":"Thai","orders":277,"revenue":7516.6},{"hour":9,"cuisine":"Chinese","orders":684,"revenue":19833.5},{"hour":9,"cuisine":"Indian","orders":382,"revenue":10124.6},{"hour":9,"cuisine":"Italian","orders":619,"revenue":17009.0},{"hour":9,"cuisine":"Thai","orders":253,"revenue":7481.0},{"hour":10,"cuisine":"Chinese","orders":660,"revenue":20106.3},{"hour":10,"cuisine":"Indian","orders":389,"revenue":9630.3},{"hour":10,"cuisine":"Italian","orders":579,"revenue":15678.7},{"hour":10,"cuisine":"Thai","orders":248,"revenue":7244.2},{"hour":11,"cuisine":"Chinese","orders":674,"revenue":19552.7},{"hour":11,"cuisine":"Indian","orders":387,"revenue":10119.7},{"hour":11,"cuisine":"Italian","orders":595,"revenue":15662.6},{"hour":11,"cuisine":"Thai","orders":275,"revenue":8039.6},{"hour":12,"cuisine":"Chinese","orders":698,"revenue":19830.9},{"hour":12,"cuisine":"Indian","orders":385,"revenue":10995.0},{"hour":12,"cuisine":"Italian","orders":621,"revenue":17038.1},{"hour":12,"cuisine":"Thai","orders":292,"revenue":8515.8},{"hour":13,"cuisine":"Chinese","orders":656,"revenue":19318.9},{"hour":13,"cuisine":"Indian","orders":391,"revenue":10515.6},{"hour":13,"cuisine":"Italian","orders":650,"revenue":16907.4},{"hour":13,"cuisine":"Thai","orders":267,"revenue":7678.8},{"hour":14,"cuisine":"Chinese","orders":699,"revenue":21483.4},{"hour":14,"cuisine":"Indian","orders":410,"revenue":11091.1},{"hour":14,"cuisine":"Italian","orders":605,"revenue":15550.6},{"hour":14,"cuisine":"Thai","orders":276,"revenue":8627.0},{"hour":15,"cuisine":"Chinese","orders":712,"revenue":20554.1},{"hour":15,"cuisine":"Indian","orders":360,"revenue":9271.4},{"hour":15,"cuisine":"Italian","orders":580,"revenue":15074.0},{"hour":15,"cuisine":"Thai","orders":259,"revenue":6606.9},{"hour":16,"cuisine":"Chinese","orders":667,"revenue":19389.8},{"hour":16,"cuisine":"Indian","orders":399,"revenue":10907.4},{"hour":16,"cuisine":"Italian","orders":583,"revenue":15118.3},{"hour":16,"cuisine":"Thai","orders":260,"revenue":7561.3},{"hour":17,"cuisine":"Chinese","orders":632,"revenue":19331.3},{"hour":17,"cuisine":"Indian","orders":410,"revenue":10790.4},{"hour":17,"cuisine":"Italian","orders":650,"revenue":17911.6},{"hour":17,"cuisine":"Thai","orders":274,"revenue":7726.9},{"hour":18,"cuisine":"Chinese","orders":713,"revenue":20922.9},{"hour":18,"cuisine":"Indian","orders":416,"revenue":10889.1},{"hour":18,"cuisine":"Italian","orders":610,"revenue":15949.5},{"hour":18,"cuisine":"Thai","orders":272,"revenue":7373.6},{"hour":19,"cuisine":"Chinese","orders":681,"revenue":18263.7},{"hour":19,"cuisine":"Indian","orders":377,"revenue":9985.8},{"hour":19,"cuisine":"Italian","orders":594,"revenue":16029.2},{"hour":19,"cuisine":"Thai","orders":280,"revenue":8495.7},{"hour":20,"cuisine":"Chinese","orders":723,"revenue":22017.4},{"hour":20,"cuisine":"Indian","orders":400,"revenue":10466.3},{"hour":20,"cuisine":"Italian","orders":614,"revenue":16364.4},{"hour":20,"cuisine":"Thai","orders":270,"revenue":7478.1},{"hour":21,"cuisine":"Chinese","orders":654,"revenue":18088.5},{"hour":21,"cuisine":"Indian","orders":408,"revenue":10320.0},{"hour":21,"cuisine":"Italian","orders":619,"revenue":17401.0},{"hour":21,"cuisine":"Thai","orders":270,"revenue":7642.0}],"dishes":[{"name":"Hot and sour soup","cuisine":"Chinese","category":"Non-Veg","qty":2638,"orders":1966},{"name":"Peking duck","cuisine":"Chinese","category":"Non-Veg","qty":2569,"orders":1889},{"name":"Spring rolls","cuisine":"Chinese","category":"Non-Veg","qty":2353,"orders":1749},{"name":"Moo shu pork","cuisine":"Chinese","category":"Non-Veg","qty":1979,"orders":1455},{"name":"Kung Pao chicken","cuisine":"Chinese","category":"Non-Veg","qty":1773,"orders":1310},{"name":"Crab Rangoon","cuisine":"Chinese","category":"Non-Veg","qty":1754,"orders":1301},{"name":"Shrimp fried rice","cuisine":"Chinese","category":"Non-Veg","qty":1487,"orders":1087},{"name":"Dan dan noodles","cuisine":"Chinese","category":"Non-Veg","qty":1464,"orders":1084},{"name":"Korean-style fried chicken","cuisine":"Chinese","category":"Non-Veg","qty":1426,"orders":1083},{"name":"Wonton soup","cuisine":"Chinese","category":"Non-Veg","qty":1413,"orders":1054},{"name":"Vegetable lo mein","cuisine":"Chinese","category":"Vegetarian","qty":1403,"orders":1054},{"name":"Beef and broccoli","cuisine":"Chinese","category":"Non-Veg","qty":1189,"orders":865},{"name":"Pot stickers","cuisine":"Chinese","category":"Non-Veg","qty":1160,"orders":874},{"name":"Dim sum (various types)","cuisine":"Chinese","category":"Non-Veg","qty":1158,"orders":896},{"name":"Butter Chicken","cuisine":"Indian","category":"Non-Veg","qty":896,"orders":663},{"name":"Peshwari Naan","cuisine":"Indian","category":"Vegetarian","qty":895,"orders":650},{"name":"Garlic Naan","cuisine":"Indian","category":"Vegetarian","qty":881,"orders":659},{"name":"Chicken Saagwala","cuisine":"Indian","category":"Non-Veg","qty":864,"orders":639},{"name":"Lamb Biryani","cuisine":"Indian","category":"Non-Veg","qty":860,"orders":661},{"name":"Szechuan chicken","cuisine":"Chinese","category":"Non-Veg","qty":848,"orders":642},{"name":"Lasagna","cuisine":"Italian","category":"Non-Veg","qty":847,"orders":635},{"name":"Peas Pulao","cuisine":"Indian","category":"Vegetarian","qty":846,"orders":613},{"name":"Cozze al vino bianco","cuisine":"Italian","category":"Non-Veg","qty":840,"orders":639},{"name":"Poori","cuisine":"Indian","category":"Vegetarian","qty":830,"orders":608},{"name":"Cannoli","cuisine":"Italian","category":"Vegetarian","qty":801,"orders":600},{"name":"Seafood risotto","cuisine":"Italian","category":"Non-Veg","qty":628,"orders":455},{"name":"Mutton Korma","cuisine":"Indian","category":"Non-Veg","qty":621,"orders":446},{"name":"Egg drop soup","cuisine":"Chinese","category":"Non-Veg","qty":608,"orders":454},{"name":"Palak Paneer","cuisine":"Indian","category":"Vegetarian","qty":608,"orders":446},{"name":"Calzone","cuisine":"Italian","category":"Non-Veg","qty":605,"orders":453},{"name":"Americano","cuisine":"Italian","category":"Non-Veg","qty":600,"orders":436},{"name":"Spuma","cuisine":"Italian","category":"Vegetarian","qty":599,"orders":450},{"name":"Arancini","cuisine":"Italian","category":"Vegetarian","qty":589,"orders":439},{"name":"Gazzosa","cuisine":"Italian","category":"Vegetarian","qty":588,"orders":437},{"name":"Chicken Jalfrezi","cuisine":"Indian","category":"Non-Veg","qty":587,"orders":449},{"name":"Vegetable Pakoras","cuisine":"Indian","category":"Vegetarian","qty":583,"orders":433},{"name":"Bellini","cuisine":"Italian","category":"Vegetarian","qty":570,"orders":418},{"name":"Kashmiri Naan","cuisine":"Indian","category":"Vegetarian","qty":564,"orders":434},{"name":"Laab Ped","cuisine":"Thai","category":"Non-Veg","qty":561,"orders":443},{"name":"Samosa Sandwich","cuisine":"Indian","category":"Vegetarian","qty":560,"orders":432},{"name":"Minestrone soup","cuisine":"Italian","category":"Non-Veg","qty":557,"orders":404},{"name":"Prosciutto pizza","cuisine":"Italian","category":"Non-Veg","qty":555,"orders":421},{"name":"Samosas","cuisine":"Indian","category":"Vegetarian","qty":555,"orders":420},{"name":"Chicken Curry","cuisine":"Indian","category":"Non-Veg","qty":552,"orders":407},{"name":"Frappato","cuisine":"Italian","category":"Non-Veg","qty":547,"orders":402},{"name":"Pepperoni pizza","cuisine":"Italian","category":"Non-Veg","qty":545,"orders":407},{"name":"Keema Naan","cuisine":"Indian","category":"Non-Veg","qty":544,"orders":411},{"name":"Aperol spritz","cuisine":"Italian","category":"Vegetarian","qty":543,"orders":406},{"name":"Shrimp scampi","cuisine":"Italian","category":"Non-Veg","qty":541,"orders":399},{"name":"Chicken piccata","cuisine":"Italian","category":"Non-Veg","qty":537,"orders":410},{"name":"Tom Kha Gai soup","cuisine":"Thai","category":"Non-Veg","qty":537,"orders":420},{"name":"Italian soda","cuisine":"Italian","category":"Vegetarian","qty":534,"orders":404},{"name":"Aloo Paratha","cuisine":"Indian","category":"Vegetarian","qty":532,"orders":423},{"name":"Khao Soi Gai","cuisine":"Thai","category":"Non-Veg","qty":529,"orders":426},{"name":"Chinotto","cuisine":"Italian","category":"Vegetarian","qty":525,"orders":403},{"name":"Pad Sator","cuisine":"Thai","category":"Non-Veg","qty":525,"orders":399},{"name":"Lamb Pulao","cuisine":"Italian","category":"Non-Veg","qty":519,"orders":394},{"name":"Fried calamari","cuisine":"Italian","category":"Non-Veg","qty":339,"orders":253},{"name":"Pasta e fagioli soup","cuisine":"Italian","category":"Non-Veg","qty":338,"orders":240},{"name":"Barbera d'Asti","cuisine":"Italian","category":"Non-Veg","qty":335,"orders":244},{"name":"Fish Tikka Masala","cuisine":"Indian","category":"Non-Veg","qty":330,"orders":236},{"name":"Manhattan","cuisine":"Italian","category":"Non-Veg","qty":329,"orders":241},{"name":"Rogan Josh Kebab","cuisine":"Indian","category":"Non-Veg","qty":324,"orders":232},{"name":"Tiramisu","cuisine":"Italian","category":"Vegetarian","qty":324,"orders":237},{"name":"Shrimp Saagwala","cuisine":"Indian","category":"Non-Veg","qty":323,"orders":231},{"name":"Beef carpaccio","cuisine":"Italian","category":"Non-Veg","qty":322,"orders":227},{"name":"Special Pasta","cuisine":"Italian","category":"Non-Veg","qty":322,"orders":230},{"name":"Lamb Tikka Salad","cuisine":"Indian","category":"Non-Veg","qty":318,"orders":231},{"name":"Nam Tok","cuisine":"Thai","category":"Non-Veg","qty":317,"orders":231},{"name":"Lamb Seekh Kebab","cuisine":"Indian","category":"Non-Veg","qty":316,"orders":232},{"name":"Pasta e fagioli soup","cuisine":"Chinese","category":"Non-Veg","qty":312,"orders":235},{"name":"Butter Naan","cuisine":"Chinese","category":"Vegetarian","qty":311,"orders":231},{"name":"Pad Prik King","cuisine":"Thai","category":"Non-Veg","qty":310,"orders":222},{"name":"Stir-fried basil beef","cuisine":"Thai","category":"Non-Veg","qty":310,"orders":229},{"name":"Lamb Biryani","cuisine":"Italian","category":"Non-Veg","qty":309,"orders":219},{"name":"Margarita","cuisine":"Italian","category":"Non-Veg","qty":309,"orders":226},{"name":"Cappuccino","cuisine":"Italian","category":"Vegetarian","qty":308,"orders":232},{"name":"Chicken Soup","cuisine":"Italian","category":"Non-Veg","qty":308,"orders":229},{"name":"Cosmopolitan","cuisine":"Italian","category":"Vegetarian","qty":308,"orders":225},{"name":"Green curry","cuisine":"Thai","category":"Vegetarian","qty":308,"orders":222},{"name":"Veal Marsala","cuisine":"Italian","category":"Non-Veg","qty":308,"orders":219},{"name":"Chicken Kebab Salad","cuisine":"Indian","category":"Non-Veg","qty":307,"orders":234},{"name":"Falanghina","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":230},{"name":"Italian Wedding Soup","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":233},{"name":"Mulligatawny Soup","cuisine":"Italian","category":"Non-Veg","qty":307,"orders":230},{"name":"Carbonara","cuisine":"Italian","category":"Non-Veg","qty":306,"orders":221},{"name":"Moscato","cuisine":"Italian","category":"Non-Veg","qty":306,"orders":223},{"name":"Gai Yang","cuisine":"Thai","category":"Non-Veg","qty":305,"orders":219},{"name":"Moo shu pork","cuisine":"Italian","category":"Non-Veg","qty":305,"orders":227},{"name":"Paneer Tikka","cuisine":"Indian","category":"Vegetarian","qty":305,"orders":230},{"name":"Coconut Ice Cream","cuisine":"Indian","category":"Vegetarian","qty":303,"orders":221},{"name":"Eggplant parmesan","cuisine":"Italian","category":"Non-Veg","qty":303,"orders":222},{"name":"Kana Moo Krob","cuisine":"Thai","category":"Non-Veg","qty":302,"orders":220},{"name":"Mango Lassi","cuisine":"Indian","category":"Vegetarian","qty":302,"orders":212},{"name":"Margherita pizza","cuisine":"Italian","category":"Vegetarian","qty":302,"orders":218},{"name":"Papadum","cuisine":"Italian","category":"Vegetarian","qty":302,"orders":219},{"name":"Affogato","cuisine":"Italian","category":"Vegetarian","qty":301,"orders":225},{"name":"Chana Masala","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":225},{"name":"Hot chocolate","cuisine":"Italian","category":"Vegetarian","qty":301,"orders":232},{"name":"Naan","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":233},{"name":"Papaya Salad","cuisine":"Indian","category":"Vegetarian","qty":301,"orders":231},{"name":"Taurasi","cuisine":"Italian","category":"Non-Veg","qty":300,"orders":218},{"name":"Barbaresco","cuisine":"Italian","category":"Non-Veg","qty":299,"orders":216},{"name":"Egg rolls","cuisine":"Chinese","category":"Non-Veg","qty":299,"orders":220},{"name":"Kang Massaman","cuisine":"Thai","category":"Non-Veg","qty":298,"orders":219},{"name":"Fiano di Avellino","cuisine":"Italian","category":"Vegetarian","qty":297,"orders":226},{"name":"Mixed Vegetable Salad","cuisine":"Indian","category":"Vegetarian","qty":296,"orders":221},{"name":"Vegetable Jalfrezi","cuisine":"Indian","category":"Vegetarian","qty":295,"orders":229},{"name":"Aloo Gobi","cuisine":"Indian","category":"Vegetarian","qty":294,"orders":224},{"name":"Amarone","cuisine":"Italian","category":"Non-Veg","qty":294,"orders":226},{"name":"Gang Keow Wan Pla","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":218},{"name":"Green papaya salad","cuisine":"Indian","category":"Non-Veg","qty":294,"orders":227},{"name":"Moo Dad Deaw","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":216},{"name":"Panzerotti ","cuisine":"Italian","category":"Vegetarian","qty":294,"orders":213},{"name":"Rad Na noodles","cuisine":"Thai","category":"Non-Veg","qty":294,"orders":212},{"name":"Valpolicella","cuisine":"Italian","category":"Non-Veg","qty":294,"orders":216},{"name":"Hoi Tod","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":217},{"name":"Panang Nuea","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":217},{"name":"Stir-fried pork belly with basil","cuisine":"Thai","category":"Non-Veg","qty":293,"orders":232},{"name":"Piadina","cuisine":"Italian","category":"Non-Veg","qty":292,"orders":231},{"name":"Crying tiger","cuisine":"Thai","category":"Non-Veg","qty":291,"orders":222},{"name":"Pappa al Pomodoro","cuisine":"Italian","category":"Vegetarian","qty":291,"orders":211},{"name":"Chili Chicken","cuisine":"Indian","category":"Non-Veg","qty":290,"orders":214},{"name":"Mutton Biryani","cuisine":"Indian","category":"Non-Veg","qty":290,"orders":211},{"name":"Miang Kham","cuisine":"Thai","category":"Vegetarian","qty":289,"orders":237},{"name":"Jalebi","cuisine":"Indian","category":"Vegetarian","qty":288,"orders":207},{"name":"Khao Soi noodles","cuisine":"Thai","category":"Non-Veg","qty":288,"orders":217},{"name":"Gnocchi","cuisine":"Italian","category":"Vegetarian","qty":287,"orders":215},{"name":"Kachori","cuisine":"Indian","category":"Vegetarian","qty":287,"orders":215},{"name":"Ribollita","cuisine":"Italian","category":"Non-Veg","qty":287,"orders":222},{"name":"Parmigiana di melanzane","cuisine":"Italian","category":"Non-Veg","qty":286,"orders":227},{"name":"Rasgulla","cuisine":"Indian","category":"Vegetarian","qty":286,"orders":224},{"name":"Chicken parmesan","cuisine":"Italian","category":"Non-Veg","qty":285,"orders":212},{"name":"Pad Thai noodles","cuisine":"Thai","category":"Non-Veg","qty":285,"orders":213},{"name":"Pad Kra Pao Moo","cuisine":"Thai","category":"Non-Veg","qty":284,"orders":223},{"name":"Gobi Paratha","cuisine":"Indian","category":"Vegetarian","qty":283,"orders":228},{"name":"Lamb Soup","cuisine":"Indian","category":"Non-Veg","qty":283,"orders":208},{"name":"Pla Too","cuisine":"Thai","category":"Non-Veg","qty":283,"orders":221},{"name":"Peking duck","cuisine":"Italian","category":"Non-Veg","qty":282,"orders":209},{"name":"Focaccia","cuisine":"Italian","category":"Vegetarian","qty":281,"orders":208},{"name":"Pad Kra Pao Talay","cuisine":"Thai","category":"Non-Veg","qty":281,"orders":214},{"name":"Spaghetti with meatballs","cuisine":"Italian","category":"Non-Veg","qty":280,"orders":211},{"name":"Pista Kulfi","cuisine":"Indian","category":"Vegetarian","qty":279,"orders":217},{"name":"Kang Panang","cuisine":"Thai","category":"Non-Veg","qty":278,"orders":213},{"name":"Lamb Seekh Kebab","cuisine":"Chinese","category":"Non-Veg","qty":278,"orders":206},{"name":"Seafood pizza","cuisine":"Italian","category":"Non-Veg","qty":278,"orders":206},{"name":"Shrimp fra diavolo","cuisine":"Italian","category":"Non-Veg","qty":278,"orders":217},{"name":"Tod Man Pla","cuisine":"Thai","category":"Non-Veg","qty":277,"orders":213},{"name":"Tom Yum fried rice","cuisine":"Thai","category":"Non-Veg","qty":277,"orders":210},{"name":"Mooncake","cuisine":"Chinese","category":"Non-Veg","qty":275,"orders":210},{"name":"Thot Man Goong","cuisine":"Thai","category":"Non-Veg","qty":275,"orders":220},{"name":"Vegetable risotto","cuisine":"Italian","category":"Vegetarian","qty":274,"orders":201},{"name":"Zuppa Toscana","cuisine":"Italian","category":"Non-Veg","qty":274,"orders":199},{"name":"Pad Kra Pao","cuisine":"Thai","category":"Non-Veg","qty":272,"orders":201},{"name":"Vermentino","cuisine":"Italian","category":"Vegetarian","qty":272,"orders":214},{"name":"Falooda","cuisine":"Indian","category":"Vegetarian","qty":271,"orders":208},{"name":"Fish Amritsari","cuisine":"Indian","category":"Non-Veg","qty":271,"orders":207},{"name":"Chicken Francese","cuisine":"Italian","category":"Non-Veg","qty":270,"orders":205},{"name":"General Tso's chicken","cuisine":"Chinese","category":"Non-Veg","qty":270,"orders":202},{"name":"Martini","cuisine":"Italian","category":"Non-Veg","qty":269,"orders":210},{"name":"Gai Med Ma Moung","cuisine":"Thai","category":"Non-Veg","qty":265,"orders":182},{"name":"Gang Dang Nuea","cuisine":"Thai","category":"Non-Veg","qty":265,"orders":193},{"name":"Rose Shake","cuisine":"Italian","category":"Vegetarian","qty":265,"orders":200},{"name":"Schiacciata","cuisine":"Italian","category":"Vegetarian","qty":264,"orders":201},{"name":"Tamarind Chutney","cuisine":"Indian","category":"Vegetarian","qty":262,"orders":189},{"name":"Pla Meuk Pad Prik","cuisine":"Thai","category":"Non-Veg","qty":255,"orders":197},{"name":"Stracciatella alla Romana","cuisine":"Italian","category":"Non-Veg","qty":255,"orders":199},{"name":"Brodetto","cuisine":"Italian","category":"Non-Veg","qty":253,"orders":191},{"name":"Lamb Vindaloo","cuisine":"Indian","category":"Non-Veg","qty":253,"orders":193},{"name":"Kuay Teow Nam Tok","cuisine":"Thai","category":"Non-Veg","qty":250,"orders":193},{"name":"Lamb Saagwala","cuisine":"Indian","category":"Non-Veg","qty":250,"orders":185},{"name":"Khao Man Gai","cuisine":"Thai","category":"Non-Veg","qty":249,"orders":181},{"name":"Acquacotta","cuisine":"Italian","category":"Non-Veg","qty":248,"orders":194},{"name":"Prosecco","cuisine":"Italian","category":"Non-Veg","qty":248,"orders":183},{"name":"Pla Muek Yang","cuisine":"Thai","category":"Non-Veg","qty":244,"orders":191},{"name":"Beef Curry","cuisine":"Italian","category":"Non-Veg","qty":243,"orders":172},{"name":"Grilled chicken satay","cuisine":"Thai","category":"Non-Veg","qty":243,"orders":190},{"name":"Lamb Korma","cuisine":"Indian","category":"Non-Veg","qty":238,"orders":181}],"restaurants":[{"name":"Loring Place","cuisine":"Chinese","orders":1268,"revenue":38504.1,"avg_order":30.37},{"name":"Hwa Yuan Szechuan","cuisine":"Thai","orders":1225,"revenue":37696.4,"avg_order":30.77},{"name":"Totto Ramen","cuisine":"Indian","orders":1191,"revenue":33265.8,"avg_order":27.93},{"name":"Rubirosa","cuisine":"Italian","orders":1185,"revenue":31849.5,"avg_order":26.88},{"name":"SriPraPhai","cuisine":"Chinese","orders":991,"revenue":28805.5,"avg_order":29.07},{"name":"Bohemian","cuisine":"Chinese","orders":934,"revenue":26496.6,"avg_order":28.37},{"name":"The Modern","cuisine":"Indian","orders":969,"revenue":26204.8,"avg_order":27.04},{"name":"Adda Indian Canteen","cuisine":"Indian","orders":994,"revenue":25017.8,"avg_order":25.17},{"name":"Jeju Noodle Bar","cuisine":"Chinese","orders":868,"revenue":24793.1,"avg_order":28.56},{"name":"The Slanted Door","cuisine":"Indian","orders":875,"revenue":24083.6,"avg_order":27.52},{"name":"Casa Mono","cuisine":"Chinese","orders":854,"revenue":24027.4,"avg_order":28.14},{"name":"Eataly NYC Flatiron","cuisine":"Italian","orders":922,"revenue":23339.4,"avg_order":25.31},{"name":"Katz's Delicatessen","cuisine":"Italian","orders":773,"revenue":22205.6,"avg_order":28.73},{"name":"Tacombi","cuisine":"Chinese","orders":703,"revenue":21223.6,"avg_order":30.19},{"name":"Diner","cuisine":"Indian","orders":786,"revenue":20547.2,"avg_order":26.14},{"name":"Roberta's","cuisine":"Chinese","orders":724,"revenue":20188.8,"avg_order":27.89},{"name":"Via Carota","cuisine":"Indian","orders":765,"revenue":20096.5,"avg_order":26.27},{"name":"Mimi Cheng's","cuisine":"Chinese","orders":684,"revenue":18471.1,"avg_order":27.0},{"name":"Cote Basque Wine House","cuisine":"Thai","orders":622,"revenue":17771.9,"avg_order":28.57},{"name":"AbcV","cuisine":"Chinese","orders":573,"revenue":17464.5,"avg_order":30.48},{"name":"Marta","cuisine":"Italian","orders":650,"revenue":17247.6,"avg_order":26.53},{"name":"Scarr's Pizza","cuisine":"Thai","orders":546,"revenue":17131.4,"avg_order":31.38},{"name":"Caf\u00e9 China","cuisine":"Chinese","orders":641,"revenue":17062.8,"avg_order":26.62},{"name":"Uncle Boons","cuisine":"Chinese","orders":551,"revenue":16799.9,"avg_order":30.49},{"name":"Russ & Daughters","cuisine":"Indian","orders":618,"revenue":15958.6,"avg_order":25.82},{"name":"Superiority Burger","cuisine":"Chinese","orders":568,"revenue":15836.3,"avg_order":27.88},{"name":"Hao Noodle","cuisine":"Chinese","orders":555,"revenue":15811.1,"avg_order":28.49},{"name":"Nom Wah Tea Parlor","cuisine":"Indian","orders":520,"revenue":15177.0,"avg_order":29.19},{"name":"Bar Pitti","cuisine":"Chinese","orders":530,"revenue":15173.9,"avg_order":28.63},{"name":"Chez Ma Tante","cuisine":"Chinese","orders":399,"revenue":15150.7,"avg_order":37.97},{"name":"Burger Joint","cuisine":"Indian","orders":566,"revenue":14981.9,"avg_order":26.47},{"name":"Raoul's","cuisine":"Indian","orders":569,"revenue":14889.2,"avg_order":26.17},{"name":"El Rey","cuisine":"Italian","orders":526,"revenue":14361.8,"avg_order":27.3},{"name":"Roberta's","cuisine":"Italian","orders":515,"revenue":14209.6,"avg_order":27.59},{"name":"Barbuto","cuisine":"Italian","orders":537,"revenue":13787.2,"avg_order":25.67},{"name":"Hearth","cuisine":"Chinese","orders":500,"revenue":13414.3,"avg_order":26.83},{"name":"Le Bernardin","cuisine":"Italian","orders":513,"revenue":13198.3,"avg_order":25.73},{"name":"Balthazar","cuisine":"Italian","orders":422,"revenue":12858.7,"avg_order":30.47},{"name":"Gotham Bar and Grill","cuisine":"Italian","orders":462,"revenue":12579.2,"avg_order":27.23},{"name":"The Mermaid Inn","cuisine":"Thai","orders":345,"revenue":12078.1,"avg_order":35.01},{"name":"Estela","cuisine":"Thai","orders":469,"revenue":11980.0,"avg_order":25.54},{"name":"Marea","cuisine":"Italian","orders":432,"revenue":11801.8,"avg_order":27.32},{"name":"I Sodi","cuisine":"Thai","orders":466,"revenue":11335.1,"avg_order":24.32},{"name":"Pasquale Jones","cuisine":"Thai","orders":422,"revenue":11304.2,"avg_order":26.79},{"name":"L'Artusi","cuisine":"Italian","orders":422,"revenue":10830.2,"avg_order":25.66},{"name":"Upland","cuisine":"Thai","orders":387,"revenue":10783.9,"avg_order":27.87},{"name":"Osteria Morini","cuisine":"Italian","orders":441,"revenue":10711.6,"avg_order":24.29},{"name":"Cosme","cuisine":"Italian","orders":398,"revenue":10475.8,"avg_order":26.32},{"name":"Via Carota","cuisine":"Italian","orders":343,"revenue":10425.8,"avg_order":30.4},{"name":"Llama Inn","cuisine":"Chinese","orders":296,"revenue":10333.0,"avg_order":34.91},{"name":"Cafe Mogador","cuisine":"Chinese","orders":376,"revenue":10288.1,"avg_order":27.36},{"name":"Jack's Wife Freda","cuisine":"Italian","orders":352,"revenue":10242.4,"avg_order":29.1},{"name":"Balthazar","cuisine":"Chinese","orders":365,"revenue":10022.8,"avg_order":27.46},{"name":"L'Appart","cuisine":"Italian","orders":390,"revenue":9882.7,"avg_order":25.34},{"name":"Don Angie","cuisine":"Italian","orders":380,"revenue":9820.2,"avg_order":25.84},{"name":"Ops","cuisine":"Chinese","orders":276,"revenue":9507.1,"avg_order":34.45},{"name":"Eataly NYC Downtown","cuisine":"Italian","orders":345,"revenue":9031.4,"avg_order":26.18},{"name":"La Newyorkina","cuisine":"Chinese","orders":344,"revenue":9006.4,"avg_order":26.18},{"name":"Lilia","cuisine":"Chinese","orders":368,"revenue":8983.1,"avg_order":24.41},{"name":"Estiatorio Milos","cuisine":"Italian","orders":343,"revenue":8693.1,"avg_order":25.34},{"name":"Llama San","cuisine":"Chinese","orders":295,"revenue":8487.5,"avg_order":28.77},{"name":"Carbone","cuisine":"Chinese","orders":215,"revenue":8409.6,"avg_order":39.11},{"name":"Charlie Bird","cuisine":"Chinese","orders":320,"revenue":8079.4,"avg_order":25.25},{"name":"Babbo Pizzeria e Enoteca","cuisine":"Italian","orders":338,"revenue":8057.1,"avg_order":23.84},{"name":"J.G. Melon","cuisine":"Italian","orders":275,"revenue":7981.3,"avg_order":29.02},{"name":"Cote Korean Steakhouse","cuisine":"Italian","orders":352,"revenue":7772.5,"avg_order":22.08},{"name":"Mission Chinese Food","cuisine":"Chinese","orders":212,"revenue":7754.4,"avg_order":36.58},{"name":"Eleven Madison Park","cuisine":"Chinese","orders":277,"revenue":7746.1,"avg_order":27.96},{"name":"Empellon","cuisine":"Italian","orders":307,"revenue":7745.5,"avg_order":25.23},{"name":"Sushi Inoue","cuisine":"Thai","orders":311,"revenue":7745.5,"avg_order":24.91},{"name":"ABC Kitchen","cuisine":"Indian","orders":318,"revenue":7578.7,"avg_order":23.83},{"name":"Joe's Pizza","cuisine":"Italian","orders":200,"revenue":7437.3,"avg_order":37.19},{"name":"Il Buco","cuisine":"Italian","orders":316,"revenue":7433.3,"avg_order":23.52},{"name":"Chikalicious Dessert Bar","cuisine":"Italian","orders":298,"revenue":7342.3,"avg_order":24.64},{"name":"Sushi Yasuda","cuisine":"Thai","orders":281,"revenue":7329.2,"avg_order":26.08},{"name":"Satsuki","cuisine":"Italian","orders":234,"revenue":6006.6,"avg_order":25.67},{"name":"Xi'an Famous Foods","cuisine":"Chinese","orders":198,"revenue":5919.9,"avg_order":29.9},{"name":"Ippudo","cuisine":"Thai","orders":187,"revenue":5680.1,"avg_order":30.37},{"name":"Frankies 457 Spuntino","cuisine":"Italian","orders":219,"revenue":5657.4,"avg_order":25.83},{"name":"Casa Enrique","cuisine":"Indian","orders":230,"revenue":5589.8,"avg_order":24.3},{"name":"Milk Bar","cuisine":"Indian","orders":201,"revenue":5129.5,"avg_order":25.52},{"name":"Cervo's","cuisine":"Italian","orders":199,"revenue":4896.3,"avg_order":24.6},{"name":"Lobster Club","cuisine":"Thai","orders":104,"revenue":4460.8,"avg_order":42.89},{"name":"Peasant","cuisine":"Indian","orders":183,"revenue":4397.5,"avg_order":24.03},{"name":"Shuka","cuisine":"Thai","orders":162,"revenue":4077.3,"avg_order":25.17},{"name":"Kiki's","cuisine":"Thai","orders":130,"revenue":4076.7,"avg_order":31.36},{"name":"Cote","cuisine":"Chinese","orders":136,"revenue":3946.0,"avg_order":29.01},{"name":"Empire Diner","cuisine":"Italian","orders":94,"revenue":3768.0,"avg_order":40.09},{"name":"Atla","cuisine":"Thai","orders":156,"revenue":3666.2,"avg_order":23.5},{"name":"Santina","cuisine":"Thai","orders":118,"revenue":3260.6,"avg_order":27.63},{"name":"Di Fara Pizza","cuisine":"Italian","orders":98,"revenue":2873.5,"avg_order":29.32},{"name":"Via Carota","cuisine":"Italian","orders":100,"revenue":2180.6,"avg_order":21.81}],"drivers":[{"name":"Brandon Luft","orders":159,"rating":3.86,"avg_mins":22.9},{"name":"Jeffrey Barton","orders":163,"rating":3.85,"avg_mins":23.3},{"name":"Harold Kallas","orders":182,"rating":3.82,"avg_mins":24.0},{"name":"Nicole Jeffrey","orders":175,"rating":3.81,"avg_mins":23.4},{"name":"Courtney Bauer","orders":177,"rating":3.81,"avg_mins":23.5},{"name":"Paul Petrie","orders":179,"rating":3.79,"avg_mins":22.6},{"name":"Constance Lukow","orders":180,"rating":3.79,"avg_mins":22.8},{"name":"Gertrude Landry","orders":152,"rating":3.79,"avg_mins":22.8},{"name":"Stephanie Baisley","orders":162,"rating":3.79,"avg_mins":23.8},{"name":"Gwendolyn Mash","orders":184,"rating":3.78,"avg_mins":23.1},{"name":"Barbara Engelhardt","orders":180,"rating":3.78,"avg_mins":23.3},{"name":"John Cordova","orders":164,"rating":3.77,"avg_mins":23.4}]};
+
+        // Active Filter State (Power BI Model)
+        const filterState = {
+            cuisine: 'ALL',
+            month: 'ALL',
+            dayType: 'ALL'
+        };
 
         // Theme Toggle
         const themeBtn = document.getElementById('themeToggleBtn');
@@ -663,50 +812,141 @@
             renderAllCharts();
         });
 
-        // Filter elements
+        // Controls elements
         const cuisineSel = document.getElementById('cuisineSelect');
         const monthSel = document.getElementById('monthSelect');
         const dayTypeSel = document.getElementById('dayTypeSelect');
         const resetBtn = document.getElementById('resetFiltersBtn');
+        const clearAllBtn = document.getElementById('clearAllFiltersBtn');
         const exportBtn = document.getElementById('exportCsvBtn');
         const searchInput = document.getElementById('tableSearchInput');
 
-        // Events
-        cuisineSel.addEventListener('change', updateDashboard);
-        monthSel.addEventListener('change', updateDashboard);
-        dayTypeSel.addEventListener('change', updateDashboard);
-        resetBtn.addEventListener('click', () => {
-            cuisineSel.value = 'ALL';
-            monthSel.value = 'ALL';
-            dayTypeSel.value = 'ALL';
-            updateDashboard();
-        });
+        // Dropdown Event Listeners
+        cuisineSel.addEventListener('change', (e) => setFilter('cuisine', e.target.value));
+        monthSel.addEventListener('change', (e) => setFilter('month', e.target.value));
+        dayTypeSel.addEventListener('change', (e) => setFilter('dayType', e.target.value));
+
+        resetBtn.addEventListener('click', resetAllFilters);
+        clearAllBtn.addEventListener('click', resetAllFilters);
         searchInput.addEventListener('input', filterExplorerTable);
 
-        // Export to CSV
-        exportBtn.addEventListener('click', () => {
-            const filtered = getFilteredMatrix();
-            let csv = "Month,Cuisine,Day_Type,Orders,Revenue,Food_Total,Delivery_Fees,Discounts,Avg_Delivery_Mins\n";
-            filtered.forEach(r => {
-                csv += `${r.month},${r.cuisine},${r.day_type},${r.orders},${r.revenue},${r.food_total},${r.deliv_fee},${r.discount},${r.avg_deliv}\n`;
+        // Power BI Slicer Pill Click Listeners (Click to toggle on / Click again to toggle off)
+        document.querySelectorAll('.slicer-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+                const val = btn.getAttribute('data-val');
+                toggleFilter(type, val);
             });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `foodhunter_filtered_data_${Date.now()}.csv`);
-            a.click();
         });
 
-        function getFilteredMatrix() {
-            const cVal = cuisineSel.value;
-            const mVal = monthSel.value;
-            const dVal = dayTypeSel.value;
+        // POWER BI TOGGLE LOGIC:
+        // If the clicked value is already active -> reset to 'ALL'!
+        // If it's different -> apply that value!
+        function toggleFilter(type, val) {
+            if (val === 'ALL' || filterState[type] === val) {
+                filterState[type] = 'ALL';
+            } else {
+                filterState[type] = val;
+            }
+            syncUIAndRefresh();
+        }
 
+        function setFilter(type, val) {
+            filterState[type] = val;
+            syncUIAndRefresh();
+        }
+
+        function resetAllFilters() {
+            filterState.cuisine = 'ALL';
+            filterState.month = 'ALL';
+            filterState.dayType = 'ALL';
+            syncUIAndRefresh();
+        }
+
+        // Synchronize Slicers, Dropdowns, Badges, and re-render
+        function syncUIAndRefresh() {
+            // Sync Dropdowns
+            cuisineSel.value = filterState.cuisine;
+            monthSel.value = filterState.month;
+            dayTypeSel.value = filterState.dayType;
+
+            // Sync Slicer Pills
+            updateSlicerPillActive('cuisine', filterState.cuisine);
+            updateSlicerPillActive('month', filterState.month);
+            updateSlicerPillActive('dayType', filterState.dayType);
+
+            // Update Breadcrumb Badges
+            updateActiveFilterBadges();
+
+            // Run Aggregations & Re-render
+            updateDashboardMetrics();
+            renderAllCharts();
+            populateDriversTable();
+            populateExplorerTable();
+        }
+
+        function updateSlicerPillActive(type, activeVal) {
+            document.querySelectorAll(`.slicer-btn[data-type="${type}"]`).forEach(btn => {
+                if (btn.getAttribute('data-val') === activeVal) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function updateActiveFilterBadges() {
+            const badgesContainer = document.getElementById('activeFiltersBadges');
+            const clearBtn = document.getElementById('clearAllFiltersBtn');
+            const pills = [];
+
+            if (filterState.cuisine !== 'ALL') {
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Cuisine:</strong> ${filterState.cuisine}</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('cuisine', '${filterState.cuisine}')"></i>
+                    </span>
+                `);
+            }
+
+            const monthNames = {
+                '2022-06': 'June 2022',
+                '2022-07': 'July 2022',
+                '2022-08': 'August 2022',
+                '2022-09': 'September 2022'
+            };
+            if (filterState.month !== 'ALL') {
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Month:</strong> ${monthNames[filterState.month] || filterState.month}</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('month', '${filterState.month}')"></i>
+                    </span>
+                `);
+            }
+
+            if (filterState.dayType !== 'ALL') {
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Day:</strong> ${filterState.dayType}s</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('dayType', '${filterState.dayType}')"></i>
+                    </span>
+                `);
+            }
+
+            if (pills.length > 0) {
+                badgesContainer.innerHTML = pills.join('');
+                clearBtn.classList.remove('d-none');
+            } else {
+                badgesContainer.innerHTML = '<span class="text-muted small fst-italic">None (Showing all data &bull; Click any bar or pie slice to cross-filter)</span>';
+                clearBtn.classList.add('d-none');
+            }
+        }
+
+        function getFilteredMatrix() {
             return RAW_DATA.matrix.filter(r => {
-                if (cVal !== 'ALL' && r.cuisine !== cVal) return false;
-                if (mVal !== 'ALL' && r.month !== mVal) return false;
-                if (dVal !== 'ALL' && r.day_type !== dVal) return false;
+                if (filterState.cuisine !== 'ALL' && r.cuisine !== filterState.cuisine) return false;
+                if (filterState.month !== 'ALL' && r.month !== filterState.month) return false;
+                if (filterState.dayType !== 'ALL' && r.day_type !== filterState.dayType) return false;
                 return true;
             });
         }
@@ -715,10 +955,9 @@
             return currentTheme === 'dark' ? 'plotly_dark' : 'plotly_white';
         }
 
-        function updateDashboard() {
+        function updateDashboardMetrics() {
             const data = getFilteredMatrix();
 
-            // Calculate Aggregates
             let totalRev = 0, totalOrders = 0, foodTot = 0, delivFees = 0, discounts = 0;
             let fastDeliv = 0, totalDelivCount = 0;
 
@@ -736,7 +975,6 @@
             const fastPct = totalDelivCount > 0 ? ((fastDeliv / totalDelivCount) * 100) : 0;
             const discPct = foodTot > 0 ? ((discounts / foodTot) * 100) : 0;
 
-            // Update KPI DOM
             document.getElementById('kpiRevenue').innerText = '$' + totalRev.toLocaleString('en-US', {maximumFractionDigits: 0});
             document.getElementById('kpiOrders').innerText = totalOrders.toLocaleString('en-US');
             document.getElementById('kpiOrdersSub').innerText = totalOrders.toLocaleString('en-US') + ' orders';
@@ -745,25 +983,9 @@
             document.getElementById('kpiDiscountSub').innerText = discPct.toFixed(1) + '% discount share';
             document.getElementById('kpiFastPct').innerText = fastPct.toFixed(1) + '%';
             document.getElementById('kpiDelivFees').innerText = '$' + delivFees.toLocaleString('en-US', {maximumFractionDigits: 0});
-
-            renderAllCharts();
-            populateDriversTable();
-            populateExplorerTable();
         }
 
-        function renderAllCharts() {
-            renderMonthlyChart();
-            renderCuisinePie();
-            renderHourlyChart();
-            renderCuisineBar();
-            renderDayTypeChart();
-            renderRestaurantsChart();
-            renderDishesChart();
-            renderDietaryChart();
-            renderDeliverySLA();
-        }
-
-        // 1. Monthly Chart
+        // 1. Monthly Chart (With Power BI Dimming / Highlighting)
         function renderMonthlyChart() {
             const filtered = getFilteredMatrix();
             const months = ['2022-06', '2022-07', '2022-08', '2022-09'];
@@ -781,14 +1003,25 @@
             const yRev = months.map(m => revMap[m]);
             const yOrd = months.map(m => ordMap[m]);
 
+            // Power BI Visual Cross-Highlighting: Dim non-selected months
+            const barColors = months.map(m => {
+                if (filterState.month === 'ALL' || filterState.month === m) {
+                    return '#4F46E5';
+                } else {
+                    return currentTheme === 'dark' ? 'rgba(79, 70, 229, 0.25)' : 'rgba(79, 70, 229, 0.28)';
+                }
+            });
+
             const traceRev = {
                 x: xVals,
                 y: yRev,
                 name: 'Revenue ($)',
                 type: 'bar',
-                marker: { color: '#4F46E5', opacity: 0.9 },
+                marker: { color: barColors },
                 text: yRev.map(v => '$' + Math.round(v).toLocaleString()),
-                textposition: 'inside'
+                textposition: 'inside',
+                customdata: months,
+                hovertemplate: '<b>%{x}</b><br>Revenue: $%{y:,.0f}<br><i>Click to filter / toggle month</i><extra></extra>'
             };
 
             const traceOrd = {
@@ -801,7 +1034,9 @@
                 line: { color: '#F59E0B', width: 3 },
                 marker: { size: 8, color: '#F59E0B' },
                 text: yOrd.map(v => v.toLocaleString()),
-                textposition: 'top center'
+                textposition: 'top center',
+                customdata: months,
+                hovertemplate: '<b>%{x}</b><br>Orders: %{y:,}<extra></extra>'
             };
 
             const layout = {
@@ -814,9 +1049,19 @@
             };
 
             Plotly.react('chartMonthly', [traceRev, traceOrd], layout, { responsive: true });
+            attachPlotlyClick('chartMonthly', (pt) => {
+                const monthMap = {
+                    'June 2022': '2022-06',
+                    'July 2022': '2022-07',
+                    'August 2022': '2022-08',
+                    'September 2022': '2022-09'
+                };
+                const mCode = monthMap[pt.x] || pt.customdata;
+                if (mCode) toggleFilter('month', mCode);
+            });
         }
 
-        // 2. Cuisine Pie
+        // 2. Cuisine Pie (With Slice Pull & Dimming)
         function renderCuisinePie() {
             const filtered = getFilteredMatrix();
             const cuisMap = {};
@@ -827,14 +1072,33 @@
             const labels = Object.keys(cuisMap);
             const values = Object.values(cuisMap);
 
+            // Pull slice if selected
+            const pulls = labels.map(c => filterState.cuisine === c ? 0.12 : 0);
+
+            const baseColors = {
+                'Chinese': '#4F46E5',
+                'Italian': '#10B981',
+                'Indian': '#F59E0B',
+                'Thai': '#EF4444'
+            };
+
+            const colors = labels.map(c => {
+                if (filterState.cuisine === 'ALL' || filterState.cuisine === c) {
+                    return baseColors[c] || '#4F46E5';
+                } else {
+                    return 'rgba(148, 163, 184, 0.35)'; // Dimmed
+                }
+            });
+
             const trace = {
                 labels: labels,
                 values: values,
                 type: 'pie',
                 hole: 0.48,
-                marker: { colors: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] },
+                pull: pulls,
+                marker: { colors: colors },
                 textinfo: 'label+percent',
-                hoverinfo: 'label+value+percent'
+                hovertemplate: '<b>%{label}</b><br>Revenue: $%{value:,.0f}<br>(%{percent})<br><i>Click to filter / toggle cuisine</i><extra></extra>'
             };
 
             const layout = {
@@ -845,11 +1109,14 @@
             };
 
             Plotly.react('chartCuisinePie', [trace], layout, { responsive: true });
+            attachPlotlyClick('chartCuisinePie', (pt) => {
+                if (pt.label) toggleFilter('cuisine', pt.label);
+            });
         }
 
         // 3. Hourly Curve
         function renderHourlyChart() {
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             const hourlyMap = new Array(24).fill(0);
 
             RAW_DATA.hourly.forEach(r => {
@@ -867,7 +1134,8 @@
                 mode: 'lines',
                 fill: 'tozeroy',
                 line: { color: '#6366F1', width: 3 },
-                fillcolor: currentTheme === 'dark' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.12)'
+                fillcolor: currentTheme === 'dark' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.12)',
+                hovertemplate: '<b>%{x}</b><br>Orders Placed: %{y:,}<extra></extra>'
             };
 
             const layout = {
@@ -881,7 +1149,7 @@
             Plotly.react('chartHourly', [trace], layout, { responsive: true });
         }
 
-        // 4. Cuisine AOV Bar
+        // 4. Cuisine AOV Bar (With Click Filter & Dimming)
         function renderCuisineBar() {
             const filtered = getFilteredMatrix();
             const cuisRev = {}, cuisOrd = {};
@@ -893,13 +1161,29 @@
             const cuisines = Object.keys(cuisRev);
             const aovs = cuisines.map(c => cuisOrd[c] > 0 ? (cuisRev[c] / cuisOrd[c]) : 0);
 
+            const baseColors = {
+                'Chinese': '#4F46E5',
+                'Italian': '#10B981',
+                'Indian': '#F59E0B',
+                'Thai': '#EF4444'
+            };
+
+            const colors = cuisines.map(c => {
+                if (filterState.cuisine === 'ALL' || filterState.cuisine === c) {
+                    return baseColors[c] || '#4F46E5';
+                } else {
+                    return 'rgba(148, 163, 184, 0.35)'; // Dimmed
+                }
+            });
+
             const trace = {
                 x: cuisines,
                 y: aovs,
                 type: 'bar',
-                marker: { color: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] },
+                marker: { color: colors },
                 text: aovs.map(v => '$' + v.toFixed(2)),
-                textposition: 'outside'
+                textposition: 'outside',
+                hovertemplate: '<b>%{x}</b><br>Average Ticket: $%{y:.2f}<br><i>Click to filter / toggle</i><extra></extra>'
             };
 
             const layout = {
@@ -910,31 +1194,46 @@
             };
 
             Plotly.react('chartCuisineBar', [trace], layout, { responsive: true });
+            attachPlotlyClick('chartCuisineBar', (pt) => {
+                if (pt.x) toggleFilter('cuisine', pt.x);
+            });
         }
 
-        // 5. Day Type Comparison
+        // 5. Day Type Comparison (With Click Filter & Dimming)
         function renderDayTypeChart() {
             const filtered = getFilteredMatrix();
             let wkRev = 0, weRev = 0;
-            let wkOrd = 0, weOrd = 0;
 
             filtered.forEach(r => {
                 if (r.day_type === 'Weekday') {
                     wkRev += r.revenue;
-                    wkOrd += r.orders;
                 } else {
                     weRev += r.revenue;
-                    weOrd += r.orders;
+                }
+            });
+
+            const dayTypes = ['Weekdays (Mon-Fri)', 'Weekends (Sat-Sun)'];
+            const dayCodes = ['Weekday', 'Weekend'];
+            const yVals = [wkRev, weRev];
+
+            const colors = dayCodes.map((dt, i) => {
+                const base = i === 0 ? '#3B82F6' : '#EC4899';
+                if (filterState.dayType === 'ALL' || filterState.dayType === dt) {
+                    return base;
+                } else {
+                    return 'rgba(148, 163, 184, 0.35)';
                 }
             });
 
             const trace = {
-                x: ['Weekdays (Mon-Fri)', 'Weekends (Sat-Sun)'],
-                y: [wkRev, weRev],
+                x: dayTypes,
+                y: yVals,
                 type: 'bar',
-                marker: { color: ['#3B82F6', '#EC4899'] },
+                marker: { color: colors },
                 text: ['$' + Math.round(wkRev).toLocaleString(), '$' + Math.round(weRev).toLocaleString()],
-                textposition: 'inside'
+                textposition: 'inside',
+                customdata: dayCodes,
+                hovertemplate: '<b>%{x}</b><br>Revenue: $%{y:,.0f}<br><i>Click to filter / toggle</i><extra></extra>'
             };
 
             const layout = {
@@ -945,11 +1244,15 @@
             };
 
             Plotly.react('chartDayType', [trace], layout, { responsive: true });
+            attachPlotlyClick('chartDayType', (pt) => {
+                const code = pt.x.includes('Weekday') ? 'Weekday' : 'Weekend';
+                toggleFilter('dayType', code);
+            });
         }
 
         // 6. Restaurants Chart
         function renderRestaurantsChart() {
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.restaurants;
             if (cVal !== 'ALL') {
                 list = list.filter(r => r.cuisine === cVal);
@@ -963,7 +1266,8 @@
                 orientation: 'h',
                 marker: { color: '#4F46E5' },
                 text: top10.map(r => '$' + Math.round(r.revenue).toLocaleString()),
-                textposition: 'outside'
+                textposition: 'outside',
+                hovertemplate: '<b>%{y}</b><br>Sales: $%{x:,.0f}<br><i>Click to search restaurant in explorer</i><extra></extra>'
             };
 
             const layout = {
@@ -974,11 +1278,21 @@
             };
 
             Plotly.react('chartRestaurants', [trace], layout, { responsive: true });
+            attachPlotlyClick('chartRestaurants', (pt) => {
+                if (pt.y) {
+                    const tableTab = document.getElementById('table-tab');
+                    if (tableTab) {
+                        bootstrap.Tab.getOrCreateInstance(tableTab).show();
+                        searchInput.value = pt.y;
+                        filterExplorerTable();
+                    }
+                }
+            });
         }
 
         // 7. Dishes Chart
         function renderDishesChart() {
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.dishes;
             if (cVal !== 'ALL') {
                 list = list.filter(d => d.cuisine === cVal);
@@ -992,7 +1306,8 @@
                 orientation: 'h',
                 marker: { color: '#EF4444' },
                 text: top12.map(d => d.qty.toLocaleString() + ' units'),
-                textposition: 'inside'
+                textposition: 'inside',
+                hovertemplate: '<b>%{y}</b><br>Units Sold: %{x:,}<br><i>Click to search dish in explorer</i><extra></extra>'
             };
 
             const layout = {
@@ -1003,11 +1318,21 @@
             };
 
             Plotly.react('chartDishes', [trace], layout, { responsive: true });
+            attachPlotlyClick('chartDishes', (pt) => {
+                if (pt.y) {
+                    const tableTab = document.getElementById('table-tab');
+                    if (tableTab) {
+                        bootstrap.Tab.getOrCreateInstance(tableTab).show();
+                        searchInput.value = pt.y;
+                        filterExplorerTable();
+                    }
+                }
+            });
         }
 
         // 8. Dietary Split Chart
         function renderDietaryChart() {
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let veg = 0, nonVeg = 0;
             RAW_DATA.dishes.forEach(d => {
                 if (cVal === 'ALL' || d.cuisine === cVal) {
@@ -1021,7 +1346,8 @@
                 values: [veg, nonVeg],
                 type: 'pie',
                 hole: 0.45,
-                marker: { colors: ['#10B981', '#EF4444'] }
+                marker: { colors: ['#10B981', '#EF4444'] },
+                hovertemplate: '<b>%{label}</b><br>Units: %{value:,}<br>(%{percent})<extra></extra>'
             };
 
             const layout = {
@@ -1049,7 +1375,8 @@
                 values: [fast, mod],
                 type: 'pie',
                 hole: 0.5,
-                marker: { colors: ['#10B981', '#F59E0B'] }
+                marker: { colors: ['#10B981', '#F59E0B'] },
+                hovertemplate: '<b>%{label}</b><br>Orders: %{value:,}<br>(%{percent})<extra></extra>'
             };
 
             const layout = {
@@ -1061,6 +1388,18 @@
             };
 
             Plotly.react('chartDeliverySLA', [trace], layout, { responsive: true });
+        }
+
+        // Attach Plotly Click Handler helper
+        function attachPlotlyClick(domId, callback) {
+            const el = document.getElementById(domId);
+            if (!el || el._clickBound) return;
+            el._clickBound = true;
+            el.on('plotly_click', (data) => {
+                if (data && data.points && data.points.length > 0) {
+                    callback(data.points[0]);
+                }
+            });
         }
 
         // Drivers Table
@@ -1078,7 +1417,7 @@
 
         // Explorer Table
         function populateExplorerTable() {
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.restaurants;
             if (cVal !== 'ALL') {
                 list = list.filter(r => r.cuisine === cVal);
@@ -1105,6 +1444,21 @@
             });
         }
 
+        // Export to CSV
+        exportBtn.addEventListener('click', () => {
+            const filtered = getFilteredMatrix();
+            let csv = "Month,Cuisine,Day_Type,Orders,Revenue,Food_Total,Delivery_Fees,Discounts,Avg_Delivery_Mins\n";
+            filtered.forEach(r => {
+                csv += `${r.month},${r.cuisine},${r.day_type},${r.orders},${r.revenue},${r.food_total},${r.deliv_fee},${r.discount},${r.avg_deliv}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `foodhunter_filtered_data_${Date.now()}.csv`);
+            a.click();
+        });
+
         // Responsive Resize Handler
         window.addEventListener('resize', () => {
             const chartIds = [
@@ -1120,7 +1474,7 @@
             });
         });
 
-        // Trigger resize on tab switch so charts render with perfect geometry
+        // Trigger resize on tab switch
         document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(tab => {
             tab.addEventListener('shown.bs.tab', () => {
                 window.dispatchEvent(new Event('resize'));
@@ -1128,7 +1482,7 @@
         });
 
         // Initial Load
-        updateDashboard();
+        syncUIAndRefresh();
     </script>
 </body>
 </html>

@@ -177,18 +177,17 @@ html_template = f"""<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodHunter - Dynamic Interactive BI Dashboard</title>
+    <title>FoodHunter - Power BI Interactive Cross-Filtering Dashboard</title>
     
-    <!-- Meta tags for responsive & social -->
-    <meta name="description" content="FoodHunter Interactive Data Analytics & BI Dashboard. Explore revenue trends, cuisine share, dish sales, and delivery efficiency.">
+    <meta name="description" content="FoodHunter Power BI-style Interactive Data Analytics Dashboard. Click to filter, click again to reset. Full cross-filtering across visuals.">
     <meta name="theme-color" content="#4F46E5">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
@@ -243,7 +242,85 @@ html_template = f"""<!DOCTYPE html>
             border-radius: 18px;
             padding: 16px 20px;
             box-shadow: var(--shadow-md);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+        }}
+
+        /* Power BI Slicer Pills */
+        .slicer-label {{
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .slicer-btn-group {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }}
+        .slicer-btn {{
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }}
+        .slicer-btn:hover {{
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }}
+        .slicer-btn.active {{
+            background: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }}
+
+        /* Active Filter Badges Container */
+        .active-filters-box {{
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }}
+        .active-filter-pill {{
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid rgba(79, 70, 229, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        .active-filter-pill i {{
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }}
+        .active-filter-pill i:hover {{
+            opacity: 1;
+            color: #ef4444;
         }}
 
         /* KPI Card */
@@ -251,37 +328,38 @@ html_template = f"""<!DOCTYPE html>
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 18px;
-            padding: 22px;
+            padding: 20px;
             box-shadow: var(--shadow-md);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             height: 100%;
         }}
         .kpi-card:hover {{
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-hover);
         }}
         .kpi-icon-box {{
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
         }}
         .kpi-title {{
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }}
         .kpi-value {{
-            font-size: 1.85rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: var(--text-main);
             margin: 6px 0 4px 0;
             letter-spacing: -0.5px;
+            transition: color 0.2s;
         }}
 
         /* Chart Container Cards */
@@ -293,39 +371,54 @@ html_template = f"""<!DOCTYPE html>
             box-shadow: var(--shadow-md);
             margin-bottom: 24px;
             transition: box-shadow 0.2s ease;
+            position: relative;
         }}
         .chart-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }}
         .chart-title {{
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             font-weight: 700;
             color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 10px;
         }}
+        .powerbi-hint {{
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }}
+
+        /* Plotly Cursor & Clickability */
+        .js-plotly-plot .plotly .bars path,
+        .js-plotly-plot .plotly .slice path {{
+            cursor: pointer !important;
+            transition: opacity 0.25s ease, filter 0.25s ease;
+        }}
 
         /* Badges */
         .badge-pill-custom {{
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
         }}
 
-        /* Select controls */
+        /* Custom Dropdown Styling (Fixed padding & Crisp SVG arrow) */
         .form-select-custom {{
             background-color: var(--bg-card);
             color: var(--text-main);
             border: 1.5px solid var(--border-color);
             border-radius: 12px;
-            padding: 9px 40px 9px 14px !important;
+            padding: 8px 40px 8px 12px !important;
             font-weight: 600;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             line-height: 1.5;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
             background-repeat: no-repeat !important;
@@ -383,13 +476,12 @@ html_template = f"""<!DOCTYPE html>
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
         }}
 
-        /* Responsive utilities */
         @media (max-width: 768px) {{
             .kpi-value {{
-                font-size: 1.5rem;
+                font-size: 1.45rem;
             }}
             .filter-bar {{
-                padding: 14px;
+                padding: 12px;
             }}
         }}
     </style>
@@ -424,21 +516,58 @@ html_template = f"""<!DOCTYPE html>
         <!-- INTRO & BREADCRUMB -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
             <div>
-                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Interactive Executive Dashboard</h3>
+                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Power BI Interactive Cross-Filtering Hub</h3>
                 <p class="text-muted small mb-0">Multi-Dimensional Analysis of 43,118 Orders &bull; June 1 – September 29, 2022</p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
-                    <i class="fas fa-bolt me-1"></i> Live Real-Time Filtering
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                    <i class="fas fa-hand-pointer me-1"></i> Click Visual to Filter &bull; Click Again to Reset
                 </span>
             </div>
         </div>
 
-        <!-- DYNAMIC FILTER TOOLBAR -->
+        <!-- POWER BI SLICER TOOLBAR (Pills & Dropdowns) -->
         <div class="filter-bar">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-utensils me-1"></i> Cuisine Filter</label>
+            <!-- Row 1: Slicer Pills -->
+            <div class="row g-3 mb-3">
+                <!-- Cuisine Slicers -->
+                <div class="col-12 col-xl-5">
+                    <div class="slicer-label"><i class="fas fa-utensils text-primary"></i> Cuisine Slicer:</div>
+                    <div class="slicer-btn-group" id="cuisineSlicers">
+                        <button class="slicer-btn active" data-type="cuisine" data-val="ALL">All Cuisines</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Chinese">🥢 Chinese</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Italian">🍕 Italian</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Indian">🍛 Indian</button>
+                        <button class="slicer-btn" data-type="cuisine" data-val="Thai">🍜 Thai</button>
+                    </div>
+                </div>
+
+                <!-- Month Slicers -->
+                <div class="col-12 col-md-7 col-xl-4">
+                    <div class="slicer-label"><i class="fas fa-calendar-alt text-warning"></i> Month Slicer:</div>
+                    <div class="slicer-btn-group" id="monthSlicers">
+                        <button class="slicer-btn active" data-type="month" data-val="ALL">All Time</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-06">Jun '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-07">Jul '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-08">Aug '22</button>
+                        <button class="slicer-btn" data-type="month" data-val="2022-09">Sep '22</button>
+                    </div>
+                </div>
+
+                <!-- Day Type Slicers -->
+                <div class="col-12 col-md-5 col-xl-3">
+                    <div class="slicer-label"><i class="fas fa-business-time text-danger"></i> Day Slicer:</div>
+                    <div class="slicer-btn-group" id="dayTypeSlicers">
+                        <button class="slicer-btn active" data-type="dayType" data-val="ALL">Full Week</button>
+                        <button class="slicer-btn" data-type="dayType" data-val="Weekday">💼 Weekdays</button>
+                        <button class="slicer-btn" data-type="dayType" data-val="Weekend">🏖️ Weekends</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Secondary Dropdown Controls & Action Buttons -->
+            <div class="row g-2 align-items-center pt-2 border-top">
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="cuisineSelect" class="form-select form-select-custom">
                         <option value="ALL">All Cuisines (All 4)</option>
                         <option value="Chinese">Chinese Only</option>
@@ -448,8 +577,7 @@ html_template = f"""<!DOCTYPE html>
                     </select>
                 </div>
                 
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-calendar-alt me-1"></i> Month Filter</label>
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="monthSelect" class="form-select form-select-custom">
                         <option value="ALL">All Months (Jun – Sep)</option>
                         <option value="2022-06">June 2022</option>
@@ -459,8 +587,7 @@ html_template = f"""<!DOCTYPE html>
                     </select>
                 </div>
                 
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <label class="form-label small fw-bold text-muted mb-1"><i class="fas fa-business-time me-1"></i> Day Type</label>
+                <div class="col-12 col-sm-4 col-lg-3">
                     <select id="dayTypeSelect" class="form-select form-select-custom">
                         <option value="ALL">All Days (Full Week)</option>
                         <option value="Weekday">Weekdays Only (Mon – Fri)</option>
@@ -468,15 +595,26 @@ html_template = f"""<!DOCTYPE html>
                     </select>
                 </div>
 
-                <div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end gap-2 pt-2 pt-lg-0">
+                <div class="col-12 col-lg-3 d-flex align-items-center gap-2 pt-2 pt-lg-0">
                     <button id="resetFiltersBtn" class="btn btn-outline-secondary w-100 rounded-3 fw-semibold py-2">
-                        <i class="fas fa-rotate-left me-1"></i> Reset Filters
+                        <i class="fas fa-rotate-left me-1"></i> Reset
                     </button>
                     <button id="exportCsvBtn" class="btn btn-primary w-100 rounded-3 fw-semibold py-2">
-                        <i class="fas fa-file-csv me-1"></i> Export CSV
+                        <i class="fas fa-file-csv me-1"></i> CSV
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- ACTIVE FILTERS BREADCRUMBS ROW (Power BI Style) -->
+        <div class="active-filters-box" id="activeFiltersBox">
+            <span class="small fw-bold text-muted me-2"><i class="fas fa-filter text-primary me-1"></i> Active Filters:</span>
+            <span id="activeFiltersBadges" class="d-flex align-items-center flex-wrap gap-2">
+                <span class="text-muted small fst-italic">None (Showing all data &bull; Click any bar or pie slice to cross-filter)</span>
+            </span>
+            <button id="clearAllFiltersBtn" class="btn btn-sm btn-link text-danger text-decoration-none fw-bold ms-auto p-0 d-none">
+                <i class="fas fa-xmark me-1"></i> Clear All
+            </button>
         </div>
 
         <!-- DYNAMIC KPI SCORECARDS (Live Updating) -->
@@ -621,7 +759,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-chart-column text-primary"></i>
                                     Monthly Revenue & Order Volume Progression
                                 </div>
-                                <span class="badge bg-light text-dark border">Dual Axis (Revenue + Orders)</span>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-primary"></i> Click bar to filter month</span>
                             </div>
                             <div id="chartMonthly" style="min-height: 380px; width: 100%;"></div>
                         </div>
@@ -635,6 +773,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-chart-pie text-success"></i>
                                     Revenue Distribution by Cuisine
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-success"></i> Click slice to filter</span>
                             </div>
                             <div id="chartCuisinePie" style="min-height: 380px; width: 100%;"></div>
                         </div>
@@ -667,6 +806,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-ranking-star text-warning"></i>
                                     Average Order Value by Cuisine ($)
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-warning"></i> Click to filter cuisine</span>
                             </div>
                             <div id="chartCuisineBar" style="min-height: 360px; width: 100%;"></div>
                         </div>
@@ -680,6 +820,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-calendar-week text-danger"></i>
                                     Weekday vs Weekend Volume & Spend
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-mouse-pointer text-danger"></i> Click to filter day</span>
                             </div>
                             <div id="chartDayType" style="min-height: 360px; width: 100%;"></div>
                         </div>
@@ -691,8 +832,9 @@ html_template = f"""<!DOCTYPE html>
                             <div class="chart-header">
                                 <div class="chart-title">
                                     <i class="fas fa-store text-primary"></i>
-                                    Top 10 Performing Restaurants by Revenue
+                                    Top Performing Restaurants by Revenue
                                 </div>
+                                <span class="powerbi-hint"><i class="fas fa-arrow-up-right-from-square text-primary"></i> Click restaurant to search</span>
                             </div>
                             <div id="chartRestaurants" style="min-height: 400px; width: 100%;"></div>
                         </div>
@@ -711,7 +853,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-fire text-danger"></i>
                                     Top 12 Most Ordered Dishes (Units Sold)
                                 </div>
-                                <span class="badge bg-light text-dark border">Dynamically filters by Cuisine</span>
+                                <span class="badge bg-light text-dark border">Filters by active Cuisine</span>
                             </div>
                             <div id="chartDishes" style="min-height: 420px; width: 100%;"></div>
                         </div>
@@ -813,7 +955,7 @@ html_template = f"""<!DOCTYPE html>
         <!-- FOOTER -->
         <footer class="text-center py-4 text-muted small border-top mt-4">
             <p class="mb-1 fw-bold">FoodHunter Data Analytics Hub &bull; Powered by Python, Pandas, SQLite & Plotly.js</p>
-            <p class="mb-0">Interactive &bull; Dynamic &bull; Fully Responsive Client-Side BI Platform</p>
+            <p class="mb-0">Power BI-Style Cross-Filtering &bull; Interactive &bull; Dynamic &bull; Fully Responsive</p>
         </footer>
 
     </div> <!-- End container -->
@@ -821,9 +963,16 @@ html_template = f"""<!DOCTYPE html>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- EMBEDDED REAL DATASET -->
+    <!-- EMBEDDED REAL DATASET & POWER BI LOGIC -->
     <script>
         const RAW_DATA = {json_str};
+
+        // Active Filter State (Power BI Model)
+        const filterState = {{
+            cuisine: 'ALL',
+            month: 'ALL',
+            dayType: 'ALL'
+        }};
 
         // Theme Toggle
         const themeBtn = document.getElementById('themeToggleBtn');
@@ -837,50 +986,141 @@ html_template = f"""<!DOCTYPE html>
             renderAllCharts();
         }});
 
-        // Filter elements
+        // Controls elements
         const cuisineSel = document.getElementById('cuisineSelect');
         const monthSel = document.getElementById('monthSelect');
         const dayTypeSel = document.getElementById('dayTypeSelect');
         const resetBtn = document.getElementById('resetFiltersBtn');
+        const clearAllBtn = document.getElementById('clearAllFiltersBtn');
         const exportBtn = document.getElementById('exportCsvBtn');
         const searchInput = document.getElementById('tableSearchInput');
 
-        // Events
-        cuisineSel.addEventListener('change', updateDashboard);
-        monthSel.addEventListener('change', updateDashboard);
-        dayTypeSel.addEventListener('change', updateDashboard);
-        resetBtn.addEventListener('click', () => {{
-            cuisineSel.value = 'ALL';
-            monthSel.value = 'ALL';
-            dayTypeSel.value = 'ALL';
-            updateDashboard();
-        }});
+        // Dropdown Event Listeners
+        cuisineSel.addEventListener('change', (e) => setFilter('cuisine', e.target.value));
+        monthSel.addEventListener('change', (e) => setFilter('month', e.target.value));
+        dayTypeSel.addEventListener('change', (e) => setFilter('dayType', e.target.value));
+
+        resetBtn.addEventListener('click', resetAllFilters);
+        clearAllBtn.addEventListener('click', resetAllFilters);
         searchInput.addEventListener('input', filterExplorerTable);
 
-        // Export to CSV
-        exportBtn.addEventListener('click', () => {{
-            const filtered = getFilteredMatrix();
-            let csv = "Month,Cuisine,Day_Type,Orders,Revenue,Food_Total,Delivery_Fees,Discounts,Avg_Delivery_Mins\\n";
-            filtered.forEach(r => {{
-                csv += `${{r.month}},${{r.cuisine}},${{r.day_type}},${{r.orders}},${{r.revenue}},${{r.food_total}},${{r.deliv_fee}},${{r.discount}},${{r.avg_deliv}}\\n`;
+        // Power BI Slicer Pill Click Listeners (Click to toggle on / Click again to toggle off)
+        document.querySelectorAll('.slicer-btn').forEach(btn => {{
+            btn.addEventListener('click', () => {{
+                const type = btn.getAttribute('data-type');
+                const val = btn.getAttribute('data-val');
+                toggleFilter(type, val);
             }});
-            const blob = new Blob([csv], {{ type: 'text/csv' }});
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `foodhunter_filtered_data_${{Date.now()}}.csv`);
-            a.click();
         }});
 
-        function getFilteredMatrix() {{
-            const cVal = cuisineSel.value;
-            const mVal = monthSel.value;
-            const dVal = dayTypeSel.value;
+        // POWER BI TOGGLE LOGIC:
+        // If the clicked value is already active -> reset to 'ALL'!
+        // If it's different -> apply that value!
+        function toggleFilter(type, val) {{
+            if (val === 'ALL' || filterState[type] === val) {{
+                filterState[type] = 'ALL';
+            }} else {{
+                filterState[type] = val;
+            }}
+            syncUIAndRefresh();
+        }}
 
+        function setFilter(type, val) {{
+            filterState[type] = val;
+            syncUIAndRefresh();
+        }}
+
+        function resetAllFilters() {{
+            filterState.cuisine = 'ALL';
+            filterState.month = 'ALL';
+            filterState.dayType = 'ALL';
+            syncUIAndRefresh();
+        }}
+
+        // Synchronize Slicers, Dropdowns, Badges, and re-render
+        function syncUIAndRefresh() {{
+            // Sync Dropdowns
+            cuisineSel.value = filterState.cuisine;
+            monthSel.value = filterState.month;
+            dayTypeSel.value = filterState.dayType;
+
+            // Sync Slicer Pills
+            updateSlicerPillActive('cuisine', filterState.cuisine);
+            updateSlicerPillActive('month', filterState.month);
+            updateSlicerPillActive('dayType', filterState.dayType);
+
+            // Update Breadcrumb Badges
+            updateActiveFilterBadges();
+
+            // Run Aggregations & Re-render
+            updateDashboardMetrics();
+            renderAllCharts();
+            populateDriversTable();
+            populateExplorerTable();
+        }}
+
+        function updateSlicerPillActive(type, activeVal) {{
+            document.querySelectorAll(`.slicer-btn[data-type="${{type}}"]`).forEach(btn => {{
+                if (btn.getAttribute('data-val') === activeVal) {{
+                    btn.classList.add('active');
+                }} else {{
+                    btn.classList.remove('active');
+                }}
+            }});
+        }}
+
+        function updateActiveFilterBadges() {{
+            const badgesContainer = document.getElementById('activeFiltersBadges');
+            const clearBtn = document.getElementById('clearAllFiltersBtn');
+            const pills = [];
+
+            if (filterState.cuisine !== 'ALL') {{
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Cuisine:</strong> ${{filterState.cuisine}}</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('cuisine', '${{filterState.cuisine}}')"></i>
+                    </span>
+                `);
+            }}
+
+            const monthNames = {{
+                '2022-06': 'June 2022',
+                '2022-07': 'July 2022',
+                '2022-08': 'August 2022',
+                '2022-09': 'September 2022'
+            }};
+            if (filterState.month !== 'ALL') {{
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Month:</strong> ${{monthNames[filterState.month] || filterState.month}}</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('month', '${{filterState.month}}')"></i>
+                    </span>
+                `);
+            }}
+
+            if (filterState.dayType !== 'ALL') {{
+                pills.push(`
+                    <span class="active-filter-pill">
+                        <span><strong>Day:</strong> ${{filterState.dayType}}s</span>
+                        <i class="fas fa-circle-xmark" title="Clear filter" onclick="toggleFilter('dayType', '${{filterState.dayType}}')"></i>
+                    </span>
+                `);
+            }}
+
+            if (pills.length > 0) {{
+                badgesContainer.innerHTML = pills.join('');
+                clearBtn.classList.remove('d-none');
+            }} else {{
+                badgesContainer.innerHTML = '<span class="text-muted small fst-italic">None (Showing all data &bull; Click any bar or pie slice to cross-filter)</span>';
+                clearBtn.classList.add('d-none');
+            }}
+        }}
+
+        function getFilteredMatrix() {{
             return RAW_DATA.matrix.filter(r => {{
-                if (cVal !== 'ALL' && r.cuisine !== cVal) return false;
-                if (mVal !== 'ALL' && r.month !== mVal) return false;
-                if (dVal !== 'ALL' && r.day_type !== dVal) return false;
+                if (filterState.cuisine !== 'ALL' && r.cuisine !== filterState.cuisine) return false;
+                if (filterState.month !== 'ALL' && r.month !== filterState.month) return false;
+                if (filterState.dayType !== 'ALL' && r.day_type !== filterState.dayType) return false;
                 return true;
             }});
         }}
@@ -889,10 +1129,9 @@ html_template = f"""<!DOCTYPE html>
             return currentTheme === 'dark' ? 'plotly_dark' : 'plotly_white';
         }}
 
-        function updateDashboard() {{
+        function updateDashboardMetrics() {{
             const data = getFilteredMatrix();
 
-            // Calculate Aggregates
             let totalRev = 0, totalOrders = 0, foodTot = 0, delivFees = 0, discounts = 0;
             let fastDeliv = 0, totalDelivCount = 0;
 
@@ -910,7 +1149,6 @@ html_template = f"""<!DOCTYPE html>
             const fastPct = totalDelivCount > 0 ? ((fastDeliv / totalDelivCount) * 100) : 0;
             const discPct = foodTot > 0 ? ((discounts / foodTot) * 100) : 0;
 
-            // Update KPI DOM
             document.getElementById('kpiRevenue').innerText = '$' + totalRev.toLocaleString('en-US', {{maximumFractionDigits: 0}});
             document.getElementById('kpiOrders').innerText = totalOrders.toLocaleString('en-US');
             document.getElementById('kpiOrdersSub').innerText = totalOrders.toLocaleString('en-US') + ' orders';
@@ -919,25 +1157,9 @@ html_template = f"""<!DOCTYPE html>
             document.getElementById('kpiDiscountSub').innerText = discPct.toFixed(1) + '% discount share';
             document.getElementById('kpiFastPct').innerText = fastPct.toFixed(1) + '%';
             document.getElementById('kpiDelivFees').innerText = '$' + delivFees.toLocaleString('en-US', {{maximumFractionDigits: 0}});
-
-            renderAllCharts();
-            populateDriversTable();
-            populateExplorerTable();
         }}
 
-        function renderAllCharts() {{
-            renderMonthlyChart();
-            renderCuisinePie();
-            renderHourlyChart();
-            renderCuisineBar();
-            renderDayTypeChart();
-            renderRestaurantsChart();
-            renderDishesChart();
-            renderDietaryChart();
-            renderDeliverySLA();
-        }}
-
-        // 1. Monthly Chart
+        // 1. Monthly Chart (With Power BI Dimming / Highlighting)
         function renderMonthlyChart() {{
             const filtered = getFilteredMatrix();
             const months = ['2022-06', '2022-07', '2022-08', '2022-09'];
@@ -955,14 +1177,25 @@ html_template = f"""<!DOCTYPE html>
             const yRev = months.map(m => revMap[m]);
             const yOrd = months.map(m => ordMap[m]);
 
+            // Power BI Visual Cross-Highlighting: Dim non-selected months
+            const barColors = months.map(m => {{
+                if (filterState.month === 'ALL' || filterState.month === m) {{
+                    return '#4F46E5';
+                }} else {{
+                    return currentTheme === 'dark' ? 'rgba(79, 70, 229, 0.25)' : 'rgba(79, 70, 229, 0.28)';
+                }}
+            }});
+
             const traceRev = {{
                 x: xVals,
                 y: yRev,
                 name: 'Revenue ($)',
                 type: 'bar',
-                marker: {{ color: '#4F46E5', opacity: 0.9 }},
+                marker: {{ color: barColors }},
                 text: yRev.map(v => '$' + Math.round(v).toLocaleString()),
-                textposition: 'inside'
+                textposition: 'inside',
+                customdata: months,
+                hovertemplate: '<b>%{{x}}</b><br>Revenue: $%{{y:,.0f}}<br><i>Click to filter / toggle month</i><extra></extra>'
             }};
 
             const traceOrd = {{
@@ -975,7 +1208,9 @@ html_template = f"""<!DOCTYPE html>
                 line: {{ color: '#F59E0B', width: 3 }},
                 marker: {{ size: 8, color: '#F59E0B' }},
                 text: yOrd.map(v => v.toLocaleString()),
-                textposition: 'top center'
+                textposition: 'top center',
+                customdata: months,
+                hovertemplate: '<b>%{{x}}</b><br>Orders: %{{y:,}}<extra></extra>'
             }};
 
             const layout = {{
@@ -988,9 +1223,19 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartMonthly', [traceRev, traceOrd], layout, {{ responsive: true }});
+            attachPlotlyClick('chartMonthly', (pt) => {{
+                const monthMap = {{
+                    'June 2022': '2022-06',
+                    'July 2022': '2022-07',
+                    'August 2022': '2022-08',
+                    'September 2022': '2022-09'
+                }};
+                const mCode = monthMap[pt.x] || pt.customdata;
+                if (mCode) toggleFilter('month', mCode);
+            }});
         }}
 
-        // 2. Cuisine Pie
+        // 2. Cuisine Pie (With Slice Pull & Dimming)
         function renderCuisinePie() {{
             const filtered = getFilteredMatrix();
             const cuisMap = {{}};
@@ -1001,14 +1246,33 @@ html_template = f"""<!DOCTYPE html>
             const labels = Object.keys(cuisMap);
             const values = Object.values(cuisMap);
 
+            // Pull slice if selected
+            const pulls = labels.map(c => filterState.cuisine === c ? 0.12 : 0);
+
+            const baseColors = {{
+                'Chinese': '#4F46E5',
+                'Italian': '#10B981',
+                'Indian': '#F59E0B',
+                'Thai': '#EF4444'
+            }};
+
+            const colors = labels.map(c => {{
+                if (filterState.cuisine === 'ALL' || filterState.cuisine === c) {{
+                    return baseColors[c] || '#4F46E5';
+                }} else {{
+                    return 'rgba(148, 163, 184, 0.35)'; // Dimmed
+                }}
+            }});
+
             const trace = {{
                 labels: labels,
                 values: values,
                 type: 'pie',
                 hole: 0.48,
-                marker: {{ colors: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] }},
+                pull: pulls,
+                marker: {{ colors: colors }},
                 textinfo: 'label+percent',
-                hoverinfo: 'label+value+percent'
+                hovertemplate: '<b>%{{label}}</b><br>Revenue: $%{{value:,.0f}}<br>(%{{percent}})<br><i>Click to filter / toggle cuisine</i><extra></extra>'
             }};
 
             const layout = {{
@@ -1019,11 +1283,14 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartCuisinePie', [trace], layout, {{ responsive: true }});
+            attachPlotlyClick('chartCuisinePie', (pt) => {{
+                if (pt.label) toggleFilter('cuisine', pt.label);
+            }});
         }}
 
         // 3. Hourly Curve
         function renderHourlyChart() {{
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             const hourlyMap = new Array(24).fill(0);
 
             RAW_DATA.hourly.forEach(r => {{
@@ -1041,7 +1308,8 @@ html_template = f"""<!DOCTYPE html>
                 mode: 'lines',
                 fill: 'tozeroy',
                 line: {{ color: '#6366F1', width: 3 }},
-                fillcolor: currentTheme === 'dark' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.12)'
+                fillcolor: currentTheme === 'dark' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.12)',
+                hovertemplate: '<b>%{{x}}</b><br>Orders Placed: %{{y:,}}<extra></extra>'
             }};
 
             const layout = {{
@@ -1055,7 +1323,7 @@ html_template = f"""<!DOCTYPE html>
             Plotly.react('chartHourly', [trace], layout, {{ responsive: true }});
         }}
 
-        // 4. Cuisine AOV Bar
+        // 4. Cuisine AOV Bar (With Click Filter & Dimming)
         function renderCuisineBar() {{
             const filtered = getFilteredMatrix();
             const cuisRev = {{}}, cuisOrd = {{}};
@@ -1067,13 +1335,29 @@ html_template = f"""<!DOCTYPE html>
             const cuisines = Object.keys(cuisRev);
             const aovs = cuisines.map(c => cuisOrd[c] > 0 ? (cuisRev[c] / cuisOrd[c]) : 0);
 
+            const baseColors = {{
+                'Chinese': '#4F46E5',
+                'Italian': '#10B981',
+                'Indian': '#F59E0B',
+                'Thai': '#EF4444'
+            }};
+
+            const colors = cuisines.map(c => {{
+                if (filterState.cuisine === 'ALL' || filterState.cuisine === c) {{
+                    return baseColors[c] || '#4F46E5';
+                }} else {{
+                    return 'rgba(148, 163, 184, 0.35)'; // Dimmed
+                }}
+            }});
+
             const trace = {{
                 x: cuisines,
                 y: aovs,
                 type: 'bar',
-                marker: {{ color: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'] }},
+                marker: {{ color: colors }},
                 text: aovs.map(v => '$' + v.toFixed(2)),
-                textposition: 'outside'
+                textposition: 'outside',
+                hovertemplate: '<b>%{{x}}</b><br>Average Ticket: $%{{y:.2f}}<br><i>Click to filter / toggle</i><extra></extra>'
             }};
 
             const layout = {{
@@ -1084,31 +1368,46 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartCuisineBar', [trace], layout, {{ responsive: true }});
+            attachPlotlyClick('chartCuisineBar', (pt) => {{
+                if (pt.x) toggleFilter('cuisine', pt.x);
+            }});
         }}
 
-        // 5. Day Type Comparison
+        // 5. Day Type Comparison (With Click Filter & Dimming)
         function renderDayTypeChart() {{
             const filtered = getFilteredMatrix();
             let wkRev = 0, weRev = 0;
-            let wkOrd = 0, weOrd = 0;
 
             filtered.forEach(r => {{
                 if (r.day_type === 'Weekday') {{
                     wkRev += r.revenue;
-                    wkOrd += r.orders;
                 }} else {{
                     weRev += r.revenue;
-                    weOrd += r.orders;
+                }}
+            }});
+
+            const dayTypes = ['Weekdays (Mon-Fri)', 'Weekends (Sat-Sun)'];
+            const dayCodes = ['Weekday', 'Weekend'];
+            const yVals = [wkRev, weRev];
+
+            const colors = dayCodes.map((dt, i) => {{
+                const base = i === 0 ? '#3B82F6' : '#EC4899';
+                if (filterState.dayType === 'ALL' || filterState.dayType === dt) {{
+                    return base;
+                }} else {{
+                    return 'rgba(148, 163, 184, 0.35)';
                 }}
             }});
 
             const trace = {{
-                x: ['Weekdays (Mon-Fri)', 'Weekends (Sat-Sun)'],
-                y: [wkRev, weRev],
+                x: dayTypes,
+                y: yVals,
                 type: 'bar',
-                marker: {{ color: ['#3B82F6', '#EC4899'] }},
+                marker: {{ color: colors }},
                 text: ['$' + Math.round(wkRev).toLocaleString(), '$' + Math.round(weRev).toLocaleString()],
-                textposition: 'inside'
+                textposition: 'inside',
+                customdata: dayCodes,
+                hovertemplate: '<b>%{{x}}</b><br>Revenue: $%{{y:,.0f}}<br><i>Click to filter / toggle</i><extra></extra>'
             }};
 
             const layout = {{
@@ -1119,11 +1418,15 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartDayType', [trace], layout, {{ responsive: true }});
+            attachPlotlyClick('chartDayType', (pt) => {{
+                const code = pt.x.includes('Weekday') ? 'Weekday' : 'Weekend';
+                toggleFilter('dayType', code);
+            }});
         }}
 
         // 6. Restaurants Chart
         function renderRestaurantsChart() {{
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.restaurants;
             if (cVal !== 'ALL') {{
                 list = list.filter(r => r.cuisine === cVal);
@@ -1137,7 +1440,8 @@ html_template = f"""<!DOCTYPE html>
                 orientation: 'h',
                 marker: {{ color: '#4F46E5' }},
                 text: top10.map(r => '$' + Math.round(r.revenue).toLocaleString()),
-                textposition: 'outside'
+                textposition: 'outside',
+                hovertemplate: '<b>%{{y}}</b><br>Sales: $%{{x:,.0f}}<br><i>Click to search restaurant in explorer</i><extra></extra>'
             }};
 
             const layout = {{
@@ -1148,11 +1452,21 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartRestaurants', [trace], layout, {{ responsive: true }});
+            attachPlotlyClick('chartRestaurants', (pt) => {{
+                if (pt.y) {{
+                    const tableTab = document.getElementById('table-tab');
+                    if (tableTab) {{
+                        bootstrap.Tab.getOrCreateInstance(tableTab).show();
+                        searchInput.value = pt.y;
+                        filterExplorerTable();
+                    }}
+                }}
+            }});
         }}
 
         // 7. Dishes Chart
         function renderDishesChart() {{
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.dishes;
             if (cVal !== 'ALL') {{
                 list = list.filter(d => d.cuisine === cVal);
@@ -1166,7 +1480,8 @@ html_template = f"""<!DOCTYPE html>
                 orientation: 'h',
                 marker: {{ color: '#EF4444' }},
                 text: top12.map(d => d.qty.toLocaleString() + ' units'),
-                textposition: 'inside'
+                textposition: 'inside',
+                hovertemplate: '<b>%{{y}}</b><br>Units Sold: %{{x:,}}<br><i>Click to search dish in explorer</i><extra></extra>'
             }};
 
             const layout = {{
@@ -1177,11 +1492,21 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartDishes', [trace], layout, {{ responsive: true }});
+            attachPlotlyClick('chartDishes', (pt) => {{
+                if (pt.y) {{
+                    const tableTab = document.getElementById('table-tab');
+                    if (tableTab) {{
+                        bootstrap.Tab.getOrCreateInstance(tableTab).show();
+                        searchInput.value = pt.y;
+                        filterExplorerTable();
+                    }}
+                }}
+            }});
         }}
 
         // 8. Dietary Split Chart
         function renderDietaryChart() {{
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let veg = 0, nonVeg = 0;
             RAW_DATA.dishes.forEach(d => {{
                 if (cVal === 'ALL' || d.cuisine === cVal) {{
@@ -1195,7 +1520,8 @@ html_template = f"""<!DOCTYPE html>
                 values: [veg, nonVeg],
                 type: 'pie',
                 hole: 0.45,
-                marker: {{ colors: ['#10B981', '#EF4444'] }}
+                marker: {{ colors: ['#10B981', '#EF4444'] }},
+                hovertemplate: '<b>%{{label}}</b><br>Units: %{{value:,}}<br>(%{{percent}})<extra></extra>'
             }};
 
             const layout = {{
@@ -1223,7 +1549,8 @@ html_template = f"""<!DOCTYPE html>
                 values: [fast, mod],
                 type: 'pie',
                 hole: 0.5,
-                marker: {{ colors: ['#10B981', '#F59E0B'] }}
+                marker: {{ colors: ['#10B981', '#F59E0B'] }},
+                hovertemplate: '<b>%{{label}}</b><br>Orders: %{{value:,}}<br>(%{{percent}})<extra></extra>'
             }};
 
             const layout = {{
@@ -1235,6 +1562,18 @@ html_template = f"""<!DOCTYPE html>
             }};
 
             Plotly.react('chartDeliverySLA', [trace], layout, {{ responsive: true }});
+        }}
+
+        // Attach Plotly Click Handler helper
+        function attachPlotlyClick(domId, callback) {{
+            const el = document.getElementById(domId);
+            if (!el || el._clickBound) return;
+            el._clickBound = true;
+            el.on('plotly_click', (data) => {{
+                if (data && data.points && data.points.length > 0) {{
+                    callback(data.points[0]);
+                }}
+            }});
         }}
 
         // Drivers Table
@@ -1252,7 +1591,7 @@ html_template = f"""<!DOCTYPE html>
 
         // Explorer Table
         function populateExplorerTable() {{
-            const cVal = cuisineSel.value;
+            const cVal = filterState.cuisine;
             let list = RAW_DATA.restaurants;
             if (cVal !== 'ALL') {{
                 list = list.filter(r => r.cuisine === cVal);
@@ -1279,6 +1618,21 @@ html_template = f"""<!DOCTYPE html>
             }});
         }}
 
+        // Export to CSV
+        exportBtn.addEventListener('click', () => {{
+            const filtered = getFilteredMatrix();
+            let csv = "Month,Cuisine,Day_Type,Orders,Revenue,Food_Total,Delivery_Fees,Discounts,Avg_Delivery_Mins\\n";
+            filtered.forEach(r => {{
+                csv += `${{r.month}},${{r.cuisine}},${{r.day_type}},${{r.orders}},${{r.revenue}},${{r.food_total}},${{r.deliv_fee}},${{r.discount}},${{r.avg_deliv}}\\n`;
+            }});
+            const blob = new Blob([csv], {{ type: 'text/csv' }});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `foodhunter_filtered_data_${{Date.now()}}.csv`);
+            a.click();
+        }});
+
         // Responsive Resize Handler
         window.addEventListener('resize', () => {{
             const chartIds = [
@@ -1294,7 +1648,7 @@ html_template = f"""<!DOCTYPE html>
             }});
         }});
 
-        // Trigger resize on tab switch so charts render with perfect geometry
+        // Trigger resize on tab switch
         document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(tab => {{
             tab.addEventListener('shown.bs.tab', () => {{
                 window.dispatchEvent(new Event('resize'));
@@ -1302,7 +1656,7 @@ html_template = f"""<!DOCTYPE html>
         }});
 
         // Initial Load
-        updateDashboard();
+        syncUIAndRefresh();
     </script>
 </body>
 </html>
@@ -1311,4 +1665,4 @@ html_template = f"""<!DOCTYPE html>
 with open(output_html, "w", encoding="utf-8") as f:
     f.write(html_template)
 
-print(f"[SUCCESS] Ultra-dynamic interactive responsive dashboard compiled at: {output_html}")
+print(f"[SUCCESS] Power BI-style interactive cross-filtering dashboard compiled at: {output_html}")
