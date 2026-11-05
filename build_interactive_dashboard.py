@@ -300,86 +300,101 @@ for seg, group in df_rfm.groupby('segment'):
         })
 
 # 7. Market Basket Analysis (Step 1 ML)
+# Pairs are counted once per order on distinct dish names, and same-name pairs
+# (e.g. the same dish bought from two restaurants) are excluded.
 total_orders_items = conn.execute('SELECT COUNT(DISTINCT order_id) FROM orders_items').fetchone()[0]
 item_counts = dict(conn.execute('SELECT f.item_name, COUNT(DISTINCT oi.order_id) FROM orders_items oi JOIN food_items f ON f.item_id = oi.item_id GROUP BY f.item_name').fetchall())
+multi_dish_orders = conn.execute("""
+SELECT COUNT(*) FROM (
+    SELECT oi.order_id FROM orders_items oi JOIN food_items f ON f.item_id = oi.item_id
+    GROUP BY oi.order_id HAVING COUNT(DISTINCT f.item_name) > 1
+)""").fetchone()[0]
 
 query_pairs = """
-SELECT 
-    f1.item_name AS item_a,
-    r1.cuisine AS cuisine_a,
-    f2.item_name AS item_b,
-    r2.cuisine AS cuisine_b,
-    COUNT(*) AS pair_orders
-FROM orders_items oi1
-JOIN orders_items oi2 ON oi1.order_id = oi2.order_id AND oi1.item_id < oi2.item_id
-JOIN food_items f1 ON f1.item_id = oi1.item_id
-JOIN food_items f2 ON f2.item_id = oi2.item_id
-JOIN restaurants r1 ON r1.restaurant_id = f1.restaurant_id
-JOIN restaurants r2 ON r2.restaurant_id = f2.restaurant_id
-GROUP BY item_a, item_b
-ORDER BY pair_orders DESC
-LIMIT 12;
+WITH oi AS (
+    SELECT DISTINCT oi.order_id, f.item_name AS name, r.cuisine
+    FROM orders_items oi
+    JOIN food_items f ON f.item_id = oi.item_id
+    JOIN restaurants r ON r.restaurant_id = f.restaurant_id
+)
+SELECT a.name AS item_a, b.name AS item_b,
+       MIN(a.cuisine) AS cuisine_a, MIN(b.cuisine) AS cuisine_b,
+       COUNT(DISTINCT a.order_id) AS pair_orders
+FROM oi a
+JOIN oi b ON a.order_id = b.order_id AND a.name < b.name
+GROUP BY a.name, b.name
 """
-df_pairs = pd.read_sql_query(query_pairs, conn)
+df_all_pairs = pd.read_sql_query(query_pairs, conn)
+df_all_pairs['cnt_a'] = df_all_pairs['item_a'].map(item_counts)
+df_all_pairs['cnt_b'] = df_all_pairs['item_b'].map(item_counts)
+df_all_pairs['lift'] = df_all_pairs['pair_orders'] * total_orders_items / (df_all_pairs['cnt_a'] * df_all_pairs['cnt_b'])
+# Confidence reported in the stronger direction: P(other dish | less common dish)
+df_all_pairs['conf'] = df_all_pairs['pair_orders'] / df_all_pairs[['cnt_a', 'cnt_b']].min(axis=1) * 100
 
-top_pairs = []
-for _, row in df_pairs.iterrows():
-    ia, ib = row['item_a'], row['item_b']
-    cnt_a = item_counts.get(ia, 1)
-    cnt_b = item_counts.get(ib, 1)
-    p_cnt = int(row['pair_orders'])
-    conf = round((p_cnt / cnt_a) * 100, 1)
-    lift = round((p_cnt * total_orders_items) / (cnt_a * cnt_b), 2)
-    top_pairs.append({
-        'pair': f"{ia} + {ib}",
-        'item_a': ia,
-        'item_b': ib,
-        'cuisine': row['cuisine_a'],
-        'orders': p_cnt,
-        'conf': conf,
-        'lift': lift,
-        'deal': f"Combo Deal: Add {ib} for 15% OFF when ordering {ia}"
-    })
+MIN_PAIR_ORDERS = 20
 
+def lift_verdict(lift):
+    if lift >= 1.2:
+        return 'positive', 'Positive association: worth an A/B-tested bundle'
+    if lift >= 1.0:
+        return 'weak', 'Weak association: low priority, monitor'
+    return 'negative', 'Ordered together less often than chance: not a bundle candidate'
+
+def pair_record(row, cuisine=None):
+    verdict, rec = lift_verdict(row['lift'])
+    if verdict != 'negative' and row['pair_orders'] < MIN_PAIR_ORDERS:
+        verdict, rec = 'weak', f"Small sample (under {MIN_PAIR_ORDERS} co-orders): treat as a hypothesis, not a finding"
+    return {
+        'pair': f"{row['item_a']} + {row['item_b']}",
+        'item_a': row['item_a'],
+        'item_b': row['item_b'],
+        'cuisine': cuisine or row['cuisine_a'],
+        'orders': int(row['pair_orders']),
+        'conf': round(float(row['conf']), 1),
+        'lift': round(float(row['lift']), 2),
+        'verdict': verdict,
+        'recommendation': rec
+    }
+
+top_pairs = [pair_record(r) for _, r in df_all_pairs.sort_values('pair_orders', ascending=False).head(12).iterrows()]
+
+supported = df_all_pairs[df_all_pairs['pair_orders'] >= MIN_PAIR_ORDERS]
+top12_lifts = [p['lift'] for p in top_pairs]
+best = supported.sort_values('lift', ascending=False).iloc[0]
+basket_summary = {
+    'multi_dish_pct': round(multi_dish_orders / total_orders_items * 100, 1),
+    'min_pair_orders': MIN_PAIR_ORDERS,
+    'pairs_lift_gt1': int((supported['lift'] > 1).sum()),
+    'max_lift': round(float(supported['lift'].max()), 2),
+    'best_pair': f"{best['item_a']} + {best['item_b']}",
+    'top12_lift_min': round(min(top12_lifts), 2),
+    'top12_lift_max': round(max(top12_lifts), 2),
+}
+
+# Within-cuisine candidates, ranked by lift (min 10 co-orders)
 query_cuisine_pairs = """
-SELECT 
-    r1.cuisine,
-    f1.item_name AS item_a,
-    f2.item_name AS item_b,
-    COUNT(*) AS pair_count
-FROM orders_items oi1
-JOIN orders_items oi2 ON oi1.order_id = oi2.order_id AND oi1.item_id < oi2.item_id
-JOIN food_items f1 ON f1.item_id = oi1.item_id
-JOIN food_items f2 ON f2.item_id = oi2.item_id
-JOIN restaurants r1 ON r1.restaurant_id = f1.restaurant_id
-JOIN restaurants r2 ON r2.restaurant_id = f2.restaurant_id
-WHERE r1.cuisine = r2.cuisine
-GROUP BY r1.cuisine, item_a, item_b
-ORDER BY r1.cuisine, pair_count DESC
+WITH oi AS (
+    SELECT DISTINCT oi.order_id, f.item_name AS name, r.cuisine
+    FROM orders_items oi
+    JOIN food_items f ON f.item_id = oi.item_id
+    JOIN restaurants r ON r.restaurant_id = f.restaurant_id
+)
+SELECT a.cuisine, a.name AS item_a, b.name AS item_b, COUNT(DISTINCT a.order_id) AS pair_orders
+FROM oi a
+JOIN oi b ON a.order_id = b.order_id AND a.name < b.name AND a.cuisine = b.cuisine
+GROUP BY a.cuisine, a.name, b.name
+HAVING COUNT(DISTINCT a.order_id) >= 10
 """
 df_cp = pd.read_sql_query(query_cuisine_pairs, conn)
+df_cp['cnt_a'] = df_cp['item_a'].map(item_counts)
+df_cp['cnt_b'] = df_cp['item_b'].map(item_counts)
+df_cp['lift'] = df_cp['pair_orders'] * total_orders_items / (df_cp['cnt_a'] * df_cp['cnt_b'])
+df_cp['conf'] = df_cp['pair_orders'] / df_cp[['cnt_a', 'cnt_b']].min(axis=1) * 100
 
 cuisine_baskets = {}
 for c in ['Chinese', 'Italian', 'Indian', 'Thai']:
-    sub = df_cp[df_cp['cuisine'] == c].head(5)
-    items = []
-    for _, r in sub.iterrows():
-        ia, ib = r['item_a'], r['item_b']
-        cnt_a = item_counts.get(ia, 1)
-        cnt_b = item_counts.get(ib, 1)
-        p_cnt = int(r['pair_count'])
-        conf = round((p_cnt / cnt_a) * 100, 1)
-        lift = round((p_cnt * total_orders_items) / (cnt_a * cnt_b), 2)
-        items.append({
-            'item_a': ia,
-            'item_b': ib,
-            'pair': f"{ia} + {ib}",
-            'orders': p_cnt,
-            'conf': conf,
-            'lift': lift,
-            'deal': f"Add {ib} as side with {ia} to save $2.50"
-        })
-    cuisine_baskets[c] = items
+    sub = df_cp[df_cp['cuisine'] == c].sort_values('lift', ascending=False).head(5)
+    cuisine_baskets[c] = [pair_record(r, c) for _, r in sub.iterrows()]
 
 conn.close()
 
@@ -394,6 +409,7 @@ payload = {
     "rfm_scatter": scatter_sample,
     "top_pairs": top_pairs,
     "cuisine_baskets": cuisine_baskets,
+    "basket_summary": basket_summary,
     "strategy_waterfall": {
         "x": ["Sep Run-Rate", "VIP Win-Back", "Menu Bundling", "Discount Optimization", "Cuisine Expansion", "Target Run-Rate"],
         "y": [258.2, 16.1, 18.5, 16.4, 11.2, 0],
@@ -401,7 +417,7 @@ payload = {
         "measure": ["relative", "relative", "relative", "relative", "relative", "total"]
     },
     "priority_matrix": [
-        {"name": "Checkout Combo Bundles", "effort": 2.5, "impact": 8.8, "cat": "Quick Win", "color": "#10B981", "desc": "Pre-packaged Apriori combos at 10-15% side discount. Fast engineering, immediate +$18.5k/mo."},
+        {"name": "Checkout Combo Bundles", "effort": 2.5, "impact": 8.8, "cat": "Quick Win", "color": "#10B981", "desc": "A/B-test checkout combos for the few positively associated pairs before scaling. Assumed upside: +$18.5k/mo."},
         {"name": "VIP Churn Win-Back Drip", "effort": 3.0, "impact": 8.2, "cat": "Quick Win", "color": "#10B981", "desc": "Automated email/SMS at day 28 of inactivity with $10 credit to recover $48.4k at-risk revenue."},
         {"name": "Discount Spend Gates ($35+)", "effort": 3.5, "impact": 7.9, "cat": "Quick Win", "color": "#10B981", "desc": "Require $35+ basket for 10% off to stop margin leak on small tickets. Recovers +$16.4k/mo."},
         {"name": "FoodHunter VIP Pass (Loyalty)", "effort": 7.5, "impact": 9.2, "cat": "Major Strategic Bet", "color": "#4F46E5", "desc": "Subscription/Points tier for Champions & Loyalists providing free delivery. Expands CLV by 28%."},
@@ -435,7 +451,7 @@ payload = {
             "target": "+$18,500 Monthly MRR",
             "kpi": "AOV Lift: $27.78 → $29.63 (+6.7%)",
             "problem": "50.4% of orders are under $20 (single items), missing side dish and appetizer cross-sell opportunities.",
-            "solution": "Implement Apriori basket recommendations at checkout (e.g. Peking Duck + Hot & Sour Soup combo with $2 discount).",
+            "solution": "Current pairs show weak association (most frequent pairs have lift below 1), so A/B-test a small set of positively associated combos at checkout before any wide rollout.",
             "owner": "Merchandising & Product Engineering",
             "timeline": "Quick Win (Days 1 - 45)"
         },
@@ -469,7 +485,7 @@ payload = {
         }
     ],
     "roadmap_milestones": [
-        {"phase": "Days 1 – 30", "focus": "Stabilization & Leak Plugging", "initiatives": "Launch 3-stage automated VIP win-back CRM campaign; roll out Top 5 Apriori combo bundles at checkout for Chinese cuisine; eliminate flat discounts under $20.", "owner": "Marketing & CRM", "target_metric": "+$16.1k/mo recovered, AOV +$0.80"},
+        {"phase": "Days 1 – 30", "focus": "Stabilization & Leak Plugging", "initiatives": "Launch 3-stage automated VIP win-back CRM campaign; A/B-test checkout combos for the few pairs with lift above 1; eliminate flat discounts under $20.", "owner": "Marketing & CRM", "target_metric": "+$16.1k/mo recovered, AOV +$0.80"},
         {"phase": "Days 31 – 60", "focus": "Margin Defense & Optimization", "initiatives": "Enforce $35+ basket threshold for promotional discounts; expand combo meal cross-selling to Italian and Indian menus; recruit first batch of 10 new regional restaurant partners.", "owner": "Finance & Merchandising", "target_metric": "Discount rate down to 10.5%, +$16.4k margin"},
         {"phase": "Days 61 – 90", "focus": "Scale & Institutional Loyalty", "initiatives": "Launch 'FoodHunter VIP Pass' tiered loyalty subscription; onboard remaining 10 high-demand merchant partners; establish automated Courier SLA driver dispatch incentives.", "owner": "Product & Growth", "target_metric": "+1,200 monthly orders, Platform MRR $320.4k"}
     ],
@@ -1324,14 +1340,14 @@ html_template = f"""<!DOCTYPE html>
                     <div class="col-12 col-sm-6 col-xl-3">
                         <div class="kpi-card">
                             <div class="d-flex justify-content-between align-items-start">
-                                <span class="kpi-title">Top Cross-Sell Pair</span>
+                                <span class="kpi-title">Basket Association</span>
                                 <div class="kpi-icon-box" style="background:#FFFBEB; color:#F59E0B;">
                                     <i class="fas fa-utensils"></i>
                                 </div>
                             </div>
-                            <div class="kpi-value text-warning" style="font-size: 1.25rem;">Duck + Soup</div>
+                            <div class="kpi-value text-warning" style="font-size: 1.25rem;">Weak (max lift {basket_summary['max_lift']})</div>
                             <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
-                                49 co-orders &bull; top Apriori pair
+                                Most frequent pairs: lift {basket_summary['top12_lift_min']}&ndash;{basket_summary['top12_lift_max']}
                             </span>
                         </div>
                     </div>
@@ -1387,23 +1403,27 @@ html_template = f"""<!DOCTYPE html>
                                         <i class="fas fa-basket-shopping text-success"></i>
                                         Market Basket: Top Co-Occurring Menu Items
                                     </div>
-                                    <div class="text-muted small">Dishes ordered together in single transactions (Apriori Mining)</div>
+                                    <div class="text-muted small">12 most frequent dish pairs. Bar colour shows lift: <span style="color:#EF4444;font-weight:600;">red = below 1</span> (ordered together less often than chance), <span style="color:#10B981;font-weight:600;">green = above 1</span>.</div>
                                 </div>
                             </div>
                             <div id="chartMarketBasket" style="min-height: 380px; width: 100%;"></div>
+                            <div class="small p-2 mt-2 rounded-2" style="background: var(--primary-light); border: 1px solid var(--border-color);">
+                                <i class="fas fa-lightbulb text-warning me-1"></i>
+                                <strong>Insight:</strong> Only {basket_summary['multi_dish_pct']}% of orders contain more than one distinct dish, and the most frequent pairs all have lift below 1. Among pairs with {basket_summary['min_pair_orders']}+ co-orders, just {basket_summary['pairs_lift_gt1']} exceed lift 1 (best: {basket_summary['best_pair']}, lift {basket_summary['max_lift']}). This data does not show strong cross-sell patterns, so bundles should be A/B-tested before any rollout.
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Cuisine Cross-Sell Bundling Engine -->
+                    <!-- Cuisine Bundle Candidates (Ranked by Lift) -->
                     <div class="col-12 col-xl-5">
                         <div class="chart-box">
                             <div class="chart-header">
                                 <div>
                                     <div class="chart-title">
                                         <i class="fas fa-wand-magic-sparkles text-info"></i>
-                                        Cuisine Cross-Sell Bundling Engine
+                                        Cuisine Bundle Candidates (Ranked by Lift)
                                     </div>
-                                    <div class="text-muted small">Recommended combos with projected cross-sell lift</div>
+                                    <div class="text-muted small">Same-cuisine pairs with 10+ co-orders. Lift above 1 means ordered together more often than chance.</div>
                                 </div>
                             </div>
                             <!-- Cuisine Pill Selector -->
@@ -1517,7 +1537,7 @@ html_template = f"""<!DOCTYPE html>
                             </div>
                             <div class="kpi-value text-warning">$29.63</div>
                             <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
-                                +6.7% via Apriori bundling
+                                +6.7% assumed from tested bundles
                             </span>
                         </div>
                     </div>
@@ -2741,8 +2761,8 @@ html_template = f"""<!DOCTYPE html>
                 parents: allParents,
                 values: allValues,
                 branchvalues: 'total',
-                textinfo: 'label+value+percent parent',
-                valueformat: '$,.0f',
+                texttemplate: '<b>%{{label}}</b><br>%{{value:$,.0f}}<br>%{{percentParent:.0%}}',
+                textfont: {{ size: 13, color: '#FFFFFF' }},
                 marker: {{
                     colors: allColors,
                     line: {{ width: 2, color: currentTheme === 'dark' ? '#151C2E' : '#FFFFFF' }}
@@ -2845,7 +2865,7 @@ html_template = f"""<!DOCTYPE html>
             const layout = {{
                 template: getPlotlyTemplate(),
                 barmode: 'group',
-                margin: {{ t: 20, b: 50, l: 140, r: 20 }},
+                margin: {{ t: 60, b: 50, l: 140, r: 20 }},
                 paper_bgcolor: 'transparent',
                 plot_bgcolor: 'transparent',
                 xaxis: {{ 
@@ -2854,7 +2874,7 @@ html_template = f"""<!DOCTYPE html>
                     gridcolor: currentTheme === 'dark' ? '#242F47' : '#F1F5F9'
                 }},
                 yaxis: {{ automargin: true }},
-                legend: {{ orientation: 'h', y: 1.15, x: 0 }},
+                legend: {{ orientation: 'h', y: 1.02, yanchor: 'bottom', x: 0, xanchor: 'left' }},
                 font: {{ family: 'Plus Jakarta Sans', color: currentTheme === 'dark' ? '#E2E8F0' : '#1E293B' }}
             }};
 
@@ -2866,7 +2886,7 @@ html_template = f"""<!DOCTYPE html>
             const pairs = [...RAW_DATA.top_pairs].reverse();
             const yPairs = pairs.map(p => p.pair);
             const xOrders = pairs.map(p => p.orders);
-            const textLabels = pairs.map(p => `${{p.orders}} orders (Conf: ${{p.conf}}%)`);
+            const textLabels = pairs.map(p => `${{p.orders}} orders · lift ${{p.lift}}`);
 
             const trace = {{
                 type: 'bar',
@@ -2877,9 +2897,7 @@ html_template = f"""<!DOCTYPE html>
                 textposition: 'inside',
                 insidetextfont: {{ color: '#FFFFFF', weight: 'bold' }},
                 marker: {{
-                    color: xOrders,
-                    colorscale: 'Viridis',
-                    showscale: false
+                    color: pairs.map(p => p.lift >= 1 ? '#10B981' : '#EF4444')
                 }},
                 customdata: pairs.map(p => [p.conf, p.lift, p.cuisine]),
                 hovertemplate: '<b>%{{y}}</b> (%{{customdata[2]}})<br>Orders Together: %{{x}}<br>Confidence: %{{customdata[0]}}%<br>Lift Score: %{{customdata[1]}}x<extra></extra>'
@@ -2908,7 +2926,7 @@ html_template = f"""<!DOCTYPE html>
             const items = RAW_DATA.cuisine_baskets[cuisine] || [];
 
             if (items.length === 0) {{
-                container.innerHTML = '<div class="text-muted small p-3">No specific pairs found for this cuisine.</div>';
+                container.innerHTML = '<div class="text-muted small p-3">No same-cuisine dish pairs with 10+ co-orders for this cuisine, so there is no basket evidence for bundles here.</div>';
                 return;
             }}
 
@@ -2919,7 +2937,7 @@ html_template = f"""<!DOCTYPE html>
                             <i class="fas fa-link me-1"></i> ${{item.pair}}
                         </span>
                         <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">
-                            ${{item.orders}} Pairs
+                            ${{item.orders}} co-orders
                         </span>
                     </div>
                     <div class="small text-muted mb-2">
@@ -2927,8 +2945,7 @@ html_template = f"""<!DOCTYPE html>
                         <span>Lift: <strong>${{item.lift}}x</strong></span>
                     </div>
                     <div class="d-flex align-items-center justify-content-between p-2 rounded-2" style="background: var(--bg-card); border: 1px dashed var(--border-color);">
-                        <span class="small fw-semibold"><i class="fas fa-tag text-warning me-1"></i> ${{item.deal}}</span>
-                        <span class="badge bg-success bg-opacity-10 text-success fw-bold small">+14% AOV</span>
+                        <span class="small fw-semibold"><i class="fas fa-flask me-1" style="color: ${{item.verdict === 'positive' ? '#10B981' : (item.verdict === 'weak' ? '#F59E0B' : '#EF4444')}};"></i> ${{item.recommendation}}</span>
                     </div>
                 </div>
             `).join('');
@@ -3429,7 +3446,7 @@ html_template = f"""<!DOCTYPE html>
                     sim: '$' + simAov.toFixed(2),
                     delta: (simAov - base.aov >= 0 ? '+$' : '-$') + Math.abs(simAov - base.aov).toFixed(2),
                     pct: ((simAov - base.aov) / base.aov * 100).toFixed(1) + '%',
-                    comment: 'Driven by checkout Apriori combo meal recommendations.',
+                    comment: 'Assumes A/B-tested checkout combos succeed; basket data shows weak associations.',
                     color: simAov >= base.aov ? 'text-warning' : 'text-danger'
                 }},
                 {{
