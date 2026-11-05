@@ -7,7 +7,7 @@ import sqlite3
 if sys.platform.startswith('win'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-base_dir = r"E:\Abdul Latif\Abdul Latif Profile\Data Analytics\Anti Gravity\food_hunter"
+base_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(base_dir, "foodhunter.db")
 output_html = os.path.join(base_dir, "index.html")
 
@@ -493,9 +493,9 @@ html_template = f"""<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodHunter - Power BI Interactive Cross-Filtering Dashboard</title>
+    <title>FoodHunter - Interactive BI Dashboard (Python · SQL · Plotly)</title>
     
-    <meta name="description" content="FoodHunter Power BI-style Interactive Data Analytics Dashboard. Click to filter, click again to reset. Full cross-filtering across visuals.">
+    <meta name="description" content="FoodHunter interactive data analytics dashboard built with Python, SQL (SQLite) and Plotly. Click to filter, click again to reset. Full cross-filtering across visuals.">
     <meta name="theme-color" content="#4F46E5">
     
     <!-- Bootstrap 5 CSS -->
@@ -807,7 +807,7 @@ html_template = f"""<!DOCTYPE html>
     <!-- TOP NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 sticky-top">
         <div class="container-fluid px-3 px-md-4">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 text-white" href="#">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 text-white" href="./">
                 <span class="p-2 bg-danger rounded-3 text-white"><i class="fas fa-burger"></i></span>
                 FoodHunter BI
             </a>
@@ -832,7 +832,7 @@ html_template = f"""<!DOCTYPE html>
         <!-- INTRO & BREADCRUMB -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
             <div>
-                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Power BI Interactive Cross-Filtering Hub</h3>
+                <h3 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Interactive BI Dashboard: Cross-Filtering Analysis</h3>
                 <p class="text-muted small mb-0">Multi-Dimensional Analysis of 43,118 Orders &bull; June 1 – September 29, 2022</p>
             </div>
             <div class="d-flex align-items-center gap-2">
@@ -939,7 +939,7 @@ html_template = f"""<!DOCTYPE html>
             <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start">
-                        <span class="kpi-title">Gross Revenue</span>
+                        <span class="kpi-title">Net Revenue</span>
                         <div class="kpi-icon-box" style="background:#EEF2FF; color:#4F46E5;">
                             <i class="fas fa-dollar-sign"></i>
                         </div>
@@ -987,7 +987,7 @@ html_template = f"""<!DOCTYPE html>
             <div class="col-12 col-sm-6 col-xl-2">
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start">
-                        <span class="kpi-title">Food Total</span>
+                        <span class="kpi-title">Food Subtotal</span>
                         <div class="kpi-icon-box" style="background:#F5F3FF; color:#8B5CF6;">
                             <i class="fas fa-plate-wheat"></i>
                         </div>
@@ -1057,7 +1057,6 @@ html_template = f"""<!DOCTYPE html>
             <li class="nav-item">
                 <button class="nav-link" id="ml-tab" data-bs-toggle="pill" data-bs-target="#tab-ml" type="button" style="border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08);">
                     <i class="fas fa-brain text-warning me-1"></i> <span class="fw-bold">1️⃣ Advanced Analytics & ML</span>
-                    <span class="badge bg-warning text-dark ms-1 px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Portfolio Boost</span>
                 </button>
             </li>
             <li class="nav-item">
@@ -1121,7 +1120,7 @@ html_template = f"""<!DOCTYPE html>
                                     <i class="fas fa-clock text-info"></i>
                                     24-Hour Peak Ordering Patterns (Hourly Traffic Distribution)
                                 </div>
-                                <span class="badge bg-light text-dark border">Lunch Peak (12-14h) &bull; Dinner Peak (18-20h)</span>
+                                <span class="badge bg-light text-dark border" title="The course dataset spreads orders almost evenly from 00:00 to 21:59 and has no orders after 22:00. This is a synthetic-data pattern, not real customer demand.">Data note: flat 00&ndash;22h pattern (sample dataset)</span>
                             </div>
                             <div id="chartHourly" style="min-height: 320px; width: 100%;"></div>
                         </div>
@@ -1271,7 +1270,7 @@ html_template = f"""<!DOCTYPE html>
                             </div>
                             <div class="d-flex gap-2">
                                 <span class="badge bg-success bg-opacity-25 text-success-light border border-success border-opacity-50 px-3 py-2 rounded-pill small">
-                                    <i class="fas fa-circle-check me-1"></i> Production Ready ML
+                                    <i class="fas fa-circle-check me-1"></i> RFM &amp; Apriori
                                 </span>
                             </div>
                         </div>
@@ -1332,7 +1331,7 @@ html_template = f"""<!DOCTYPE html>
                             </div>
                             <div class="kpi-value text-warning" style="font-size: 1.25rem;">Duck + Soup</div>
                             <span class="badge-pill-custom bg-warning bg-opacity-10 text-warning">
-                                49 orders &bull; +$38.4k potential
+                                49 co-orders &bull; top Apriori pair
                             </span>
                         </div>
                     </div>
@@ -1462,11 +1461,11 @@ html_template = f"""<!DOCTYPE html>
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                                     <span class="badge bg-info text-dark fw-bold px-3 py-1 rounded-pill">STEP 2 COMPLETE</span>
-                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-chess-knight me-1"></i> McKinsey/BCG Style Prescriptive Strategy</span>
+                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-chess-knight me-1"></i> Prescriptive Strategy</span>
                                 </div>
                                 <h4 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Executive Turnaround Roadmap: Reversing Volume Decline &amp; Unlocking +$149.6k/Qtr</h4>
                                 <p class="text-white-50 mb-0 small">
-                                    Synthesizing <strong>43,118 transactional records</strong>, <strong>9,874 customer accounts</strong>, and delivery logistics into 4 quantifiable growth levers to restore peak June revenue run-rates.
+                                    Synthesizing <strong>43,118 transactional records</strong>, <strong>9,874 customer accounts</strong>, and delivery logistics into 4 quantifiable growth levers to restore peak June revenue run-rates. <em>Targets are planning estimates based on stated assumptions, not forecasts.</em>
                                 </p>
                             </div>
                             <div class="d-flex gap-2">
@@ -1625,16 +1624,16 @@ html_template = f"""<!DOCTYPE html>
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                                     <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">STEP 3 COMPLETE</span>
-                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-calculator me-1"></i> Real-Time Interactive BI Engine</span>
+                                    <span class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill"><i class="fas fa-calculator me-1"></i> Interactive Scenario Model</span>
                                 </div>
                                 <h4 class="fw-bolder mb-1" style="letter-spacing: -0.5px;">Executive What-If Scenario Simulator &amp; Financial Sensitivity Model</h4>
                                 <p class="text-white-50 mb-0 small">
-                                    Simulate dynamic growth scenarios in real-time &bull; Adjust strategic sliders or select one-click presets to model revenue, margin expansion, and volume recovery.
+                                    Adjust sliders or pick a preset to model revenue, margin and volume. Baseline = <strong>September 2022 actuals</strong> (AOV $27.57, discount rate 13.2%), so figures differ from the full-period KPIs above. Outputs are illustrative scenarios and are separate from the Step 2 plan targets.
                                 </p>
                             </div>
                             <div class="d-flex gap-2">
                                 <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-3 py-2 rounded-pill small">
-                                    <i class="fas fa-bolt me-1"></i> Instant 60 FPS Recomputation
+                                    <i class="fas fa-calendar me-1"></i> Baseline: September 2022 actuals
                                 </span>
                             </div>
                         </div>
@@ -1804,7 +1803,7 @@ html_template = f"""<!DOCTYPE html>
                                 </div>
                                 <input type="range" class="form-range" id="sliderAov" min="0" max="20" step="0.5" value="6.7">
                                 <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
-                                    <span>0% ($27.57 baseline)</span>
+                                    <span>0% ($27.57 Sep baseline)</span>
                                     <span>+6.7% (+$1.85)</span>
                                     <span>+20% ($33.08)</span>
                                 </div>
@@ -1828,7 +1827,7 @@ html_template = f"""<!DOCTYPE html>
                                     <span>15.0% (Current Flat Leak)</span>
                                 </div>
                                 <div class="text-muted small mt-1" style="font-size: 0.78rem;">
-                                    Enforce $35+ spend threshold on promo codes (Baseline is 13.2%).
+                                    Enforce $35+ spend threshold on promo codes (September baseline: 13.2%).
                                 </div>
                             </div>
 
@@ -1957,7 +1956,8 @@ html_template = f"""<!DOCTYPE html>
         <!-- FOOTER -->
         <footer class="text-center py-4 text-muted small border-top mt-4">
             <p class="mb-1 fw-bold">FoodHunter Data Analytics Hub &bull; Powered by Python, Pandas, SQLite & Plotly.js</p>
-            <p class="mb-0">Power BI-Style Cross-Filtering &bull; Interactive &bull; Dynamic &bull; Fully Responsive</p>
+            <p class="mb-1">Built by <strong>Abdul Latif</strong> &bull; <a href="https://www.linkedin.com/in/abdul-latif-ksa2691" target="_blank" rel="noopener">LinkedIn</a> &bull; <a href="https://github.com/Sahil-093/foodhunter-case-study" target="_blank" rel="noopener">GitHub</a></p>
+            <p class="mb-0">Data: FoodHunter sample dataset from the Coursera course <em>Data Analysis Using SQL</em> (Fractal Analytics) &bull; Jun &ndash; Sep 2022</p>
         </footer>
 
     </div> <!-- End container -->
@@ -3316,7 +3316,7 @@ html_template = f"""<!DOCTYPE html>
 
         // 1. Comparison Bar Chart (Baseline vs Simulated)
         function renderSimComparisonChart(base, simRev, simOrders, simAov, simDisc, discSavings) {{
-            const xMetrics = ['Gross Revenue ($)', 'Net Food Volume ($)', 'Discount Spend ($)'];
+            const xMetrics = ['Net Revenue ($)', 'Revenue minus Discount Spend ($)', 'Discount Spend ($)'];
             const yBaseline = [base.revenue, base.revenue - base.discounts, base.discounts];
             const ySimulated = [simRev, simRev - simDisc, simDisc];
 
@@ -3406,7 +3406,7 @@ html_template = f"""<!DOCTYPE html>
 
             const rows = [
                 {{
-                    name: 'Monthly Gross Revenue',
+                    name: 'Monthly Net Revenue',
                     base: '$' + Math.round(base.revenue).toLocaleString(),
                     sim: '$' + Math.round(simRev).toLocaleString(),
                     delta: (simRev - base.revenue >= 0 ? '+$' : '-$') + Math.abs(Math.round(simRev - base.revenue)).toLocaleString(),
@@ -3486,4 +3486,4 @@ html_template = f"""<!DOCTYPE html>
 with open(output_html, "w", encoding="utf-8") as f:
     f.write(html_template)
 
-print(f"[SUCCESS] Power BI-style interactive cross-filtering dashboard compiled at: {output_html}")
+print(f"[SUCCESS] Interactive cross-filtering dashboard compiled at: {output_html}")
