@@ -8,6 +8,8 @@
 
 > **Live Interactive Dashboard:** [https://sahil-093.github.io/foodhunter-case-study/](https://sahil-093.github.io/foodhunter-case-study/)
 
+![FoodHunter dashboard: KPIs, monthly revenue and orders, revenue by cuisine](assets/preview.png)
+
 ---
 
 ## 📌 Project Overview

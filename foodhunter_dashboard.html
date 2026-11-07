@@ -7,6 +7,16 @@
     
     <meta name="description" content="FoodHunter interactive data analytics dashboard built with Python, SQL (SQLite) and Plotly. Click to filter, click again to reset. Full cross-filtering across visuals.">
     <meta name="theme-color" content="#4F46E5">
+    <meta name="author" content="Abdul Latif">
+    <!-- Link preview (LinkedIn, WhatsApp, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FoodHunter Food-Delivery Analytics Dashboard">
+    <meta property="og:description" content="Why revenue fell 26% in four months: SQL + Python analysis of 43,118 orders with RFM segmentation, market basket analysis and an interactive Plotly dashboard. Built by Abdul Latif.">
+    <meta property="og:url" content="https://sahil-093.github.io/foodhunter-case-study/">
+    <meta property="og:image" content="https://sahil-093.github.io/foodhunter-case-study/assets/preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="627">
+    <meta name="twitter:card" content="summary_large_image">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1726,6 +1736,8 @@
                 marker: { color: barColors },
                 text: yRev.map(v => '$' + Math.round(v).toLocaleString()),
                 textposition: 'inside',
+                insidetextanchor: 'middle',
+                textfont: { color: '#FFFFFF', size: 13 },
                 customdata: months,
                 hovertemplate: '<b>%{x}</b><br>Revenue: $%{y:,.0f}<br><i>Click to filter / toggle month</i><extra></extra>'
             };
@@ -1735,22 +1747,27 @@
                 y: yOrd,
                 name: 'Orders Count',
                 type: 'scatter',
-                mode: 'lines+markers+text',
+                // Order counts are shown under each month label instead of on the line,
+                // so they never collide with the bar labels
+                mode: 'lines+markers',
                 yaxis: 'y2',
                 line: { color: '#F59E0B', width: 3 },
-                marker: { size: 8, color: '#F59E0B' },
-                text: yOrd.map(v => v.toLocaleString()),
-                textposition: 'top center',
+                marker: { size: 9, color: '#F59E0B', line: { color: '#FFFFFF', width: 2 } },
                 customdata: months,
                 hovertemplate: '<b>%{x}</b><br>Orders: %{y:,}<extra></extra>'
             };
 
             const layout = {
                 template: getPlotlyTemplate(),
-                margin: { l: 40, r: 40, t: 30, b: 40 },
+                margin: { l: 70, r: 70, t: 30, b: 60 },
                 legend: { orientation: 'h', y: 1.12, x: 0.5, xanchor: 'center' },
-                yaxis: { title: 'Revenue ($)', showgrid: true },
-                yaxis2: { title: 'Order Volume', overlaying: 'y', side: 'right', showgrid: false },
+                xaxis: {
+                    tickmode: 'array',
+                    tickvals: xVals,
+                    ticktext: xVals.map((x, i) => `${x}<br><span style="font-size:11px">${yOrd[i].toLocaleString()} orders</span>`)
+                },
+                yaxis: { title: { text: 'Revenue ($)', standoff: 12 }, showgrid: true, rangemode: 'tozero', automargin: true },
+                yaxis2: { title: { text: 'Orders', standoff: 12 }, overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero', automargin: true },
                 autosize: true
             };
 
